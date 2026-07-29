@@ -106,7 +106,7 @@ STM32F407 I2C  → OLED (SCL→PB6, SDA→PB7)
 
 ### 启动 RK3506
 ```bash
-./oled_gateway /dev/ttyS1 80 9527
+./oled_gateway /dev/ttyFIQ0 8080 9527
 ```
 
 ### 访问 Web

@@ -135,14 +135,6 @@ static int json_get_str(const char* json, const char* key, char* out, int out_si
     }
 }
 
-static int json_get_int(const char* json, const char* key, int default_val)
-{
-    char buf[32];
-    if (json_get_str(json, key, buf, sizeof(buf)) < 0) return default_val;
-    if (buf[0] == '\0') return default_val;
-    return atoi(buf);
-}
-
 /* 解析嵌套路径: key1.key2 */
 static int json_get_nested_str(const char* json, const char* key_path, char* out, int out_size)
 {
@@ -234,8 +226,7 @@ static void on_uart_frame_cb(const ProtoFrame* frame, void* user_data)
         {
             pthread_mutex_lock(&d->event_mutex);
             if (d->event_count < DISP_EVENT_QUEUE_MAX) {
-                strncpy(d->event_queue[d->event_tail], evt, sizeof(d->event_queue[0]) - 1);
-                d->event_queue[d->event_tail][sizeof(d->event_queue[0]) - 1] = '\0';
+                snprintf(d->event_queue[d->event_tail], sizeof(d->event_queue[0]), "%s", evt);
                 d->event_tail = (d->event_tail + 1) % DISP_EVENT_QUEUE_MAX;
                 d->event_count++;
             }
@@ -249,8 +240,7 @@ static void on_uart_frame_cb(const ProtoFrame* frame, void* user_data)
         const char* evt = disp_build_event("mode_status", obj);
         pthread_mutex_lock(&d->event_mutex);
         if (d->event_count < DISP_EVENT_QUEUE_MAX) {
-            strncpy(d->event_queue[d->event_tail], evt, sizeof(d->event_queue[0]) - 1);
-            d->event_queue[d->event_tail][sizeof(d->event_queue[0]) - 1] = '\0';
+            snprintf(d->event_queue[d->event_tail], sizeof(d->event_queue[0]), "%s", evt);
             d->event_tail = (d->event_tail + 1) % DISP_EVENT_QUEUE_MAX;
             d->event_count++;
         }
@@ -267,8 +257,7 @@ static void on_uart_frame_cb(const ProtoFrame* frame, void* user_data)
         const char* evt = disp_build_event("key_event", data_json);
         pthread_mutex_lock(&d->event_mutex);
         if (d->event_count < DISP_EVENT_QUEUE_MAX) {
-            strncpy(d->event_queue[d->event_tail], evt, sizeof(d->event_queue[0]) - 1);
-            d->event_queue[d->event_tail][sizeof(d->event_queue[0]) - 1] = '\0';
+            snprintf(d->event_queue[d->event_tail], sizeof(d->event_queue[0]), "%s", evt);
             d->event_tail = (d->event_tail + 1) % DISP_EVENT_QUEUE_MAX;
             d->event_count++;
         }
@@ -282,8 +271,7 @@ static void on_uart_frame_cb(const ProtoFrame* frame, void* user_data)
         const char* evt = disp_build_event("ack", "{\"code\":0}");
         pthread_mutex_lock(&d->event_mutex);
         if (d->event_count < DISP_EVENT_QUEUE_MAX) {
-            strncpy(d->event_queue[d->event_tail], evt, sizeof(d->event_queue[0]) - 1);
-            d->event_queue[d->event_tail][sizeof(d->event_queue[0]) - 1] = '\0';
+            snprintf(d->event_queue[d->event_tail], sizeof(d->event_queue[0]), "%s", evt);
             d->event_tail = (d->event_tail + 1) % DISP_EVENT_QUEUE_MAX;
             d->event_count++;
         }
@@ -297,8 +285,7 @@ static void on_uart_frame_cb(const ProtoFrame* frame, void* user_data)
         const char* evt = disp_build_event("error", data_json);
         pthread_mutex_lock(&d->event_mutex);
         if (d->event_count < DISP_EVENT_QUEUE_MAX) {
-            strncpy(d->event_queue[d->event_tail], evt, sizeof(d->event_queue[0]) - 1);
-            d->event_queue[d->event_tail][sizeof(d->event_queue[0]) - 1] = '\0';
+            snprintf(d->event_queue[d->event_tail], sizeof(d->event_queue[0]), "%s", evt);
             d->event_tail = (d->event_tail + 1) % DISP_EVENT_QUEUE_MAX;
             d->event_count++;
         }
@@ -338,8 +325,7 @@ static void on_uart_frame_cb(const ProtoFrame* frame, void* user_data)
 
                         pthread_mutex_lock(&d->event_mutex);
                         if (d->event_count < DISP_EVENT_QUEUE_MAX) {
-                            strncpy(d->event_queue[d->event_tail], evt, sizeof(d->event_queue[0]) - 1);
-                            d->event_queue[d->event_tail][sizeof(d->event_queue[0]) - 1] = '\0';
+                            snprintf(d->event_queue[d->event_tail], sizeof(d->event_queue[0]), "%s", evt);
                             d->event_tail = (d->event_tail + 1) % DISP_EVENT_QUEUE_MAX;
                             d->event_count++;
                         }
@@ -391,8 +377,7 @@ int disp_poll_event(CmdDispatcher* d, char* json_buf, int buf_size)
     }
 
     if (json_buf && buf_size > 0) {
-        strncpy(json_buf, d->event_queue[d->event_head], buf_size - 1);
-        json_buf[buf_size - 1] = '\0';
+        snprintf(json_buf, buf_size, "%s", d->event_queue[d->event_head]);
     }
     d->event_head = (d->event_head + 1) % DISP_EVENT_QUEUE_MAX;
     d->event_count--;
@@ -412,8 +397,8 @@ const char* disp_handle_json(CmdDispatcher* d, const char* json)
         int state = json_get_nested_int(json, "data.state", -1);
         if (state < 0 || state > 2) return disp_build_ack("led", -1);
 
-        uint8_t d = (uint8_t)state;
-        int seq = uart_send_command(d->uart, CMD_LED_CTRL, &d, 1, CMD_ACK, UART_TIMEOUT_MS);
+        uint8_t led_val = (uint8_t)state;
+        int seq = uart_send_command(d->uart, CMD_LED_CTRL, &led_val, 1, CMD_ACK, UART_TIMEOUT_MS);
         return disp_build_ack("led", seq);
     }
 
@@ -421,8 +406,8 @@ const char* disp_handle_json(CmdDispatcher* d, const char* json)
         int mode = json_get_nested_int(json, "data.mode", -1);
         if (mode < 0 || mode > 6) return disp_build_ack("mode", -1);
 
-        uint8_t d = (uint8_t)mode;
-        int seq = uart_send_command(d->uart, CMD_DISPLAY_MODE, &d, 1, CMD_ACK, UART_TIMEOUT_MS);
+        uint8_t mode_val = (uint8_t)mode;
+        int seq = uart_send_command(d->uart, CMD_DISPLAY_MODE, &mode_val, 1, CMD_ACK, UART_TIMEOUT_MS);
         return disp_build_ack("mode", seq);
     }
 
@@ -457,7 +442,7 @@ const char* disp_handle_json(CmdDispatcher* d, const char* json)
     if (strcmp(cmd_buf, "time_sync") == 0) {
         time_t ts = (time_t)json_get_nested_int(json, "data.ts", 0);
         struct tm* t = localtime(&ts);
-        uint8_t d[7] = {
+        uint8_t time_data[7] = {
             (uint8_t)(t->tm_year - 100),
             (uint8_t)(t->tm_mon + 1),
             (uint8_t)t->tm_mday,
@@ -466,7 +451,7 @@ const char* disp_handle_json(CmdDispatcher* d, const char* json)
             (uint8_t)t->tm_sec,
             (uint8_t)t->tm_wday
         };
-        int seq = uart_send_command(d->uart, CMD_TIME_SYNC, td, 7, CMD_ACK, UART_TIMEOUT_MS);
+        int seq = uart_send_command(d->uart, CMD_TIME_SYNC, time_data, 7, CMD_ACK, UART_TIMEOUT_MS);
         return disp_build_ack("time_sync", seq);
     }
 
@@ -508,7 +493,7 @@ void disp_tick_time_sync(CmdDispatcher* d)
 
 const char* disp_build_ack(const char* cmd, int code)
 {
-    static char buf[256];
+    static char buf[2048];
     snprintf(buf, sizeof(buf),
              "{\"cmd\":\"ack\",\"data\":{\"ref\":\"%s\",\"code\":%d}}",
              cmd, code);
@@ -517,7 +502,7 @@ const char* disp_build_ack(const char* cmd, int code)
 
 const char* disp_build_event(const char* evt, const char* data_json)
 {
-    static char buf[512];
+    static char buf[4096];
     snprintf(buf, sizeof(buf), "{\"evt\":\"%s\",\"data\":%s}", evt, data_json);
     return buf;
 }

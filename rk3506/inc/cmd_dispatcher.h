@@ -26,7 +26,7 @@ typedef struct {
     void*       json_cb_user_data;
 
     /* 事件队列 */
-    char        event_queue[DISP_EVENT_QUEUE_MAX][512];
+    char        event_queue[DISP_EVENT_QUEUE_MAX][4096];
     int         event_head;
     int         event_tail;
     int         event_count;

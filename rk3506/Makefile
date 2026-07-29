@@ -5,9 +5,9 @@
 TARGET  = oled_gateway
 BUILD   = build
 
-CC      = arm-linux-gnueabihf-gcc
+CC      = arm-linux-gcc
 CFLAGS  = -std=c11 -Wall -O2 -g
-CFLAGS  += -Iinc -DMG_ENABLE_HTTP_WEBSOCKET=1
+CFLAGS  += -Iinc -I. -D_GNU_SOURCE -DMG_ENABLE_HTTP_WEBSOCKET=1
 
 # 需要将 mongoose.c 和 mongoose.h 放在项目目录
 LDFLAGS  = -lpthread
@@ -28,7 +28,7 @@ clean:
 
 # 部署到目标设备 (修改 IP 和目标路径)
 deploy: $(TARGET)
-	scp $(BUILD)/$(TARGET) root@192.168.1.100:/root/
-	scp web/index.html root@192.168.1.100:/root/web/
+	scp $(BUILD)/$(TARGET) root@192.168.10.99:/root/
+	scp web/index.html root@192.168.10.99:/root/web/
 
 .PHONY: all clean deploy

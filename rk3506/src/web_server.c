@@ -101,9 +101,10 @@ static void* web_thread_func(void* arg)
     struct mg_connection* listener = mg_http_listen(&mgr, addr, web_event_handler, self);
     if (listener) {
         self->listen_conn_id = listener->id;
+        printf("[WebServer] Listening on %s\n", addr);
+    } else {
+        fprintf(stderr, "[WebServer] FAILED to listen on %s (port already in use?)\n", addr);
     }
-
-    printf("[WebServer] Listening on %s\n", addr);
 
     /* 主循环 */
     while (self->running) {

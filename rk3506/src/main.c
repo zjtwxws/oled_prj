@@ -18,6 +18,7 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 static volatile int g_running = 1;
 
@@ -32,18 +33,6 @@ static const char* web_msg_callback(const char* msg, void* user_data)
 {
     CmdDispatcher* disp = (CmdDispatcher*)user_data;
     return disp_handle_json(disp, msg);
-}
-
-/* TCP 消息回调 (给 TcpServer) */
-static void tcp_msg_callback(const char* msg, int client_id, void* user_data)
-{
-    CmdDispatcher* disp = (CmdDispatcher*)user_data;
-    (void)client_id;
-    const char* resp = disp_handle_json(disp, msg);
-    /* TCP server 需要通过 tcp_send 发送响应 */
-    /* 此处使用全局变量方式, 在 main 中处理 */
-    /* 暂存到 disp 内部, 由主循环的 pollEvent 广播 */
-    (void)resp;
 }
 
 /* 全局 TCP 服务器指针 (用于 tcp_msg_callback 中发送响应) */
@@ -65,8 +54,8 @@ int main(int argc, char* argv[])
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
 
-    const char* uart_dev = "/dev/ttyS1";  /* 默认串口 */
-    int web_port  = 80;
+    const char* uart_dev = "/dev/ttyFIQ0"; /* 默认串口 (RK3506 硬件) */
+    int web_port  = 8080;
     int tcp_port  = 9527;
 
     if (argc > 1) uart_dev = argv[1];
@@ -80,7 +69,8 @@ int main(int argc, char* argv[])
     UartAdapter uart;
     uart_init(&uart);
     if (uart_open(&uart, uart_dev, 115200) != 0) {
-        fprintf(stderr, "[FATAL] Failed to open UART %s\n", uart_dev);
+        fprintf(stderr, "[FATAL] Failed to open UART %s (errno=%d: %s)\n",
+                uart_dev, errno, strerror(errno));
         return -1;
     }
     printf("[UART] Connected to STM32\n");
@@ -115,7 +105,7 @@ int main(int argc, char* argv[])
         web_poll_events(&web);
 
         /* 分发 UART 事件到 Web/TCP */
-        char evt_json[512];
+        char evt_json[2048];
         while (disp_poll_event(&disp, evt_json, sizeof(evt_json))) {
             web_broadcast(&web, evt_json);
             tcp_broadcast(&tcp, evt_json);
