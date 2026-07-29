@@ -26,10 +26,12 @@
 #include "key_drv.h"
 #include "iwdg_drv.h"
 #include "sys_config.h"
+#include "debug_console.h"
 
 /* ---- 外部 HAL 句柄 (由 CubeMX 生成, 需根据实际配置修改) ---- */
 extern I2C_HandleTypeDef  hi2c1;
 extern UART_HandleTypeDef huart1;  /* 与 RK3506 通信的串口 */
+extern UART_HandleTypeDef huart2;  /* 调试串口 (需在 CubeMX 中配置 USART2, 仅 TX) */
 
 /* ---- 私有函数声明 ---- */
 static void SystemClock_Config(void);
@@ -54,11 +56,13 @@ int main(void)
     /* CubeMX 生成的外设初始化 (函数名/参数以实际 CubeMX 工程为准) */
     MX_GPIO_Init();
     MX_USART1_UART_Init();
+    MX_USART2_UART_Init();   /* 调试串口 */
     MX_I2C1_Init();
 
     /* 驱动层初始化 */
     i2c_drv_init(&hi2c1);
     uart_drv_init(&huart1);
+    debug_console_init(&huart2);  /* 调试串口初始化 */
 
     /* OLED 初始化 */
     ssd1306_init();
@@ -70,6 +74,8 @@ int main(void)
     led_mgr_init();
     key_drv_init();
     iwdg_drv_init();
+
+    DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
 
     /* 显示管理器初始化 (使用 Flash 中存储的上电默认文字) */
     display_mgr_init(sys_config_get_boot_text());
@@ -88,7 +94,9 @@ int main(void)
         while (uart_drv_available()) {
             uart_drv_read_byte(&rx_byte);
             if (proto_feed_byte(rx_byte)) {
-                process_frame(proto_get_frame());
+                const proto_frame_t *f = proto_get_frame();
+                DEBUG_PRINTF("RX: cmd=0x%02X seq=%d len=%d", f->cmd, f->seq, f->len);
+                process_frame(f);
             }
         }
 
@@ -96,6 +104,7 @@ int main(void)
         if (HAL_GetTick() - last_key_scan >= 20) {
             last_key_scan = HAL_GetTick();
             if (key_drv_scan(&key_info)) {
+                DEBUG_PRINTF("KEY: id=%d event=%d", key_info.key_id, key_info.event);
                 /* 处理按键事件 */
                 switch (key_info.key_id) {
                 case 1:  /* KEY1: 切换显示模式 */
@@ -184,38 +193,48 @@ static void process_frame(const proto_frame_t *frame)
 
     case CMD_LED_CTRL:
         if (frame->len >= 1 && frame->data[0] <= 2) {
+            DEBUG_PRINTF("LED: set state=%d", frame->data[0]);
             led_mgr_set_state((led_state_t)frame->data[0]);
             send_ack(frame->seq);
             send_led_status();
         } else {
+            DEBUG_PRINTF("LED: param error (len=%d val=%d)", frame->len, frame->data[0]);
             send_nak(frame->seq, NAK_PARAM_ERROR);
         }
         break;
 
     case CMD_DISPLAY_MODE:
         if (frame->len >= 1 && frame->data[0] < DISP_MODE_COUNT) {
+            DEBUG_PRINTF("DISP: set mode=%d", frame->data[0]);
             display_mgr_set_mode((display_mode_t)frame->data[0]);
             send_ack(frame->seq);
             send_mode_status();
         } else {
+            DEBUG_PRINTF("DISP: param error (len=%d val=%d)", frame->len, frame->data[0]);
             send_nak(frame->seq, NAK_PARAM_ERROR);
         }
         break;
 
     case CMD_TEXT_CONTENT:
         if (frame->len > 0 && frame->len <= PROTO_MAX_DATA) {
+            DEBUG_PRINTF("TEXT: len=%d", frame->len);
             char buf[PROTO_MAX_DATA + 1];
             memcpy(buf, frame->data, frame->len);
             buf[frame->len] = '\0';
             display_mgr_set_text(buf);
             send_ack(frame->seq);
         } else {
+            DEBUG_PRINTF("TEXT: param error (len=%d)", frame->len);
             send_nak(frame->seq, NAK_PARAM_ERROR);
         }
         break;
 
     case CMD_TIME_SYNC:
         if (frame->len >= 7) {
+            DEBUG_PRINTF("TIME: 20%02d-%02d-%02d %02d:%02d:%02d wd=%d",
+                         frame->data[0], frame->data[1], frame->data[2],
+                         frame->data[3], frame->data[4], frame->data[5],
+                         frame->data[6]);
             display_status_t st = *display_mgr_get_status();
             st.year     = frame->data[0];
             st.month    = frame->data[1];
@@ -227,12 +246,16 @@ static void process_frame(const proto_frame_t *frame)
             display_mgr_update_status(&st);
             send_ack(frame->seq);
         } else {
+            DEBUG_PRINTF("TIME: param error (len=%d)", frame->len);
             send_nak(frame->seq, NAK_PARAM_ERROR);
         }
         break;
 
     case CMD_WEATHER_DATA:
         if (frame->len >= 4) {
+            DEBUG_PRINTF("WTHR: type=%d temp=%d hum=%d wind=%d",
+                         frame->data[0], (int8_t)frame->data[1],
+                         frame->data[2], frame->data[3]);
             display_status_t st = *display_mgr_get_status();
             st.weather_type = frame->data[0];
             st.temperature  = (int8_t)frame->data[1];
@@ -241,12 +264,14 @@ static void process_frame(const proto_frame_t *frame)
             display_mgr_update_status(&st);
             send_ack(frame->seq);
         } else {
+            DEBUG_PRINTF("WTHR: param error (len=%d)", frame->len);
             send_nak(frame->seq, NAK_PARAM_ERROR);
         }
         break;
 
     case CMD_BOOT_TEXT:
         if (frame->len > 0) {
+            DEBUG_PRINTF("BOOT: text len=%d", frame->len);
             char buf[PROTO_MAX_DATA + 1];
             memcpy(buf, frame->data, frame->len);
             buf[frame->len] = '\0';
@@ -254,6 +279,7 @@ static void process_frame(const proto_frame_t *frame)
             display_mgr_set_boot_text(buf);
             send_ack(frame->seq);
         } else {
+            DEBUG_PRINTF("BOOT: param error (len=%d)", frame->len);
             send_nak(frame->seq, NAK_PARAM_ERROR);
         }
         break;
@@ -264,9 +290,13 @@ static void process_frame(const proto_frame_t *frame)
 
     case CMD_NAK:
         /* RK3506 回复的 NAK, 暂不处理 */
+        if (frame->len >= 1) {
+            DEBUG_PRINTF("NAK from host: code=0x%02X", frame->data[0]);
+        }
         break;
 
     default:
+        DEBUG_PRINTF("RX: unknown cmd=0x%02X", frame->cmd);
         send_nak(frame->seq, NAK_UNKNOWN_CMD);
         break;
     }

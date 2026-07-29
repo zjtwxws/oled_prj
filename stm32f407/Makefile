@@ -22,6 +22,7 @@ MCU     = $(CPU) -mthumb $(FPU)
 PROJ_SRC = src/ssd1306.c src/font.c src/display_mgr.c \
            src/i2c_drv.c src/uart_drv.c src/protocol.c \
            src/led_mgr.c src/key_drv.c src/iwdg_drv.c src/sys_config.c \
+           src/debug_console.c \
            src/main.c
 
 # CubeMX 生成的 HAL 源文件 (需用户补充路径)
