@@ -467,6 +467,30 @@ const char* disp_handle_json(CmdDispatcher* d, const char* json)
         return disp_build_ack("boot_text", seq);
     }
 
+    if (strcmp(cmd_buf, "serial_test") == 0) {
+        char content[256];
+        int clen = json_get_nested_str(json, "data.content", content, sizeof(content));
+        if (clen < 0) clen = 0;
+        content[sizeof(content) - 1] = '\0';
+
+        printf("\n========================================\n");
+        printf("[SERIAL TEST] 收到测试消息\n");
+        printf("  内容: %s\n", content);
+        printf("  长度: %d 字节\n", clen);
+        printf("  时间: %s", ctime(&(time_t){time(NULL)}));
+        printf("========================================\n");
+        fflush(stdout);
+
+        /* 同时也通过串口发送到 STM32, 方便观察 */
+        if (clen > 0) {
+            uint8_t test_len = (uint8_t)(clen < PROTO_MAX_DATA ? clen : PROTO_MAX_DATA);
+            uart_send_raw(d->uart, CMD_TEXT_CONTENT, 0,
+                          (const uint8_t*)content, test_len);
+        }
+
+        return disp_build_ack("serial_test", 0);
+    }
+
     return disp_build_ack("unknown", -2);
 }
 

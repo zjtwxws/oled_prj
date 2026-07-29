@@ -32,7 +32,9 @@
   .mode-radio input{display:none}
   .inp{width:100%;padding:6px 8px;border:1px solid var(--accent);border-radius:4px;background:#0a0a1a;color:var(--text);font-size:0.8rem}
   .inp:focus{outline:none;border-color:var(--blue)}
-  .log-area{max-height:120px;overflow-y:auto;font-size:0.7rem;font-family:monospace;background:#0a0a1a;padding:8px;border-radius:4px;color:#aaa}
+  .log-area{max-height:240px;overflow-y:auto;font-size:0.7rem;font-family:monospace;background:#0a0a1a;padding:8px;border-radius:4px;color:#aaa}
+  .log-area div{padding:1px 0;border-bottom:1px solid #222;line-height:1.4}
+  .log-area div:first-child{border-bottom-color:var(--blue)}
   .led-status{font-size:1.5rem;font-weight:bold}
   .led-status.on{color:var(--green)}
   .led-status.off{color:#666}
@@ -55,7 +57,10 @@
 
     <div class="panel">
       <h3>🔌 连接管理</h3>
-      <input class="inp" id="ipInput" placeholder="192.168.x.x" value="192.168.1.100">
+      <div style="display:flex;gap:6px">
+        <input class="inp" id="ipInput" placeholder="192.168.x.x" value="192.168.1.100" style="flex:1">
+        <input class="inp" id="portInput" placeholder="端口" value="8080" style="width:70px">
+      </div>
       <div class="btn-group" style="margin-top:8px">
         <button class="btn btn-blue" onclick="connect()">连接</button>
         <button class="btn btn-red" onclick="disconnect()">断开</button>
@@ -98,6 +103,17 @@
       <input class="inp" id="bootTextInput" placeholder="欢迎进入系统">
       <div class="btn-group" style="margin-top:8px">
         <button class="btn btn-amber" onclick="send({cmd:'boot_text',data:{content:getVal('bootTextInput')}})">保存到Flash</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>🧪 串口测试</h3>
+      <input class="inp" id="testInput" placeholder="输入测试内容，确认后从 RK3506 串口输出...">
+      <div class="btn-group" style="margin-top:8px">
+        <button class="btn btn-green" onclick="send({cmd:'serial_test',data:{content:getVal('testInput')}})">确认发送</button>
+      </div>
+      <div style="margin-top:6px;font-size:0.7rem;color:#888">
+        测试消息将通过 RK3506 的控制台串口输出
       </div>
     </div>
 
@@ -150,10 +166,12 @@
 
   function connect(){
     const ip=getVal('ipInput');
-    try{ws=new WebSocket('ws://'+ip+'/ws');
-      ws.onopen=()=>{connected=true;setStatus('已连接 ✓',true);log('已连接到 '+ip)};
+    const port=getVal('portInput');
+    const url=port ? 'ws://'+ip+':'+port+'/ws' : 'ws://'+ip+'/ws';
+    try{ws=new WebSocket(url);
+      ws.onopen=()=>{connected=true;setStatus('已连接 ✓',true);log('已连接到 '+url)};
       ws.onclose=()=>{connected=false;setStatus('断开',false);log('连接断开')};
-      ws.onerror=()=>{setStatus('异常',false)};
+      ws.onerror=()=>{setStatus('异常',false);log('⚠ 连接失败: 请检查IP和端口是否正确, 以及服务是否已启动')};
       ws.onmessage=e=>handleMsg(e.data);
     }catch(e){log('连接失败: '+e.message)}
   }
@@ -210,9 +228,12 @@
   function log(msg){
     const el=document.getElementById('logArea');
     const time=new Date().toLocaleTimeString();
-    el.innerHTML='['+time+'] '+msg+'\n'+el.innerHTML;
-    const lines=el.innerHTML.split('\n');
-    if(lines.length>50)el.innerHTML=lines.slice(0,50).join('\n');
+    const div=document.createElement('div');
+    div.textContent='['+time+'] '+msg;
+    el.insertBefore(div, el.firstChild);
+    while(el.children.length>50){
+      el.removeChild(el.lastChild);
+    }
   }
 
   /* OLED Canvas 预览绘制 */
