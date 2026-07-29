@@ -26,6 +26,7 @@ enum ProtoCmd : uint8_t {
     CMD_LED_STATUS    = 0x10,
     CMD_MODE_STATUS   = 0x11,
     CMD_KEY_EVENT     = 0x12,
+    CMD_FRAME_SYNC    = 0x20,   /* STM32 → PC: OLED 显存同步帧 */
     CMD_ACK           = 0xF0,
     CMD_NAK           = 0xFF
 };

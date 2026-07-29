@@ -100,4 +100,10 @@ const display_status_t* display_mgr_get_status(void);
  */
 void display_mgr_tick(void);
 
+/**
+ * @brief 触发一次 OLED 显存同步上报 (分帧通过 UART 上传给 RK3506)
+ * @note  建议在内容变化或 display_mgr_tick 中周期性调用
+ */
+void display_mgr_sync_frame(void);
+
 #endif /* __DISPLAY_MGR_H */

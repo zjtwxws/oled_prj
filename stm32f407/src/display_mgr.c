@@ -15,6 +15,8 @@
 #include "display_mgr.h"
 #include "ssd1306.h"
 #include "font.h"
+#include "protocol.h"
+#include "uart_drv.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -26,6 +28,9 @@
 #define FLIP_INTERVAL_MS    3000    /* 翻页间隔 */
 #define FADE_INTERVAL_MS    30      /* 淡入淡出间隔 */
 #define FADE_STEPS          32      /* 淡入淡出步数 */
+
+#define FRAME_SYNC_INTERVAL_MS  200 /* 显存同步上报间隔 */
+#define FRAME_SYNC_PAYLOAD      200 /* 每帧最大 payload 字节数 */
 
 /* --- 静态变量 --- */
 static display_mode_t  current_mode = DISP_MODE_STATIC;
@@ -47,6 +52,10 @@ static uint32_t flip_timer = 0;
 static uint8_t fade_step = 0;
 static uint8_t fade_dir = 0;         /* 0=淡出, 1=淡入 */
 static uint32_t fade_timer = 0;
+
+/* 显存同步状态 */
+static uint32_t frame_sync_timer = 0;
+static uint8_t  frame_sync_seg = 0;
 
 /* 特效函数指针表 */
 typedef void (*effect_func_t)(void);
@@ -122,6 +131,19 @@ static void refresh_content_area(uint8_t fill_bg)
     }
 }
 
+/* 在内容区绘制 16x16 中文字符 (跨两个 page) */
+static void draw_chinese_char(uint8_t x, uint8_t page, const uint8_t *glyph)
+{
+    if (!glyph) return;
+    uint8_t *buf = ssd1306_get_buffer();
+    for (uint8_t c = 0; c < FONT_CHINESE_W && x + c < SSD1306_WIDTH; c++, x++) {
+        if (page < SSD1306_PAGES)
+            buf[page * SSD1306_WIDTH + x] = glyph[c * 2];       /* 上半 8 像素 */
+        if (page + 1 < SSD1306_PAGES)
+            buf[(page + 1) * SSD1306_WIDTH + x] = glyph[c * 2 + 1]; /* 下半 8 像素 */
+    }
+}
+
 /* 在内容区绘制文字 (用于静态/翻页模式) */
 static void draw_text_content(const char *text)
 {
@@ -130,24 +152,44 @@ static void draw_text_content(const char *text)
     uint8_t page = DISP_CONTENT_Y >> 3; /* page 2 */
     uint8_t col = 0;
     const char *p = text;
+    uint8_t *buf = ssd1306_get_buffer();
 
-    while (*p) {
-        /* 处理 UTF-8 中文 (3 字节) */
-        if (((uint8_t)*p & 0x80) && font_is_chinese_lead((uint8_t)*p)) {
-            /* 简易中文显示: 尝试获取字模 */
-            /* 由于完整字库需要 GB2312 码表, 此处仅做占位 */
-            /* 实际项目中此处调用 font_get_chinese_utf8(p) */
-            p += 3;
+    while (*p && page < SSD1306_PAGES - 1) {
+        uint8_t first = (uint8_t)*p;
+
+        /* 处理 UTF-8 中文 (3 字节, U+4E00~U+9FA5) */
+        if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+            const uint8_t *glyph = font_get_chinese_utf8(p);
+
+            /* 换行判断 */
+            if (col + FONT_CHINESE_W > SSD1306_WIDTH) {
+                col = 0;
+                page += 2;
+                if (page >= SSD1306_PAGES - 1) break;
+            }
+
+            if (glyph) {
+                draw_chinese_char(col, page, glyph);
+            } else {
+                /* 字库未收录: 显示占位方块 */
+                for (uint8_t c = 0; c < FONT_CHINESE_W && col + c < SSD1306_WIDTH; c++) {
+                    if (page < SSD1306_PAGES)
+                        buf[page * SSD1306_WIDTH + col + c] = 0xFF;
+                    if (page + 1 < SSD1306_PAGES)
+                        buf[(page + 1) * SSD1306_WIDTH + col + c] = 0xFF;
+                }
+            }
             col += FONT_CHINESE_W;
-        } else {
-            /* ASCII */
+            p += 3;
+        }
+        /* ASCII (含 UTF-8 两字节/四字节等非中文字符, 统一按 ASCII 宽度占位) */
+        else {
             if (col + FONT_ASCII_W > SSD1306_WIDTH) {
                 col = 0;
-                page += 2;  /* 换行 (16px 高) */
+                page += 2;
                 if (page >= SSD1306_PAGES - 1) break;
             }
             const uint8_t *bm = font_get_ascii(*p);
-            uint8_t *buf = ssd1306_get_buffer();
             for (uint8_t c = 0; c < FONT_ASCII_W && col < SSD1306_WIDTH; c++, col++) {
                 if (page < SSD1306_PAGES)
                     buf[page * SSD1306_WIDTH + col] = bm[c];
@@ -396,6 +438,13 @@ void display_mgr_tick(void)
     static uint32_t tick_count = 0;
     tick_count++;
 
+    /* 周期性触发显存同步上报 */
+    frame_sync_timer += 50;
+    if (frame_sync_timer >= FRAME_SYNC_INTERVAL_MS) {
+        frame_sync_timer = 0;
+        display_mgr_sync_frame();
+    }
+
     switch (current_mode) {
     case DISP_MODE_SCROLL_L:
     case DISP_MODE_SCROLL_R:
@@ -452,4 +501,29 @@ void display_mgr_tick(void)
     default:
         break;
     }
+}
+
+void display_mgr_sync_frame(void)
+{
+    const uint8_t *frame_buf = ssd1306_get_buffer();
+    uint16_t total = SSD1306_WIDTH * SSD1306_PAGES;  /* 1024 */
+    uint8_t seg_total = (total + FRAME_SYNC_PAYLOAD - 1) / FRAME_SYNC_PAYLOAD;
+
+    if (frame_sync_seg >= seg_total) {
+        frame_sync_seg = 0;
+    }
+
+    uint16_t offset = frame_sync_seg * FRAME_SYNC_PAYLOAD;
+    uint16_t remain = total - offset;
+    uint8_t payload_len = (remain > FRAME_SYNC_PAYLOAD) ? FRAME_SYNC_PAYLOAD : (uint8_t)remain;
+
+    uint8_t data[FRAME_SYNC_PAYLOAD + 2];
+    data[0] = frame_sync_seg;
+    data[1] = seg_total;
+    memcpy(&data[2], &frame_buf[offset], payload_len);
+
+    uint16_t len = proto_build_frame(CMD_FRAME_SYNC, frame_sync_seg, data, payload_len + 2);
+    uart_drv_send(proto_get_tx_buf(), len);
+
+    frame_sync_seg++;
 }

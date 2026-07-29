@@ -7,10 +7,12 @@
 #define CMD_DISPATCHER_H
 
 #include "uart_adapter.h"
+#include "protocol.h"
 #include <string>
 #include <functional>
 #include <map>
 #include <vector>
+#include <array>
 
 /* JSON 操作简化: 使用 nlohmann/json 或自定义简易解析器 */
 /* 为减少依赖, 此处使用手写简易 JSON 构建/解析 */
@@ -57,6 +59,14 @@ private:
 
     /* 时间 */
     uint32_t m_lastTimeSync = 0;
+
+    /* OLED 显存同步重组 */
+    std::array<uint8_t, 1024> m_oledFrame;
+    uint8_t m_frameSegTotal = 0;
+    uint8_t m_frameSegMask = 0;  /* 已收到的分片位掩图 (最多 8 片, 1024/200=6) */
+    bool    m_frameReady = false;
+
+    static std::string base64Encode(const uint8_t* data, size_t len);
 };
 
 #endif /* CMD_DISPATCHER_H */

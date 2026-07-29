@@ -27,6 +27,7 @@
 #define CMD_LED_STATUS      0x10
 #define CMD_MODE_STATUS     0x11
 #define CMD_KEY_EVENT       0x12
+#define CMD_FRAME_SYNC      0x20   /* STM32 → PC: OLED 显存同步帧 */
 #define CMD_ACK             0xF0
 #define CMD_NAK             0xFF
 

@@ -176,6 +176,18 @@
       if(m.evt==='mode_status')updateMode(m.data.mode);
       if(m.evt==='key_event')log('按键'+m.data.key+':'+m.data.action);
       if(m.evt==='error')log('❌ 错误码:'+m.data.code);
+      if(m.evt==='frame_sync')decodeFrame(m.data);
+    }catch(e){}
+  }
+
+  function decodeFrame(b64){
+    try{
+      const binary=atob(b64);
+      if(binary.length!==1024)return;
+      for(let i=0;i<1024;i++){
+        oledBuf[i]=binary.charCodeAt(i);
+      }
+      drawOLED();
     }catch(e){}
   }
 
@@ -244,9 +256,11 @@
     ctx.fillText('LED:● 模式:静态',16,248);
   }
 
-  /* 初始绘制 */
+  /* 初始绘制 (连接前显示演示画面, 连接后由 frame_sync 驱动) */
   drawDemo();
-  setInterval(drawDemo,1000); /* 每秒刷新预览 */
+  setInterval(function(){
+    if(!connected) drawDemo();
+  },1000);
 </script>
 </body>
 </html>

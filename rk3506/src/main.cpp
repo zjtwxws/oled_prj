@@ -16,6 +16,8 @@
 #include <iostream>
 #include <csignal>
 #include <string>
+#include <thread>
+#include <chrono>
 
 static volatile int g_running = 1;
 
@@ -51,16 +53,18 @@ int main(int argc, char* argv[])
     /* 3. Web 服务器 */
     WebServer web;
     web.start(webPort, "./web");
-    web.onMessage([&dispatcher](const std::string& msg) {
-        std::string resp = dispatcher.handleJsonCommand(msg);
-        /* 响应推回 (通过 dispatcher 的 pollEvent 机制) */
+    web.onMessage([&dispatcher](const std::string& msg) -> std::string {
+        return dispatcher.handleJsonCommand(msg);
     });
 
     /* 4. TCP 服务器 */
     TcpServer tcp;
     tcp.start(tcpPort);
-    tcp.onMessage([&dispatcher](const std::string& msg, int clientId) {
+    tcp.onMessage([&dispatcher, &tcp](const std::string& msg, int clientId) {
         std::string resp = dispatcher.handleJsonCommand(msg);
+        if (!resp.empty()) {
+            tcp.send(clientId, resp + "\n");
+        }
     });
 
     /* 5. 注册事件回调 (仅记录到队列, 不在回调中直接广播, 避免与主循环 pollEvent 重复) */
@@ -76,7 +80,7 @@ int main(int argc, char* argv[])
         uart.poll();
 
         /* Web服务器自带事件循环, 此处处理命令广播 */
-        web.poll();
+        web.pollEvents();
 
         /* 分发 UART 事件到 Web/TCP */
         std::string evtJson;
@@ -88,7 +92,7 @@ int main(int argc, char* argv[])
         /* 时间同步 */
         dispatcher.tickTimeSync();
 
-        usleep(20000); /* 20ms */
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
     /* 清理 */

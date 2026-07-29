@@ -22,39 +22,59 @@
 
 /* --- mongoose 事件处理 --- */
 
-static void mg_event_handler(struct mg_connection* c, int ev, void* ev_data)
+void WebServer::eventHandler(struct mg_connection* c, int ev, void* ev_data)
 {
     WebServer* self = (WebServer*)c->fn_data;
+    if (!self) return;
 
     if (ev == MG_EV_HTTP_MSG) {
         struct mg_http_message* hm = (struct mg_http_message*)ev_data;
 
         /* WebSocket 升级 */
-        if (mg_http_match_uri(hm, "/ws")) {
+        if (mg_match(hm->uri, mg_str("/ws"), NULL)) {
             mg_ws_upgrade(c, hm, NULL);
             return;
         }
 
         /* 静态文件服务 */
         struct mg_http_serve_opts opts = {};
-        opts.root_dir = ".";
+        opts.root_dir = self->m_webRoot.c_str();
         mg_http_serve_dir(c, hm, &opts);
         return;
     }
 
     if (ev == MG_EV_WS_MSG) {
         struct mg_ws_message* wm = (struct mg_ws_message*)ev_data;
-        std::string msg((char*)wm->data.ptr, wm->data.len);
+        std::string msg((char*)wm->data.buf, wm->data.len);
 
-        if (self && self->m_msgCb) {
-            self->m_msgCb(msg);
+        if (self->m_msgCb) {
+            std::string resp = self->m_msgCb(msg);
+            if (!resp.empty()) {
+                mg_ws_send(c, resp.c_str(), resp.length(), WEBSOCKET_OP_TEXT);
+            }
         }
+        return;
+    }
+
+    /* 跨线程广播: 主线程通过 mg_wakeup 投递的消息在此处理 */
+    if (ev == MG_EV_WAKEUP) {
+        struct mg_str* data = (struct mg_str*)ev_data;
+        if (data && data->buf && data->len > 0) {
+            std::string payload(data->buf, data->len);
+            struct mg_mgr* mgr = (struct mg_mgr*)self->m_mgr;
+            for (struct mg_connection* wc = mgr->conns; wc != NULL; wc = wc->next) {
+                if (wc->is_websocket) {
+                    mg_ws_send(wc, payload.c_str(), payload.length(), WEBSOCKET_OP_TEXT);
+                }
+            }
+        }
+        return;
     }
 }
 
 /* --- WebServer 实现 --- */
 
-WebServer::WebServer() : m_port(80), m_running(false), m_mgr(nullptr) {}
+WebServer::WebServer() : m_port(80), m_running(false), m_mgr(nullptr), m_listenConnId(0) {}
 
 WebServer::~WebServer() { stop(); }
 
@@ -79,26 +99,18 @@ void WebServer::onMessage(MessageCallback cb) { m_msgCb = cb; }
 
 void WebServer::broadcast(const std::string& msg)
 {
-    std::lock_guard<std::mutex> lock(m_queueMutex);
-    m_broadcastQueue.push_back(msg);
+    if (!m_mgr || m_listenConnId == 0) return;
+
+    struct mg_mgr* mgr = (struct mg_mgr*)m_mgr;
+    /* mg_wakeup 是 mongoose 提供的跨线程唤醒/投递 API,
+     * 向 listen 连接投递 MG_EV_WAKEUP 事件, 在事件循环线程内执行广播。 */
+    mg_wakeup(mgr, m_listenConnId, msg.c_str(), msg.length());
 }
 
-void WebServer::poll()
+void WebServer::pollEvents()
 {
-    /* mongoose 使用自己的事件循环, poll 中处理广播队列 */
-    if (!m_mgr) return;
-
-    std::lock_guard<std::mutex> lock(m_queueMutex);
-    for (auto& msg : m_broadcastQueue) {
-        /* 遍历所有连接, 发送 WebSocket 消息 */
-        struct mg_mgr* mgr = (struct mg_mgr*)m_mgr;
-        for (struct mg_connection* c = mgr->conns; c != NULL; c = c->next) {
-            if (c->is_websocket) {
-                mg_ws_send(c, msg.c_str(), msg.length(), WEBSOCKET_OP_TEXT);
-            }
-        }
-    }
-    m_broadcastQueue.clear();
+    /* 广播已改为通过 mg_wakeup 投递到 mongoose 线程内处理,
+     * 此处无需操作, 保留接口兼容上层。 */
 }
 
 void WebServer::serverThread()
@@ -107,12 +119,18 @@ void WebServer::serverThread()
     mg_mgr_init(&mgr);
     m_mgr = &mgr;
 
+    /* 初始化跨线程唤醒管道 */
+    mg_wakeup_init(&mgr);
+
     /* 监听端口 */
     char addr[32];
     snprintf(addr, sizeof(addr), "http://0.0.0.0:%d", m_port);
 
-    /* 传入 this 指针作为 fn_data, 替代 WebServerCtx 结构体 */
-    mg_http_listen(&mgr, addr, mg_event_handler, this);
+    /* 传入 this 指针作为 fn_data */
+    struct mg_connection* listener = mg_http_listen(&mgr, addr, &WebServer::eventHandler, this);
+    if (listener) {
+        m_listenConnId = listener->id;
+    }
 
     std::cout << "[WebServer] Listening on " << addr << std::endl;
 
@@ -123,4 +141,5 @@ void WebServer::serverThread()
 
     mg_mgr_free(&mgr);
     m_mgr = nullptr;
+    m_listenConnId = 0;
 }

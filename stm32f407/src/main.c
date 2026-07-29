@@ -51,10 +51,10 @@ int main(void)
     HAL_Init();
     SystemClock_Config();
 
-    /* CubeMX 生成的外设初始化 (需从 CubeMX 文件复制) */
-    /* MX_GPIO_Init();    -- 用户需补充 */
-    /* MX_USART1_UART_Init(); -- 用户需补充 */
-    /* MX_I2C1_Init();    -- 用户需补充 */
+    /* CubeMX 生成的外设初始化 (函数名/参数以实际 CubeMX 工程为准) */
+    MX_GPIO_Init();
+    MX_USART1_UART_Init();
+    MX_I2C1_Init();
 
     /* 驱动层初始化 */
     i2c_drv_init(&hi2c1);
