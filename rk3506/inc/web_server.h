@@ -1,64 +1,61 @@
 /**
  * @file    web_server.h
- * @brief   RK3506 Web 服务器 — HTTP 静态资源 + WebSocket 双向通信
+ * @brief   RK3506 Web 服务器 — HTTP 静态资源 + WebSocket 双向通信 (纯 C)
  *
  * 使用 mongoose 轻量级网络库 (单头文件, 无需外部依赖).
- * 编译: g++ -DMG_ENABLE_HTTP_WEBSOCKET=1 ...
+ * 编译: gcc -DMG_ENABLE_HTTP_WEBSOCKET=1 ...
  */
 
 #ifndef WEB_SERVER_H
 #define WEB_SERVER_H
 
-#include <string>
-#include <functional>
-#include <thread>
-#include <atomic>
-#include <vector>
-#include <mutex>
+#include <stdint.h>
+#include <pthread.h>
 
-class WebServer {
-public:
-    /* 返回字符串会直接作为响应发回当前 WebSocket 连接 */
-    using MessageCallback = std::function<std::string(const std::string& msg)>;
+/* WebSocket 消息回调: 接收消息字符串, 返回响应字符串 (静态缓冲区) */
+typedef const char* (*web_msg_callback_t)(const char* msg, void* user_data);
 
-    WebServer();
-    ~WebServer();
+typedef struct {
+    int    port;
+    char   web_root[256];
+    int    running;
 
-    /* 启动服务 (非阻塞) */
-    int  start(int port = 80, const std::string& webRoot = "./web");
-    void stop();
-    bool isRunning() const;
-
-    /* 设置收到 WebSocket 消息的回调
-     * 回调返回的字符串会作为响应直接发回当前连接 */
-    void onMessage(MessageCallback cb);
-
-    /* 向所有连接的 WebSocket 客户端广播消息 */
-    void broadcast(const std::string& msg);
-
-    /* 主循环轮询 (保留以兼容上层, 现为空操作) */
-    void pollEvents();
-
-private:
-    void serverThread();
-
-    /* mongoose 事件处理回调 (C++ 静态成员可匹配 C 函数指针) */
-    static void eventHandler(struct mg_connection* c, int ev, void* ev_data);
-
-    int    m_port;
-    std::string m_webRoot;
-    std::atomic<bool> m_running;
-    MessageCallback m_msgCb;
+    web_msg_callback_t msg_cb;
+    void*  msg_cb_user_data;
 
     /* mongoose 内部句柄 (void* 避免头文件依赖) */
-    void* m_mgr;
+    void*  mgr;
 
-    /* 用于跨线程广播的内部连接 id:
-     * 主线程调用 mg_wakeup() 向该连接投递消息,
-     * mongoose 线程在 MG_EV_WAKEUP 中执行真正的广播。 */
-    unsigned long m_listenConnId;
+    /* 用于跨线程广播的内部连接 id */
+    unsigned long listen_conn_id;
 
-    std::thread m_thread;
-};
+    pthread_t thread;
+} WebServer;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* 初始化/销毁 */
+void web_init(WebServer* ws);
+void web_deinit(WebServer* ws);
+
+/* 启动服务 (非阻塞), port=0 使用默认 80 */
+int  web_start(WebServer* ws, int port, const char* web_root);
+void web_stop(WebServer* ws);
+int  web_is_running(const WebServer* ws);
+
+/* 设置收到 WebSocket 消息的回调 */
+void web_on_message(WebServer* ws, web_msg_callback_t cb, void* user_data);
+
+/* 向所有连接的 WebSocket 客户端广播消息 */
+void web_broadcast(WebServer* ws, const char* msg);
+
+/* 主循环轮询 (保留以兼容上层, 现为空操作) */
+void web_poll_events(WebServer* ws);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* WEB_SERVER_H */

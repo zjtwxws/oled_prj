@@ -466,7 +466,7 @@ const char* disp_handle_json(CmdDispatcher* d, const char* json)
             (uint8_t)t->tm_sec,
             (uint8_t)t->tm_wday
         };
-        int seq = uart_send_command(d->uart, CMD_TIME_SYNC, d, 7, CMD_ACK, UART_TIMEOUT_MS);
+        int seq = uart_send_command(d->uart, CMD_TIME_SYNC, td, 7, CMD_ACK, UART_TIMEOUT_MS);
         return disp_build_ack("time_sync", seq);
     }
 

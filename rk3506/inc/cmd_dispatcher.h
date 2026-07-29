@@ -1,6 +1,6 @@
 /**
  * @file    cmd_dispatcher.h
- * @brief   命令分发器 — WebSocket/TCP JSON ↔ UART 二进制帧 转换中心
+ * @brief   命令分发器 — WebSocket/TCP JSON ↔ UART 二进制帧 转换中心 (纯 C)
  */
 
 #ifndef CMD_DISPATCHER_H
@@ -8,65 +8,78 @@
 
 #include "uart_adapter.h"
 #include "protocol.h"
-#include <string>
-#include <functional>
-#include <map>
-#include <vector>
-#include <array>
+#include <stdint.h>
+#include <pthread.h>
+#include <time.h>
 
-/* JSON 操作简化: 使用 nlohmann/json 或自定义简易解析器 */
-/* 为减少依赖, 此处使用手写简易 JSON 构建/解析 */
+#define DISP_EVENT_QUEUE_MAX  64
+#define OLED_FRAME_SIZE       1024
+#define OLED_SEG_MAX          8
 
-class CmdDispatcher {
-public:
-    using JsonEventCallback = std::function<void(const std::string& json)>;
+/* JSON 事件回调 */
+typedef void (*disp_json_event_callback_t)(const char* json, void* user_data);
 
-    CmdDispatcher(UartAdapter& uart);
-
-    /* 下行: WebSocket/TCP JSON → UART 帧 */
-    std::string handleJsonCommand(const std::string& json);
-
-    /* 上行: UART 帧 → JSON 事件 (注册回调推送到 Web) */
-    void onJsonEvent(JsonEventCallback cb);
-
-    /* 拉取待推送的 JSON 事件 */
-    bool pollEvent(std::string& json);
-
-    /* 时间同步 tick */
-    void tickTimeSync();
-
-private:
-    void onUartFrame(const ProtoFrame& frame);
-    void pushEvent(const std::string& json);
-
-    /* JSON 构建辅助 */
-    static std::string buildAck(const std::string& cmd, int code);
-    static std::string buildEvent(const std::string& evt, const std::string& dataJson);
-    static std::string buildSimpleObj(const std::map<std::string, std::string>& kv);
-
-    UartAdapter& m_uart;
-    JsonEventCallback m_jsonCb;
+/* 命令分发器 */
+typedef struct {
+    UartAdapter* uart;
+    disp_json_event_callback_t json_cb;
+    void*       json_cb_user_data;
 
     /* 事件队列 */
-    std::vector<std::string> m_eventQueue;
-    std::mutex m_eventMutex;
+    char        event_queue[DISP_EVENT_QUEUE_MAX][512];
+    int         event_head;
+    int         event_tail;
+    int         event_count;
+    pthread_mutex_t event_mutex;
 
     /* 天气模拟状态 */
-    int m_weatherType = 0;
-    int m_temperature = 25;
-    int m_humidity    = 60;
-    int m_windDir     = 0;
+    int         weather_type;
+    int         temperature;
+    int         humidity;
+    int         wind_dir;
 
-    /* 时间 */
-    uint32_t m_lastTimeSync = 0;
+    /* 时间同步 */
+    uint32_t    last_time_sync;
 
     /* OLED 显存同步重组 */
-    std::array<uint8_t, 1024> m_oledFrame;
-    uint8_t m_frameSegTotal = 0;
-    uint8_t m_frameSegMask = 0;  /* 已收到的分片位掩图 (最多 8 片, 1024/200=6) */
-    bool    m_frameReady = false;
+    uint8_t     oled_frame[OLED_FRAME_SIZE];
+    uint8_t     frame_seg_total;
+    uint8_t     frame_seg_mask;
+    int         frame_ready;
+} CmdDispatcher;
 
-    static std::string base64Encode(const uint8_t* data, size_t len);
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* 初始化/销毁 */
+void disp_init(CmdDispatcher* d, UartAdapter* uart);
+void disp_deinit(CmdDispatcher* d);
+
+/* 下行: WebSocket/TCP JSON → UART 帧, 返回 JSON 响应字符串 */
+const char* disp_handle_json(CmdDispatcher* d, const char* json);
+
+/* 上行: UART 帧 → JSON 事件 (注册回调推送到 Web) */
+void disp_on_json_event(CmdDispatcher* d, disp_json_event_callback_t cb, void* user_data);
+
+/* 拉取待推送的 JSON 事件, 返回 1 表示有事件, json_buf 至少 512 字节 */
+int  disp_poll_event(CmdDispatcher* d, char* json_buf, int buf_size);
+
+/* 时间同步 tick (主循环中每帧调用) */
+void disp_tick_time_sync(CmdDispatcher* d);
+
+/* 获取 ACK 响应字符串 (静态缓冲区, 下次调用覆盖) */
+const char* disp_build_ack(const char* cmd, int code);
+
+/* 构建事件 JSON (静态缓冲区, 下次调用覆盖) */
+const char* disp_build_event(const char* evt, const char* data_json);
+
+/* 构建简单 KV JSON 对象 (静态缓冲区, 下次调用覆盖) */
+const char* disp_build_simple_obj(const char* key, const char* val);
+const char* disp_build_simple_obj_int(const char* key, int val);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CMD_DISPATCHER_H */

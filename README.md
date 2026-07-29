@@ -34,18 +34,18 @@ oled_prj/
 ├── rk3506/                  # RK3506 端代码
 │   ├── Makefile
 │   ├── inc/
-│   │   ├── protocol.h       # 二进制帧协议(C++)
+│   │   ├── protocol.h       # 二进制帧协议(C)
 │   │   ├── uart_adapter.h   # 串口适配器
 │   │   ├── cmd_dispatcher.h # 命令分发器
 │   │   ├── web_server.h     # Web服务器(mongoose)
 │   │   └── tcp_server.h     # TCP服务器
 │   ├── src/
-│   │   ├── main.cpp
-│   │   ├── protocol.cpp
-│   │   ├── uart_adapter.cpp
-│   │   ├── cmd_dispatcher.cpp
-│   │   ├── web_server.cpp
-│   │   └── tcp_server.cpp
+│   │   ├── main.c
+│   │   ├── protocol.c
+│   │   ├── uart_adapter.c
+│   │   ├── cmd_dispatcher.c
+│   │   ├── web_server.c
+│   │   └── tcp_server.c
 │   └── web/
 │       └── index.html       # Web前端单页应用
 └── docs/                    # 文档
@@ -79,8 +79,10 @@ make flash
 
 ## RK3506 编译
 
+> **开发语言**: 纯 C (C11 标准)，无 C++ 运行时依赖。
+
 ### 前置条件
-1. Buildroot 生成的交叉编译工具链
+1. Buildroot 生成的交叉编译工具链 (`arm-linux-gnueabihf-gcc`)
 2. mongoose 单文件库 (mongoose.c / mongoose.h)
 
 ### 步骤
