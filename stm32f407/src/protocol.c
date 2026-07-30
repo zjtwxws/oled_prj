@@ -1,12 +1,12 @@
 /**
  * @file    protocol.c
- * @brief   二进制帧协议引擎实现
+ * @brief   二进制帧协议引擎实现 (含超时恢复)
  */
 
 #include "protocol.h"
 #include <string.h>
 
-/* --- CRC-8-ATM 查表 --- */
+/* CRC-8-ATM 查表 */
 static const uint8_t crc8_table[256] = {
     0x00,0x07,0x0E,0x09,0x1C,0x1B,0x12,0x15,0x38,0x3F,0x36,0x31,0x24,0x23,0x2A,0x2D,
     0x70,0x77,0x7E,0x79,0x6C,0x6B,0x62,0x65,0x48,0x4F,0x46,0x41,0x54,0x53,0x5A,0x5D,
@@ -26,7 +26,6 @@ static const uint8_t crc8_table[256] = {
     0xDE,0xD9,0xD0,0xD7,0xC2,0xC5,0xCC,0xCB,0xE6,0xE1,0xE8,0xEF,0xFA,0xFD,0xF4,0xF3
 };
 
-/* --- 接收状态机 --- */
 typedef enum {
     RX_WAIT_SOF = 0,
     RX_WAIT_LEN,
@@ -42,37 +41,46 @@ static proto_frame_t rx_frame;
 static uint8_t       rx_data_idx;
 static uint8_t       rx_expected_len;
 static uint8_t       rx_crc_accum;
+static volatile uint32_t last_byte_tick = 0;  /* 最后收到字节的时刻 */
 
-/* 发送缓冲区 */
 static uint8_t tx_buf[PROTO_FRAME_MAX];
-static uint16_t tx_len;
-
-/* --- CRC --- */
 
 uint8_t proto_crc8(const uint8_t *data, uint16_t len)
 {
     uint8_t crc = 0x00;
-    while (len--) {
-        crc = crc8_table[crc ^ *data++];
-    }
+    while (len--) crc = crc8_table[crc ^ *data++];
     return crc;
 }
 
-/* --- 接收器 --- */
+/*
+ * 依赖 HAL_GetTick() 记录最后收到字节的时刻,
+ * 用于调用方超时检测。调用方需引入 "stm32f4xx_hal.h"。
+ */
+static void proto_record_tick(void)
+{
+    extern uint32_t HAL_GetTick(void);
+    last_byte_tick = HAL_GetTick();
+}
+
+uint32_t proto_get_last_byte_tick(void)
+{
+    return last_byte_tick;
+}
 
 int proto_feed_byte(uint8_t byte)
 {
+    proto_record_tick();
+
     switch (rx_state) {
     case RX_WAIT_SOF:
         if (byte == PROTO_SOF) {
-            rx_crc_accum = crc8_table[0x00 ^ byte];  /* 开始 CRC 累加 */
+            rx_crc_accum = crc8_table[0x00 ^ byte];
             rx_state = RX_WAIT_LEN;
         }
         break;
 
     case RX_WAIT_LEN:
         if (byte > PROTO_MAX_DATA) {
-            /* 长度非法, 回 SOF */
             rx_state = RX_WAIT_SOF;
         } else {
             rx_expected_len = byte;
@@ -109,11 +117,9 @@ int proto_feed_byte(uint8_t byte)
         break;
 
     case RX_WAIT_CRC:
-        /* 比较 CRC */
         if (byte == rx_crc_accum) {
             rx_state = RX_WAIT_EOF;
         } else {
-            /* CRC 不匹配, 丢弃 */
             rx_state = RX_WAIT_SOF;
         }
         break;
@@ -121,9 +127,8 @@ int proto_feed_byte(uint8_t byte)
     case RX_WAIT_EOF:
         if (byte == PROTO_EOF) {
             rx_state = RX_WAIT_SOF;
-            return 1;  /* 一帧完整 */
+            return 1;
         }
-        /* EOF 不匹配, 丢弃 */
         rx_state = RX_WAIT_SOF;
         break;
     }
@@ -140,12 +145,9 @@ void proto_reset_rx(void)
     rx_state = RX_WAIT_SOF;
 }
 
-/* --- 发送器 --- */
-
 uint16_t proto_build_frame(uint8_t cmd, uint8_t seq, const uint8_t *data, uint8_t len)
 {
     uint8_t idx = 0;
-
     tx_buf[idx++] = PROTO_SOF;
     tx_buf[idx++] = len;
     tx_buf[idx++] = cmd;
@@ -156,14 +158,11 @@ uint16_t proto_build_frame(uint8_t cmd, uint8_t seq, const uint8_t *data, uint8_
         idx += len;
     }
 
-    /* 计算 CRC (覆盖 SOF ~ DATA) */
     tx_buf[idx] = proto_crc8(tx_buf, idx);
     idx++;
-
     tx_buf[idx++] = PROTO_EOF;
-    tx_len = idx;
 
-    return tx_len;
+    return idx;
 }
 
 const uint8_t* proto_get_tx_buf(void)

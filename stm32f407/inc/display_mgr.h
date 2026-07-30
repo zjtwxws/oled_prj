@@ -37,73 +37,16 @@ typedef struct {
     uint8_t  led_state;        /* 0=关,1=开,2=闪烁 */
 } display_status_t;
 
-/* --- 初始化 --- */
-
-/**
- * @brief 显示管理器初始化
- * @param boot_text  上电默认文字 (UTF-8 编码)
- */
 void display_mgr_init(const char *boot_text);
-
-/* --- 内容设置 --- */
-
-/**
- * @brief 设置主内容区显示文字
- * @param text  UTF-8 编码字符串
- */
 void display_mgr_set_text(const char *text);
-
-/**
- * @brief 设置上电默认文字
- */
 void display_mgr_set_boot_text(const char *text);
-
-/**
- * @brief 获取上电默认文字
- */
 const char* display_mgr_get_boot_text(void);
-
-/* --- 显示模式 --- */
-
-/**
- * @brief 设置显示模式
- */
 void display_mgr_set_mode(display_mode_t mode);
-
-/**
- * @brief 获取当前显示模式
- */
 display_mode_t display_mgr_get_mode(void);
-
-/**
- * @brief 切换到下一个显示模式 (按键循环)
- */
 void display_mgr_next_mode(void);
-
-/* --- 状态更新 --- */
-
-/**
- * @brief 更新状态栏信息 (时间/天气/LED)
- */
 void display_mgr_update_status(const display_status_t *status);
-
-/**
- * @brief 获取当前状态指针 (供 UI 同步用)
- */
 const display_status_t* display_mgr_get_status(void);
-
-/* --- 周期任务 --- */
-
-/**
- * @brief 显示管理器 tick (需在主循环或定时器中每 20~50ms 调用一次)
- *        用于驱动滚动、翻页、淡入淡出等动画
- */
 void display_mgr_tick(void);
-
-/**
- * @brief 触发一次 OLED 显存同步上报 (分帧通过 UART 上传给 RK3506)
- * @note  建议在内容变化或 display_mgr_tick 中周期性调用
- */
 void display_mgr_sync_frame(void);
 
-#endif /* __DISPLAY_MGR_H */
+#endif

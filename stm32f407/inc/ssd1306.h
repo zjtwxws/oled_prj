@@ -13,8 +13,16 @@
 #define SSD1306_HEIGHT  64
 #define SSD1306_PAGES   (SSD1306_HEIGHT / 8)  /* 8 pages */
 
-/* I²C 从机地址 (SA0=0 时 0x3C, SA0=1 时 0x3D) */
+/*
+ * I²C 从机地址
+ * 7-bit SA0=0 → 0x3C, SA0=1 → 0x3D
+ * 模组默认 SA0=0 (通过板上电阻配置), 对应 I²C 总线地址 0x78 (左移 1 位后)
+ * 若模组丝印为 0x7A, 则 SA0=1, 需改为 0x3D
+ */
 #define SSD1306_I2C_ADDR    0x3C
+
+/* I²C 操作超时 (ms), 避免 I²C 总线异常时永久阻塞主循环 */
+#define SSD1306_I2C_TIMEOUT_MS  100
 
 /* 基本颜色 */
 #define SSD1306_COLOR_BLACK  0
@@ -29,7 +37,7 @@ typedef enum {
 /* --- 公开接口 --- */
 
 /**
- * @brief  初始化 SSD1306 (发送初始化命令序列)
+ * @brief  初始化 SSD1306 (发送初始化命令序列, 含 100ms 上电延时)
  * @return 0=成功, 非0=失败
  */
 int ssd1306_init(void);

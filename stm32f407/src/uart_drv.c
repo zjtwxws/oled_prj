@@ -1,9 +1,6 @@
 /**
  * @file    uart_drv.c
- * @brief   UART 驱动实现
- *
- * 环形缓冲区 + 中断接收 (每次接收 1 字节, HAL_UART_Receive_IT)
- * 发送: 阻塞 (HAL_UART_Transmit) 或 DMA (HAL_UART_Transmit_DMA)
+ * @brief   UART 驱动实现 (中断接收 + 环形缓冲区)
  */
 
 #include "uart_drv.h"
@@ -12,11 +9,10 @@
 
 static UART_HandleTypeDef *p_uart = NULL;
 
-/* 环形接收缓冲区 */
 static uint8_t  rx_buf[UART_RX_BUF_SIZE];
 static volatile uint16_t rx_head = 0;
-static volatile uint16_t rx_tail = 0;   /* ISR 读, 主循环写 → 需 volatile */
-static uint8_t  rx_byte;  /* 中断接收单字节缓冲 */
+static volatile uint16_t rx_tail = 0;
+static uint8_t  rx_byte;
 
 void uart_drv_init(void *huart)
 {
@@ -24,7 +20,6 @@ void uart_drv_init(void *huart)
     rx_head = 0;
     rx_tail = 0;
 
-    /* 启动单字节中断接收 */
     HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
 }
 
@@ -84,20 +79,22 @@ void uart_drv_rx_callback(uint8_t byte)
         rx_buf[rx_head & (UART_RX_BUF_SIZE - 1)] = byte;
         rx_head = next;
     }
-    /* else: 缓冲区满, 丢弃字节 */
 
-    /* 重新启动中断接收 */
+    /*
+     * 重新启动中断接收。
+     * 若 HAL_UART_Receive_IT 失败 (状态冲突/错误未清除),
+     * 记录错误并尝试恢复: 调用 HAL_UART_AbortReceive_IT 清状态后重试。
+     */
     if (p_uart) {
-        HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
+        HAL_StatusTypeDef ret = HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
+        if (ret != HAL_OK) {
+            /* 错误恢复: 中止当前接收, 重新启动 */
+            HAL_UART_AbortReceive_IT(p_uart);
+            HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
+        }
     }
 }
 
-/*
- * HAL UART 接收完成回调。
- * HAL 中断流程: USART_IRQHandler → HAL_UART_IRQHandler 读取 DR 到 rx_byte
- *               → 调用 HAL_UART_RxCpltCallback。
- * 此时 rx_byte 已包含有效字节, 直接传给环形缓冲区即可, 切勿再次读 DR。
- */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (p_uart && huart->Instance == p_uart->Instance) {
