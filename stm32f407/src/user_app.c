@@ -1,6 +1,6 @@
 /**
- * @file    main.c
- * @brief   STM32F407 主程序 — OLED 三级联动项目
+ * @file    user_app.c
+ * @brief   用户主程序 — OLED 三级联动项目
  */
 
 #include "stm32f4xx_hal.h"
@@ -15,13 +15,14 @@
 #include "key_drv.h"
 #include "iwdg_drv.h"
 #include "sys_config.h"
+#include "sys_tick.h"
 #include "debug_console.h"
 
-extern I2C_HandleTypeDef  hi2c2;
-extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
+/* 外设定义 */
+extern I2C_HandleTypeDef  hi2c2; //用于oled通讯
+extern USART_HandleTypeDef husart1; //用于rk3506通讯
+extern USART_HandleTypeDef husart2; //用于调试打印信息
 
-static void SystemClock_Config(void);
 static void process_frame(const proto_frame_t *frame);
 static void send_ack(uint8_t seq);
 static void send_nak(uint8_t seq, uint8_t error_code);
@@ -43,19 +44,11 @@ static void safe_send(const uint8_t *data, uint16_t len)
     __enable_irq();
 }
 
-int main(void)
+int user_app_init(void)
 {
-    HAL_Init();
-    SystemClock_Config();
-
-    MX_GPIO_Init();
-    MX_USART1_UART_Init();
-    MX_USART2_UART_Init();
-    MX_I2C2_Init();
-
     i2c_drv_init(&hi2c2);
-    uart_drv_init(&huart1);
-    debug_console_init(&huart2);
+    uart_drv_init(&husart1);
+    debug_console_init(&husart2);
 
     ssd1306_init();
     sys_config_init();
@@ -63,109 +56,85 @@ int main(void)
     led_mgr_init();
     key_drv_init();
     iwdg_drv_init();
+	
+	display_mgr_init(sys_config_get_boot_text());
+	
+	DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
 
-    DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
+	return 0;
+}
 
-    display_mgr_init(sys_config_get_boot_text());
-
-    uint32_t last_tick = HAL_GetTick();
-    uint32_t last_key_scan = 0;
-    uint32_t led_tick_acc = 0;
+//需要在main里面的while(1)里面调用
+int user_app_handle(void)
+{
+    static uint32_t last_tick = 0;
+    static uint32_t last_key_scan = 0;
+    static uint32_t led_tick_acc = 0;
     key_info_t key_info;
     uint8_t rx_byte;
 
-    while (1)
-    {
-        /*
-         * 协议帧间超时检测: 若超过 PROTO_RX_TIMEOUT_MS 未收到完整帧,
-         * 自动复位接收状态机防止卡死。
-         */
-        if (proto_get_last_byte_tick() > 0 &&
-            HAL_GetTick() - proto_get_last_byte_tick() > PROTO_RX_TIMEOUT_MS) {
-            proto_reset_rx();
-        }
-
-        while (uart_drv_available()) {
-            uart_drv_read_byte(&rx_byte);
-            if (proto_feed_byte(rx_byte)) {
-                const proto_frame_t *f = proto_get_frame();
-                DEBUG_PRINTF("RX: cmd=0x%02X seq=%d len=%d", f->cmd, f->seq, f->len);
-                process_frame(f);
-            }
-        }
-
-        if (HAL_GetTick() - last_key_scan >= 20) {
-            last_key_scan = HAL_GetTick();
-            if (key_drv_scan(&key_info)) {
-                DEBUG_PRINTF("KEY: id=%d event=%d", key_info.key_id, key_info.event);
-                switch (key_info.key_id) {
-                case 1:
-                    display_mgr_next_mode();
-                    send_mode_status();
-                    break;
-                case 2:
-                    {
-                        uint8_t next = (led_mgr_get_state() + 1) % 3;
-                        led_mgr_set_state((led_state_t)next);
-                        send_led_status();
-                    }
-                    break;
-                }
-                send_key_event(key_info.key_id, key_info.event);
-            }
-        }
-
-        {
-            uint32_t now = HAL_GetTick();
-            uint32_t elapsed = now - last_tick;
-            last_tick = now;
-            led_tick_acc += elapsed;
-            if (led_tick_acc >= 50) {
-                led_mgr_tick(led_tick_acc);
-                led_tick_acc = 0;
-            }
-        }
-
-        {
-            static uint32_t disp_tick = 0;
-            uint32_t now = HAL_GetTick();
-            if (now - disp_tick >= 50) {
-                disp_tick = now;
-                display_mgr_tick();
-            }
-        }
-
-        iwdg_drv_feed();
+    /*
+     * 协议帧间超时检测: 若超过 PROTO_RX_TIMEOUT_MS 未收到完整帧,
+     * 自动复位接收状态机防止卡死。
+     */
+    if (proto_get_last_byte_tick() > 0 &&
+        sys_tick_ms() - proto_get_last_byte_tick() > PROTO_RX_TIMEOUT_MS) {
+        proto_reset_rx();
     }
-}
 
-static void SystemClock_Config(void)
-{
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    while (uart_drv_available()) {
+        uart_drv_read_byte(&rx_byte);
+        if (proto_feed_byte(rx_byte)) {
+            const proto_frame_t *f = proto_get_frame();
+            DEBUG_PRINTF("RX: cmd=0x%02X seq=%d len=%d", f->cmd, f->seq, f->len);
+            process_frame(f);
+        }
+    }
 
-    __HAL_RCC_PWR_CLK_ENABLE();
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    if (sys_tick_ms() - last_key_scan >= 20) {
+        last_key_scan = sys_tick_ms();
+        if (key_drv_scan(&key_info)) {
+            DEBUG_PRINTF("KEY: id=%d event=%d", key_info.key_id, key_info.event);
+            switch (key_info.key_id) {
+            case 1:
+                display_mgr_next_mode();
+                send_mode_status();
+                break;
+            case 2:
+                {
+                    uint8_t next = (led_mgr_get_state() + 1) % 3;
+                    led_mgr_set_state((led_state_t)next);
+                    send_led_status();
+                }
+                break;
+            }
+            send_key_event(key_info.key_id, key_info.event);
+        }
+    }
 
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
-    RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM       = 8;
-    RCC_OscInitStruct.PLL.PLLN       = 336;
-    RCC_OscInitStruct.PLL.PLLP       = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ       = 7;
+    {
+        uint32_t now = sys_tick_ms();
+        uint32_t elapsed = now - last_tick;
+        last_tick = now;
+        led_tick_acc += elapsed;
+        if (led_tick_acc >= 50) {
+            led_mgr_tick(led_tick_acc);
+            led_tick_acc = 0;
+        }
+    }
 
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) { while(1); }
+    {
+        static uint32_t disp_tick = 0;
+        uint32_t now = sys_tick_ms();
+        if (now - disp_tick >= 50) {
+            disp_tick = now;
+            display_mgr_tick();
+        }
+    }
 
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-                                | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider  = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+    iwdg_drv_feed();
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK) { while(1); }
+	return 0;
 }
 
 static void process_frame(const proto_frame_t *frame)
@@ -313,8 +282,3 @@ static void send_mode_status(void)
     safe_send(proto_get_tx_buf(), len);
 }
 
-void Error_Handler(void)
-{
-    __disable_irq();
-    while (1);
-}

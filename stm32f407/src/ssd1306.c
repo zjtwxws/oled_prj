@@ -9,6 +9,7 @@
 
 #include "ssd1306.h"
 #include "i2c_drv.h"
+#include "stm32f4xx_hal.h"
 #include <string.h>
 
 /* --- 内部常量 --- */

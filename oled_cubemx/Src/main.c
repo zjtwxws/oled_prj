@@ -24,7 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "user_app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,6 +96,7 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+  user_app_init();
 
   /* USER CODE END 2 */
 
@@ -104,10 +105,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		
+
     /* USER CODE BEGIN 3 */
-		HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
-		HAL_Delay(1000);
+	HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
+	user_app_handle();
   }
   /* USER CODE END 3 */
 }

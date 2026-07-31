@@ -23,7 +23,20 @@
 "oled_cubemx\stm32f4xx_hal_exti.o"
 "oled_cubemx\stm32f4xx_hal_usart.o"
 "oled_cubemx\system_stm32f4xx.o"
---strict --scatter "oled_cubemx\oled_cubemx.sct"
+"oled_cubemx\debug_console.o"
+"oled_cubemx\display_mgr.o"
+"oled_cubemx\font.o"
+"oled_cubemx\i2c_drv.o"
+"oled_cubemx\iwdg_drv.o"
+"oled_cubemx\key_drv.o"
+"oled_cubemx\led_mgr.o"
+"oled_cubemx\protocol.o"
+"oled_cubemx\ssd1306.o"
+"oled_cubemx\sys_config.o"
+"oled_cubemx\sys_tick.o"
+"oled_cubemx\uart_drv.o"
+"oled_cubemx\user_app.o"
+--library_type=microlib --strict --scatter "oled_cubemx\oled_cubemx.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "oled_cubemx.map" -o oled_cubemx\oled_cubemx.axf

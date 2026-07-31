@@ -2,7 +2,7 @@
  * @file    sys_config.c
  * @brief   系统配置存储实现 (STM32 内部 Flash)
  *
-/* 用户需确认 Flash 分区规划:
+ * 用户需确认 Flash 分区规划:
  * STM32F407VG Flash: 1024KB, Sector 0~11, Sector 11(0x080E0000)为最后128KB.
  * 代码区(Bootloader+App): Sector 0~7(0x08000000~0x080BFFFF, 768KB) 足够容纳本项目代码+字模.
  * 配置区: Sector 11(0x080E0000~0x080FFFFF) 独立使用, 不与代码重叠.

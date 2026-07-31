@@ -12,6 +12,7 @@
  */
 
 #include "font.h"
+#include <stddef.h>
 
 /* ========== ASCII 8x16 字库 (0x20~0x7E) ========== */
 

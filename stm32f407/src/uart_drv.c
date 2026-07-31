@@ -7,7 +7,7 @@
 #include "stm32f4xx_hal.h"
 #include <string.h>
 
-static UART_HandleTypeDef *p_uart = NULL;
+static USART_HandleTypeDef *p_uart = NULL;
 
 static uint8_t  rx_buf[UART_RX_BUF_SIZE];
 static volatile uint16_t rx_head = 0;
@@ -16,31 +16,31 @@ static uint8_t  rx_byte;
 
 void uart_drv_init(void *huart)
 {
-    p_uart = (UART_HandleTypeDef *)huart;
+    p_uart = (USART_HandleTypeDef *)huart;
     rx_head = 0;
     rx_tail = 0;
 
-    HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
+    HAL_USART_Receive_IT(p_uart, &rx_byte, 1);
 }
 
 int uart_drv_send(const uint8_t *data, uint16_t len)
 {
     if (p_uart == NULL) return -1;
-    HAL_StatusTypeDef status = HAL_UART_Transmit(p_uart, (uint8_t *)data, len, HAL_MAX_DELAY);
+    HAL_StatusTypeDef status = HAL_USART_Transmit(p_uart, (uint8_t *)data, len, HAL_MAX_DELAY);
     return (status == HAL_OK) ? 0 : -1;
 }
 
 int uart_drv_send_dma(const uint8_t *data, uint16_t len)
 {
     if (p_uart == NULL) return -1;
-    HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(p_uart, (uint8_t *)data, len);
+    HAL_StatusTypeDef status = HAL_USART_Transmit_DMA(p_uart, (uint8_t *)data, len);
     return (status == HAL_OK) ? 0 : -1;
 }
 
 int uart_drv_tx_busy(void)
 {
     if (p_uart == NULL) return 0;
-    return (p_uart->gState != HAL_UART_STATE_READY) ? 1 : 0;
+    return (p_uart->State != HAL_USART_STATE_READY) ? 1 : 0;
 }
 
 uint16_t uart_drv_available(void)
@@ -86,16 +86,16 @@ void uart_drv_rx_callback(uint8_t byte)
      * 记录错误并尝试恢复: 调用 HAL_UART_AbortReceive_IT 清状态后重试。
      */
     if (p_uart) {
-        HAL_StatusTypeDef ret = HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
+        HAL_StatusTypeDef ret = HAL_USART_Receive_IT(p_uart, &rx_byte, 1);
         if (ret != HAL_OK) {
             /* 错误恢复: 中止当前接收, 重新启动 */
-            HAL_UART_AbortReceive_IT(p_uart);
-            HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
+            HAL_USART_Abort_IT(p_uart);
+            HAL_USART_Receive_IT(p_uart, &rx_byte, 1);
         }
     }
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void HAL_USART_RxCpltCallback(USART_HandleTypeDef *huart)
 {
     if (p_uart && huart->Instance == p_uart->Instance) {
         uart_drv_rx_callback(rx_byte);

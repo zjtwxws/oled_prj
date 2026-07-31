@@ -81,7 +81,7 @@
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
-            <RunUserProg2>0</RunUserProg2>
+            <RunUserProg2>1</RunUserProg2>
             <UserProg1Name></UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\..\stm32f407\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -516,6 +516,76 @@
               <FileName>system_stm32f4xx.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/system_stm32f4xx.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>UserApp</GroupName>
+          <Files>
+            <File>
+              <FileName>debug_console.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\debug_console.c</FilePath>
+            </File>
+            <File>
+              <FileName>display_mgr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\display_mgr.c</FilePath>
+            </File>
+            <File>
+              <FileName>font.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\font.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c_drv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\i2c_drv.c</FilePath>
+            </File>
+            <File>
+              <FileName>iwdg_drv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\iwdg_drv.c</FilePath>
+            </File>
+            <File>
+              <FileName>key_drv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\key_drv.c</FilePath>
+            </File>
+            <File>
+              <FileName>led_mgr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\led_mgr.c</FilePath>
+            </File>
+            <File>
+              <FileName>protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>ssd1306.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\ssd1306.c</FilePath>
+            </File>
+            <File>
+              <FileName>sys_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\sys_config.c</FilePath>
+            </File>
+            <File>
+              <FileName>sys_tick.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\sys_tick.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart_drv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\uart_drv.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\user_app.c</FilePath>
             </File>
           </Files>
         </Group>
