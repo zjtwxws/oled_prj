@@ -11,8 +11,8 @@
 #include "stm32f4xx_hal.h"
 
 /* ---- 用户配置: LED 端口 & 引脚 ---- */
-#define LED_PORT    GPIOB
-#define LED_PIN     GPIO_PIN_0  /* TODO: 根据实际板卡修改 */
+#define LED_PORT    GPIOF
+#define LED_PIN     GPIO_PIN_9
 
 static led_state_t led_state = LED_STATE_OFF;
 static uint32_t blink_timer = 0;

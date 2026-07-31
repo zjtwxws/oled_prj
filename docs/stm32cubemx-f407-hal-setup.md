@@ -98,26 +98,26 @@ Pinout 自动分配: PA9 → USART1_TX, PA10 → USART1_RX
 | Parity | None |
 | Stop Bits | 1 |
 
-### 4.4 串口2 — USART2 (调试串口, TX only)
+### 4.4 串口2 — USART2 (调试串口, TX+RX)
 
 Categories → **USART2 → Mode: Asynchronous**
 
-仅 TX 模式（调试输出，不需要 RX）。将 PA3 (USART2_RX) 释放: 在 Pinout 视图右键 PA3 → **Reset State**。
+Pinout 自动分配: PA2 → USART2_TX, PA3 → USART2_RX
 
 **Parameter Settings**: 同 USART1, Baud Rate = 115200
 
-> 调试串口仅用 TX (PA2), RX (PA3) 释放给 KEY3。
+> 调试串口使用全双工 (PA2 TX, PA3 RX)。按键已全部移至 PE 端口，PA3 无冲突。
 
-### 4.5 I2C1 (驱动 OLED)
+### 4.5 I2C2 (驱动 OLED)
 
-Categories → **I2C1 → Mode: I2C**
+Categories → **I2C2 → Mode: I2C**
 
 | 参数 | 值 |
 |------|-----|
 | I2C Speed Mode | **Fast Mode** |
 | I2C Speed Frequency | **400 KHz** |
 
-Pinout 自动分配: PB6 → I2C1_SCL, PB7 → I2C1_SDA。OLED 地址 `0x3C` (7-bit)，HAL 库内部会 `<< 1` 处理。
+Pinout 自动分配: PB10 → I2C2_SCL, PB11 → I2C2_SDA。OLED 地址 `0x3C` (7-bit)，HAL 库内部会 `<< 1` 处理。
 
 ### 4.6 GPIO 输入 (按键)
 
@@ -125,20 +125,20 @@ Pinout 自动分配: PB6 → I2C1_SCL, PB7 → I2C1_SDA。OLED 地址 `0x3C` (7-
 
 | 引脚 | 标签 | 模式 |
 |------|------|------|
-| **PA1** | KEY1 | GPIO_Input, Pull-up |
-| **PA2** | KEY2 | GPIO_Input, Pull-up |
-| PA3 (可选) | KEY3 | GPIO_Input, Pull-up |
-| PA4 (可选) | KEY4 | GPIO_Input, Pull-up |
+| **PE1** | KEY1 | GPIO_Input, Pull-up |
+| **PE2** | KEY2 | GPIO_Input, Pull-up |
+| **PE3** | KEY3 | GPIO_Input, Pull-up |
+| **PE4** | KEY4 | GPIO_Input, Pull-up |
 
-> PA3 同时是 USART2_RX，如果 USART2 只用作 TX 则释放 PA3 给 KEY3。按键启用数量由 `key_drv.h` 中 `KEY_COUNT` 宏控制，默认 2。
+> 4 个按键全部使用 PE 端口，与串口引脚 (PA2/PA3) 不再冲突。UART2 可实现全双工调试。按键启用数量由 `key_drv.h` 中 `KEY_COUNT` 宏控制，默认 4。
 
 ### 4.7 GPIO 输出 (LED)
 
 | 引脚 | 标签 | 模式 |
 |------|------|------|
-| **PB0** (示例) | LED | GPIO_Output, Push-Pull, No Pull-up/Pull-down |
+| **PF9** | LED | GPIO_Output, Push-Pull, No Pull-up/Pull-down |
 
-> 实际引脚根据开发板而定。本工程 `led_mgr.c` 中使用 PB0。初始化由 CubeMX 生成的 `MX_GPIO_Init()` 完成。
+> 本工程 `led_mgr.c` 中使用 PF9。初始化由 CubeMX 生成的 `MX_GPIO_Init()` 完成。
 
 **完整 Pinout 一览** (本项目当前配置):
 
@@ -147,11 +147,14 @@ Pinout 自动分配: PB6 → I2C1_SCL, PB7 → I2C1_SDA。OLED 地址 `0x3C` (7-
 | USART1_TX | PA9 | UART 发送 → RK3506 |
 | USART1_RX | PA10 | UART 接收 ← RK3506 |
 | USART2_TX | PA2 | 调试 TX (可选) |
-| I2C1_SCL | PB6 | OLED SCL |
-| I2C1_SDA | PB7 | OLED SDA |
-| KEY1 | PA1 | GPIO Input, Pull-up |
-| KEY2 | PA2 | (复用 USART2_TX 时注意冲突) |
-| LED | PB0 | GPIO Output |
+| USART2_RX | PA3 | 调试 RX (可选) |
+| I2C2_SCL | PB10 | OLED SCL |
+| I2C2_SDA | PB11 | OLED SDA |
+| KEY1 | PE1 | GPIO Input, Pull-up |
+| KEY2 | PE2 | GPIO Input, Pull-up |
+| KEY3 | PE3 | GPIO Input, Pull-up |
+| KEY4 | PE4 | GPIO Input, Pull-up |
+| LED | PF9 | GPIO Output |
 
 ## 5. 工程设置 (Project Manager)
 
@@ -209,7 +212,7 @@ stm32f407/
 │   │   ├── system_stm32f4xx.c      ← CMSIS 系统初始化
 │   │   ├── gpio.c
 │   │   ├── usart.c                 ← MX_USARTx_UART_Init()
-│   │   └── i2c.c                   ← MX_I2C1_Init()
+│   │   └── i2c.c                   ← MX_I2C2_Init()
 │   └── Startup/
 │       └── startup_stm32f407xx.s   ← 启动文件 (向量表)
 ├── Drivers/
@@ -230,7 +233,7 @@ int main(void)
     MX_GPIO_Init();                // GPIO 初始化
     MX_USART1_UART_Init();         // USART1 初始化
     MX_USART2_UART_Init();         // USART2 初始化
-    MX_I2C1_Init();                // I2C1 初始化
+    MX_I2C2_Init();                // I2C2 初始化
     MX_IWDG_Init();                // IWDG 初始化
 
     // ★ 此处 (USER CODE BEGIN 2) 添加应用初始化代码
@@ -276,15 +279,15 @@ static void MX_USART1_UART_Init(void)
 ### 7.4 `i2c.c` — I2C 初始化函数
 
 ```c
-static void MX_I2C1_Init(void)
+static void MX_I2C2_Init(void)
 {
-    hi2c1.Instance             = I2C1;
-    hi2c1.Init.ClockSpeed      = 400000;
-    hi2c1.Init.DutyCycle       = I2C_DUTYCYCLE_2;
-    hi2c1.Init.OwnAddress1     = 0;
-    hi2c1.Init.AddressingMode  = I2C_ADDRESSINGMODE_7BIT;
-    hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-    HAL_I2C_Init(&hi2c1);
+    hi2c2.Instance             = I2C2;
+    hi2c2.Init.ClockSpeed      = 400000;
+    hi2c2.Init.DutyCycle       = I2C_DUTYCYCLE_2;
+    hi2c2.Init.OwnAddress1     = 0;
+    hi2c2.Init.AddressingMode  = I2C_ADDRESSINGMODE_7BIT;
+    hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    HAL_I2C_Init(&hi2c2);
 }
 ```
 
@@ -301,7 +304,7 @@ static void MX_I2C1_Init(void)
 ```c
 /* USER CODE BEGIN 2 */
 // --- 应用层初始化 ---
-i2c_drv_init(&hi2c1);          // 传入 HAL 句柄给驱动封装层
+i2c_drv_init(&hi2c2);          // 传入 HAL 句柄给驱动封装层
 uart_drv_init(&huart1);        // 启动 USART1 中断接收
 debug_console_init(&huart2);   // 调试串口初始化
 
@@ -335,7 +338,7 @@ DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
 #include "sys_config.h"
 #include "debug_console.h"
 
-extern I2C_HandleTypeDef  hi2c1;
+extern I2C_HandleTypeDef  hi2c2;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 /* USER CODE END Includes */

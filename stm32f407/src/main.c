@@ -17,7 +17,7 @@
 #include "sys_config.h"
 #include "debug_console.h"
 
-extern I2C_HandleTypeDef  hi2c1;
+extern I2C_HandleTypeDef  hi2c2;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 
@@ -51,9 +51,9 @@ int main(void)
     MX_GPIO_Init();
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
-    MX_I2C1_Init();
+    MX_I2C2_Init();
 
-    i2c_drv_init(&hi2c1);
+    i2c_drv_init(&hi2c2);
     uart_drv_init(&huart1);
     debug_console_init(&huart2);
 

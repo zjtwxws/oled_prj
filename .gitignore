@@ -38,3 +38,9 @@ Desktop.ini
 # ==================== 第三方库（mongoose.c 等如需保留请自行放开） ====================
 # mongoose.c
 # mongoose.h
+
+# ==================== stm32cubemx ====================
+LICENSE.txt
+*.crf
+*.i
+*.o
