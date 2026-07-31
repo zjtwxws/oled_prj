@@ -10,6 +10,7 @@ oled_prj/
 ├── stm32f407/               # STM32F407 端代码
 │   ├── Makefile
 │   ├── inc/                 # 头文件
+│   │   ├── user_app.h       # 应用入口 (模块编排)
 │   │   ├── ssd1306.h        # OLED 底层驱动 (SSD1306 I²C)
 │   │   ├── i2c_drv.h        # I²C 抽象层 (超时保护)
 │   │   ├── font.h           # 字库管理 (ASCII + GB2312)
@@ -20,12 +21,13 @@ oled_prj/
 │   │   ├── key_drv.h        # 按键驱动 (消抖 + 长按, 真实时间)
 │   │   ├── iwdg_drv.h       # 看门狗 (条件编译)
 │   │   ├── sys_config.h     # 系统配置 (Flash 存储)
+│   │   ├── sys_tick.h       # 系统滴答时钟 (HAL 封装)
 │   │   └── debug_console.h  # 调试串口 (编译开关)
 │   ├── src/
-│   │   ├── main.c           # 主程序
+│   │   ├── user_app.c       # 应用主循环 (init + 轮询)
 │   │   ├── ssd1306.c        # SSD1306 驱动 (参照厂家示例)
 │   │   ├── i2c_drv.c        # I²C 驱动 (超时保护)
-│   │   ├── font.c           # 字库 (ASCII + 中文 + LRU 缓存)
+│   │   ├── font.c           # 字库 (ASCII 内嵌 + 中文 Flash 查询)
 │   │   ├── display_mgr.c    # 显示管理器
 │   │   ├── uart_drv.c       # UART 驱动 (IT 错误恢复)
 │   │   ├── protocol.c       # 协议引擎
@@ -33,6 +35,7 @@ oled_prj/
 │   │   ├── key_drv.c        # 按键驱动
 │   │   ├── iwdg_drv.c       # 看门狗
 │   │   ├── sys_config.c     # Flash 配置
+│   │   ├── sys_tick.c       # 系统滴答时钟
 │   │   └── debug_console.c  # 调试串口
 │   └── tools/
 │       └── gen_font.py      # 字模生成工具
@@ -66,10 +69,10 @@ oled_prj/
 
 ### 步骤
 ```bash
-# 1. 用 CubeMX 生成基础工程 (配置 I²C1, USART1, USART2, GPIO)
+# 1. 用 CubeMX 生成基础工程 (配置 I²C2, USART1, USART2, GPIO, IWDG)
 # 2. 将本项目的 inc/ 和 src/ 文件合并到 CubeMX 工程
 # 3. 修改 Makefile 中的 HAL_SRC / HAL_LIB 路径
-# 4. 修改 led_mgr.c 中的 LED_PORT/LED_PIN 为实际板卡引脚
+# 4. 确认 led_mgr.c 中的 LED_PORT/LED_PIN 与实际板卡一致 (默认 PF9)
 cd stm32f407
 make
 make flash
@@ -78,14 +81,15 @@ make flash
 ### CubeMX 配置要点
 | 外设 | 模式 | 参数 |
 |------|------|------|
-| I2C1 | I2C | **Fast Mode 400kHz** (SSD1306 完全支持; 参照厂家示例) |
-| USART1 | Asynchronous | 115200, 8N1 (与 RK3506 通信) |
-| USART2 | Asynchronous | 115200, 8N1, **仅 TX** (调试串口, 可选) |
-| GPIO (LED) | Output | 推挽, 无上拉 (PB0, 根据实际板卡修改) |
-| GPIO (KEY1~KEY4) | Input | 上拉, PA1~PA4 (参照 HelTec OLED+按键模组接线) |
+| I2C2 | I2C | **Fast Mode 400kHz** (SSD1306 完全支持; 参照厂家示例), SCL=PB10, SDA=PB11 |
+| USART1 | Asynchronous | 115200, 8N1 (与 RK3506 通信), TX=PA9, RX=PA10 |
+| USART2 | Asynchronous | 115200, 8N1, **全双工** (调试串口, 可选), TX=PA2, RX=PA3 |
+| GPIO (LED) | Output | 推挽, 无上拉 (**PF9**) |
+| GPIO (KEY1~KEY4) | Input | 上拉, **PE1~PE4** |
 
 ### 调试串口
 - 通过 `debug_console.h` 中的 `DEBUG_UART_ENABLE` 宏控制, 默认为 `0` (关闭)
+- USART2 (PA2 TX, PA3 RX) 全双工, 可用串口工具收发调试信息
 - 开启时需在 Makefile 中取消 `PROJ_SRC += src/debug_console.c` 的注释
 - 关闭时零开销, 所有 `DEBUG_PRINTF` 等宏编译为空
 
@@ -94,13 +98,15 @@ make flash
 - 发布时取消注释 `#define IWDG_ENABLE 1` 启用
 - 复位周期约 1s, 主循环末尾喂狗
 
-### 按键引脚映射 (参照厂家模组接线)
+### 按键引脚映射
 | 按键 | 引脚 | 说明 |
 |------|------|------|
-| KEY1 | PA1 | 切换显示模式 |
-| KEY2 | PA2 | LED 开/关/闪烁切换 |
-| KEY3 | PA3 | 预留 (需将 key_drv.h 中 `KEY_COUNT` 改为 4) |
-| KEY4 | PA4 | 预留 |
+| KEY1 | PE1 | 切换显示模式 (按顺序切换 7 种特效) |
+| KEY2 | PE2 | LED 开/关/闪烁切换 |
+| KEY3 | PE3 | 预留 |
+| KEY4 | PE4 | 预留 |
+
+> 按键启用数量由 `key_drv.h` 中 `KEY_COUNT` 宏控制, 默认 4。
 
 ## RK3506 编译
 
@@ -126,7 +132,7 @@ make deploy
 RK3506 UART TX → STM32F407 UART RX (PA10)
 RK3506 UART RX → STM32F407 UART TX (PA9)
 RK3506 GND     → STM32F407 GND
-STM32F407 I2C  → OLED (SCL→PB6, SDA→PB7, VCC→3.3V, GND→GND)
+STM32F407 I2C  → OLED (SCL→PB10, SDA→PB11, VCC→3.3V, GND→GND)
 ```
 
 ### 启动 RK3506
@@ -155,8 +161,8 @@ nc <RK3506_IP> 9527
 | 机制 | 实现 | 位置 |
 |------|------|------|
 | I²C 总线超时保护 | HAL_I2C_Mem_Write 超时 100ms, 避免总线挂死永久阻塞 | `i2c_drv.c` |
-| 协议帧间超时恢复 | 500ms 未收到完整帧自动复位接收状态机 | `protocol.c` + `main.c` |
-| 发送临界区保护 | build → send 之间关中断, 防止 ISR 覆盖全局 tx_buf | `main.c:safe_send()` |
+| 协议帧间超时恢复 | 500ms 未收到完整帧自动复位接收状态机 | `protocol.c` + `user_app.c` |
+| 发送临界区保护 | build → send 之间关中断, 防止 ISR 覆盖全局 tx_buf | `user_app.c:safe_send()` |
 | UART IT 接收恢复 | HAL_UART_Receive_IT 重启失败时 AbortReceive + 重试 | `uart_drv.c` |
 | 独立看门狗 | 1s 复位周期, 条件编译开关 | `iwdg_drv.c/h` |
 | 汉字查询 LRU 缓存 | 5 条目 round-robin, 高频字命中率 > 90% | `font.c` |

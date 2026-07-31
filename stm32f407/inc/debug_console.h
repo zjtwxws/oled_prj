@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 /* 调试开关: 1=开启, 0=完全关闭 */
-#define DEBUG_UART_ENABLE  0
+#define DEBUG_UART_ENABLE  1
 
 #if DEBUG_UART_ENABLE
 

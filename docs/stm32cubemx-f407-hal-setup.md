@@ -386,7 +386,8 @@ while (1)
 }
 ```
 
-完整实现见 [`src/main.c`](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/main.c)。
+完整实现见 [`src/user_app.c`](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/user_app.c)。
+实际 `main.c` 通过 `user_app_init()` / `user_app_handle()` 两个函数调用应用逻辑, 保持生成的 `main.c` 极简。
 
 ### 8.3 Makefile 集成
 
@@ -463,7 +464,7 @@ arm-none-eabi-gdb build/oled_f407.elf
 | `MX_GPIO_Init()` | `HAL_GPIO_WritePin` / `HAL_GPIO_ReadPin` | `led_mgr.c` / `key_drv.c` |
 | `MX_USART1_UART_Init()` | `HAL_UART_Receive_IT` / `HAL_UART_Transmit` / `HAL_UART_RxCpltCallback` | `uart_drv.c` |
 | `MX_USART2_UART_Init()` | `HAL_UART_Transmit` (阻塞) | `debug_console.c` |
-| `MX_I2C1_Init()` | `HAL_I2C_Mem_Write` / `HAL_I2C_IsDeviceReady` | `i2c_drv.c` |
+| `MX_I2C2_Init()` | `HAL_I2C_Mem_Write` / `HAL_I2C_IsDeviceReady` | `i2c_drv.c` |
 | `MX_IWDG_Init()` | `HAL_IWDG_Init` / `HAL_IWDG_Refresh` | `iwdg_drv.c` |
 | `SystemClock_Config()` | `HAL_RCC_OscConfig` / `HAL_RCC_ClockConfig` | `main.c` |
 
