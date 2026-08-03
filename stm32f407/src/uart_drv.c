@@ -81,16 +81,20 @@ void uart_drv_rx_callback(uint8_t byte)
     }
 
     /*
-     * 重新启动中断接收。
-     * 若 HAL_UART_Receive_IT 失败 (状态冲突/错误未清除),
-     * 记录错误并尝试恢复: 调用 HAL_UART_AbortReceive_IT 清状态后重试。
+     * ORE发生时 HAL_UART_IRQHandler 已读 DR 并清标志。
+     * 这里清剩余错误标志后重试一次；若仍失败则放弃，
+     * 不再 Abort 循环（11.5 kHz 中断率下 Abort/Re-init
+     * 可导致 HAL 状态机不一致 → HardFault → 复位）。
      */
     if (p_uart) {
         HAL_StatusTypeDef ret = HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
         if (ret != HAL_OK) {
-            /* 错误恢复: 中止当前接收, 重新启动 */
-            HAL_UART_Abort_IT(p_uart);
-            HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
+            __HAL_UART_CLEAR_FLAG(p_uart, UART_FLAG_ORE | UART_FLAG_NE |
+                                             UART_FLAG_FE | UART_FLAG_PE);
+            ret = HAL_UART_Receive_IT(p_uart, &rx_byte, 1);
+            if (ret != HAL_OK) {
+                /* 放弃本字节, 等待下一次 HAL_UART_RxCpltCallback 重试 */
+            }
         }
     }
 }
