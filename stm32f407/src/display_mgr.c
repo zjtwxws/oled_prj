@@ -347,12 +347,6 @@ void display_mgr_tick(void)
     static uint32_t tick_count = 0;
     tick_count++;
 
-    frame_sync_timer += 50;
-    if (frame_sync_timer >= FRAME_SYNC_INTERVAL_MS) {
-        frame_sync_timer = 0;
-        display_mgr_sync_frame();
-    }
-
     switch (current_mode) {
     case DISP_MODE_SCROLL_L:
     case DISP_MODE_SCROLL_R:
@@ -440,3 +434,4 @@ void display_mgr_sync_frame(void)
 
     frame_sync_seg++;
 }
+

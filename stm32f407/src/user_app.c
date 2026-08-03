@@ -20,7 +20,7 @@
 
 /* 外设定义 */
 extern I2C_HandleTypeDef  hi2c2; //用于oled通讯
-extern UART_HandleTypeDef huart1; //用于rk3506通讯
+extern UART_HandleTypeDef huart1; //用于PC上位机通讯
 extern UART_HandleTypeDef huart2; //用于调试打印信息
 
 static void process_frame(const proto_frame_t *frame);
@@ -281,4 +281,5 @@ static void send_mode_status(void)
     uint16_t len = proto_build_frame(CMD_MODE_STATUS, tx_seq++, &data, 1);
     safe_send(proto_get_tx_buf(), len);
 }
+
 

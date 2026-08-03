@@ -1,168 +1,76 @@
-# OLED 三级联动嵌入式项目
+# OLED 串口直连控制项目 (v2.0)
 
 ## 项目结构
 
 ```
 oled_prj/
-├── 需求描述.md              # 原始需求描述
-├── 最终需求文档.md          # 详细需求规格文档
+├── 需求描述.md              # 需求描述 (v2.0)
+├── 最终需求文档.md          # 详细需求规格文档 (v2.0)
 ├── README.md               # 本文件
-├── stm32f407/               # STM32F407 端代码
+├── stm32f407/               # STM32F407 端代码（裸机 HAL）
 │   ├── Makefile
 │   ├── inc/                 # 头文件
-│   │   ├── user_app.h       # 应用入口 (模块编排)
-│   │   ├── ssd1306.h        # OLED 底层驱动 (SSD1306 I²C)
-│   │   ├── i2c_drv.h        # I²C 抽象层 (超时保护)
-│   │   ├── font.h           # 字库管理 (ASCII + GB2312)
-│   │   ├── display_mgr.h    # 显示管理器 (7 种特效)
-│   │   ├── uart_drv.h       # UART 驱动 (中断接收 + 环形缓冲)
-│   │   ├── protocol.h       # 二进制帧协议 (超时恢复)
-│   │   ├── led_mgr.h        # LED 状态机 (关/开/闪烁)
-│   │   ├── key_drv.h        # 按键驱动 (消抖 + 长按, 真实时间)
-│   │   ├── iwdg_drv.h       # 看门狗 (条件编译)
-│   │   ├── sys_config.h     # 系统配置 (Flash 存储)
-│   │   ├── sys_tick.h       # 系统滴答时钟 (HAL 封装)
-│   │   └── debug_console.h  # 调试串口 (编译开关)
-│   ├── src/
-│   │   ├── user_app.c       # 应用主循环 (init + 轮询)
-│   │   ├── ssd1306.c        # SSD1306 驱动 (参照厂家示例)
-│   │   ├── i2c_drv.c        # I²C 驱动 (超时保护)
-│   │   ├── font.c           # 字库 (ASCII 内嵌 + 中文 Flash 查询)
-│   │   ├── display_mgr.c    # 显示管理器
-│   │   ├── uart_drv.c       # UART 驱动 (IT 错误恢复)
-│   │   ├── protocol.c       # 协议引擎
-│   │   ├── led_mgr.c        # LED 管理器
-│   │   ├── key_drv.c        # 按键驱动
-│   │   ├── iwdg_drv.c       # 看门狗
-│   │   ├── sys_config.c     # Flash 配置
-│   │   ├── sys_tick.c       # 系统滴答时钟
-│   │   └── debug_console.c  # 调试串口
-│   └── tools/
-│       └── gen_font.py      # 字模生成工具
-├── rk3506/                  # RK3506 端代码
-│   ├── Makefile
-│   ├── inc/
-│   │   ├── protocol.h       # 二进制帧协议 (C)
-│   │   ├── uart_adapter.h   # 串口适配器
-│   │   ├── cmd_dispatcher.h # 命令分发器
-│   │   ├── web_server.h     # Web 服务器 (mongoose)
-│   │   └── tcp_server.h     # TCP 服务器
-│   ├── src/
-│   │   ├── main.c
-│   │   ├── protocol.c
-│   │   ├── uart_adapter.c
-│   │   ├── cmd_dispatcher.c
-│   │   ├── web_server.c
-│   │   └── tcp_server.c
-│   └── web/
-│       └── index.html       # Web 前端单页应用
-└── docs/
-    └── protocol-uart.md     # 串口协议详细说明
+│   ├── src/                 # 源文件
+│   └── tools/               # 字模生成工具
+├── pc_host/                 # Windows 上位机 (VS2019 Win32 + C++17)
+│   ├── oled_control.sln
+│   └── oled_control/
+│       ├── oled_control.vcxproj
+│       ├── protocol.h/cpp       # 二进制帧协议（与 STM32 端一致）
+│       ├── serial_port.h/cpp    # 串口驱动
+│       ├── frame_queue.h        # 线程安全队列 + TxTask
+│       ├── oled_preview.h/cpp   # OLED GDI 本地模拟预览
+│       ├── oled_preview_gen.h   # 字模数据 (316汉字)
+│       ├── main.cpp             # WinMain + DialogProc
+│       ├── resource.h           # 控件 ID 定义
+│       └── oled_control.rc      # 对话框资源
+├── rk3506/                  # 预留（不再使用）
+├── docs/                    # 协议说明文档
+└── oled_cubemx/             # STM32CubeMX 配置
+```
+
+## 系统架构 (v2.0)
+
+```
+Windows PC (VS2019 Win32 对话框) → STM32F407 → OLED (128x64 SSD1306)
+        ↑ USB-TTL 串口              ↑ UART       ↑ I²C
 ```
 
 ## STM32F407 编译
 
-### 前置条件
-1. STM32CubeMX 生成初始化代码 (HAL 库)
-2. ARM GNU Toolchain (`arm-none-eabi-gcc`)
-3. stlink 工具 (`st-flash`)
-
-### 步骤
 ```bash
-# 1. 用 CubeMX 生成基础工程 (配置 I²C2, USART1, USART2, GPIO, IWDG)
-# 2. 将本项目的 inc/ 和 src/ 文件合并到 CubeMX 工程
-# 3. 修改 Makefile 中的 HAL_SRC / HAL_LIB 路径
-# 4. 确认 led_mgr.c 中的 LED_PORT/LED_PIN 与实际板卡一致 (默认 PF9)
 cd stm32f407
 make
 make flash
 ```
 
-### CubeMX 配置要点
-| 外设 | 模式 | 参数 |
-|------|------|------|
-| I2C2 | I2C | **Fast Mode 400kHz** (SSD1306 完全支持; 参照厂家示例), SCL=PB10, SDA=PB11 |
-| USART1 | Asynchronous | 115200, 8N1 (与 RK3506 通信), TX=PA9, RX=PA10 |
-| USART2 | Asynchronous | 115200, 8N1, **全双工** (调试串口, 可选), TX=PA2, RX=PA3 |
-| GPIO (LED) | Output | 推挽, 无上拉 (**PF9**) |
-| GPIO (KEY1~KEY4) | Input | 上拉, **PE1~PE4** |
+## Windows 上位机编译
 
-### 调试串口
-- 通过 `debug_console.h` 中的 `DEBUG_UART_ENABLE` 宏控制, 默认为 `0` (关闭)
-- USART2 (PA2 TX, PA3 RX) 全双工, 可用串口工具收发调试信息
-- 开启时需在 Makefile 中取消 `PROJ_SRC += src/debug_console.c` 的注释
-- 关闭时零开销, 所有 `DEBUG_PRINTF` 等宏编译为空
-
-### 看门狗
-- 通过 `iwdg_drv.h` 中的 `IWDG_ENABLE` 宏控制, 默认**未定义** (关闭)
-- 发布时取消注释 `#define IWDG_ENABLE 1` 启用
-- 复位周期约 1s, 主循环末尾喂狗
-
-### 按键引脚映射
-| 按键 | 引脚 | 说明 |
-|------|------|------|
-| KEY1 | PE1 | 切换显示模式 (按顺序切换 7 种特效) |
-| KEY2 | PE2 | LED 开/关/闪烁切换 |
-| KEY3 | PE3 | 预留 |
-| KEY4 | PE4 | 预留 |
-
-> 按键启用数量由 `key_drv.h` 中 `KEY_COUNT` 宏控制, 默认 4。
-
-## RK3506 编译
-
-> **开发语言**: 纯 C (C11 标准), 无 C++ 运行时依赖。
-
-### 前置条件
-1. Buildroot 生成的交叉编译工具链 (`arm-linux-gnueabihf-gcc`)
-2. mongoose 单文件库 (mongoose.c / mongoose.h)
-
-### 步骤
-```bash
-# 1. 下载 mongoose: wget https://raw.githubusercontent.com/cesanta/mongoose/master/mongoose.c
-# 2. 将 mongoose.c 和 mongoose.h 放入 rk3506/ 目录
-cd rk3506
-make
-make deploy
-```
+1. VS2019 打开 `pc_host/oled_control.sln`（纯 Win32 对话框，无 MFC 依赖）
+2. 选择 Debug/Release + Win32/x64
+3. 生成解决方案
 
 ## 运行
 
 ### 设备连接
 ```
-RK3506 UART TX → STM32F407 UART RX (PA10)
-RK3506 UART RX → STM32F407 UART TX (PA9)
-RK3506 GND     → STM32F407 GND
-STM32F407 I2C  → OLED (SCL→PB10, SDA→PB11, VCC→3.3V, GND→GND)
+USB-TTL TX → STM32F407 PA10 (USART1 RX)
+USB-TTL RX → STM32F407 PA9  (USART1 TX)
+USB-TTL GND → STM32F407 GND
+
+OLED SCL → STM32F407 PB10 (I2C2 SCL)
+OLED SDA → STM32F407 PB11 (I2C2 SDA)
+OLED VCC → 3.3V, GND → GND
 ```
 
-### 启动 RK3506
-```bash
-./oled_gateway /dev/ttyFIQ0 8080 9527
-```
+### 启动上位机
+运行编译后的 `oled_control.exe`，选择 COM 口，点击"打开"即可。
 
-### 访问 Web
-浏览器打开 `http://<RK3506_IP>:8080/`
+## 通信协议
 
-### TCP 调试
-```bash
-nc <RK3506_IP> 9527
-> {"cmd":"led","data":{"state":1}}
-```
+PC ↔ STM32F407 使用自定义二进制帧协议（详见 `docs/protocol-uart.md`）。
 
-## 架构说明
+## 版本历史
 
-详细需求文档见 `最终需求文档.md`
-
-三层架构: PC浏览器 ↔ RK3506(Linux网关) ↔ STM32F407(执行控制) ↔ OLED(显示)
-通信协议: WebSocket/JSON (PC↔RK) + 自定义二进制帧 (RK↔STM) + I²C (STM↔OLED)
-
-## 固件健壮性设计
-
-| 机制 | 实现 | 位置 |
-|------|------|------|
-| I²C 总线超时保护 | HAL_I2C_Mem_Write 超时 100ms, 避免总线挂死永久阻塞 | `i2c_drv.c` |
-| 协议帧间超时恢复 | 500ms 未收到完整帧自动复位接收状态机 | `protocol.c` + `user_app.c` |
-| 发送临界区保护 | build → send 之间关中断, 防止 ISR 覆盖全局 tx_buf | `user_app.c:safe_send()` |
-| UART IT 接收恢复 | HAL_UART_Receive_IT 重启失败时 AbortReceive + 重试 | `uart_drv.c` |
-| 独立看门狗 | 1s 复位周期, 条件编译开关 | `iwdg_drv.c/h` |
-| 汉字查询 LRU 缓存 | 5 条目 round-robin, 高频字命中率 > 90% | `font.c` |
+- v1.4: 三级架构 PC→RK3506→STM32→OLED
+- v2.0: 两级架构 PC→STM32→OLED，上位机为 VS2019 Win32 对话框应用
