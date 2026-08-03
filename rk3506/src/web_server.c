@@ -100,7 +100,9 @@ static void* web_thread_func(void* arg)
 
     struct mg_connection* listener = mg_http_listen(&mgr, addr, web_event_handler, self);
     if (listener) {
+        pthread_mutex_lock(&self->mgr_mutex);
         self->listen_conn_id = listener->id;
+        pthread_mutex_unlock(&self->mgr_mutex);
         printf("[WebServer] Listening on %s\n", addr);
     } else {
         fprintf(stderr, "[WebServer] FAILED to listen on %s (port already in use?)\n", addr);
@@ -111,9 +113,12 @@ static void* web_thread_func(void* arg)
         mg_mgr_poll(&mgr, 50); /* 50ms timeout */
     }
 
+    /* mg_mgr_free 前加锁, 防止主线程 broadcast 读脏 mgr */
+    pthread_mutex_lock(&self->mgr_mutex);
     mg_mgr_free(&mgr);
     self->mgr = NULL;
     self->listen_conn_id = 0;
+    pthread_mutex_unlock(&self->mgr_mutex);
     return NULL;
 }
 
@@ -123,11 +128,13 @@ void web_init(WebServer* ws)
 {
     memset(ws, 0, sizeof(*ws));
     ws->port = 80;
+    pthread_mutex_init(&ws->mgr_mutex, NULL);
 }
 
 void web_deinit(WebServer* ws)
 {
     web_stop(ws);
+    pthread_mutex_destroy(&ws->mgr_mutex);
 }
 
 int web_start(WebServer* ws, int port, const char* web_root)
@@ -166,10 +173,14 @@ void web_on_message(WebServer* ws, web_msg_callback_t cb, void* user_data)
 
 void web_broadcast(WebServer* ws, const char* msg)
 {
-    if (!ws->mgr || ws->listen_conn_id == 0) return;
-
+    pthread_mutex_lock(&ws->mgr_mutex);
+    if (!ws->mgr || ws->listen_conn_id == 0) {
+        pthread_mutex_unlock(&ws->mgr_mutex);
+        return;
+    }
     struct mg_mgr* mgr = (struct mg_mgr*)ws->mgr;
     mg_wakeup(mgr, ws->listen_conn_id, msg, strlen(msg));
+    pthread_mutex_unlock(&ws->mgr_mutex);
 }
 
 void web_poll_events(WebServer* ws)

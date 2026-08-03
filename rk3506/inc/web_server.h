@@ -29,6 +29,9 @@ typedef struct {
     /* 用于跨线程广播的内部连接 id */
     unsigned long listen_conn_id;
 
+    /* 保护 mgr / listen_conn_id 的跨线程访问 (主线程 broadcast ↔ web 线程 stop) */
+    pthread_mutex_t mgr_mutex;
+
     pthread_t thread;
 } WebServer;
 

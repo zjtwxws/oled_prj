@@ -29,10 +29,15 @@ static void signal_handler(int sig)
 }
 
 /* WebSocket 消息回调 (给 WebServer) */
+/* 注意: mongoose 事件循环为单线程, resp_buf 在此上下文安全 */
 static const char* web_msg_callback(const char* msg, void* user_data)
 {
     CmdDispatcher* disp = (CmdDispatcher*)user_data;
-    return disp_handle_json(disp, msg);
+    static char resp_buf[2048];
+    pthread_mutex_lock(&disp->json_mutex);
+    snprintf(resp_buf, sizeof(resp_buf), "%s", disp_handle_json(disp, msg));
+    pthread_mutex_unlock(&disp->json_mutex);
+    return resp_buf;
 }
 
 /* 全局 TCP 服务器指针 (用于 tcp_msg_callback 中发送响应) */
@@ -41,10 +46,15 @@ static TcpServer* g_tcp = NULL;
 static void tcp_msg_callback_with_reply(const char* msg, int client_id, void* user_data)
 {
     CmdDispatcher* disp = (CmdDispatcher*)user_data;
+    char buf[512];
+    buf[0] = '\0';
+    pthread_mutex_lock(&disp->json_mutex);
     const char* resp = disp_handle_json(disp, msg);
-    if (resp && resp[0] && g_tcp) {
-        char buf[512];
+    if (resp && resp[0]) {
         snprintf(buf, sizeof(buf), "%s\n", resp);
+    }
+    pthread_mutex_unlock(&disp->json_mutex);
+    if (buf[0] && g_tcp) {
         tcp_send(g_tcp, client_id, buf);
     }
 }

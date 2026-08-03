@@ -20,8 +20,8 @@
 
 /* 外设定义 */
 extern I2C_HandleTypeDef  hi2c2; //用于oled通讯
-extern USART_HandleTypeDef husart1; //用于rk3506通讯
-extern USART_HandleTypeDef husart2; //用于调试打印信息
+extern UART_HandleTypeDef huart1; //用于rk3506通讯
+extern UART_HandleTypeDef huart2; //用于调试打印信息
 
 static void process_frame(const proto_frame_t *frame);
 static void send_ack(uint8_t seq);
@@ -47,8 +47,8 @@ static void safe_send(const uint8_t *data, uint16_t len)
 int user_app_init(void)
 {
     i2c_drv_init(&hi2c2);
-    uart_drv_init(&husart1);
-    debug_console_init(&husart2);
+    uart_drv_init(&huart1);
+    debug_console_init(&huart2);
 
     ssd1306_init();
     sys_config_init();

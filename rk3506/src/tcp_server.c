@@ -13,6 +13,8 @@
 #include <string.h>
 #include <errno.h>
 
+#define TCP_READ_ERR_MAX  8  /* 连续读错误超过此值则断开连接 */
+
 /* --- 服务线程 --- */
 
 static void* tcp_thread_func(void* arg)
@@ -145,6 +147,7 @@ void tcp_poll(TcpServer* ts)
                 ts->clients[idx].fd = fd;
                 ts->clients[idx].buffer[0] = '\0';
                 ts->clients[idx].active = 1;
+                ts->clients[idx].read_err_cnt = 0;
                 printf("[TcpServer] Client connected: fd=%d\n", fd);
             } else {
                 close(fd); /* 队列满，拒绝 */
@@ -163,6 +166,7 @@ void tcp_poll(TcpServer* ts)
 
         ssize_t n = read(cl->fd, buf, sizeof(buf) - 1);
         if (n > 0) {
+            cl->read_err_cnt = 0;
             buf[n] = '\0';
 
             /* 追加到 buffer */
@@ -191,7 +195,7 @@ void tcp_poll(TcpServer* ts)
             }
             i++;
         } else if (n == 0 || (n < 0 && errno != EAGAIN && errno != EWOULDBLOCK)) {
-            /* 客户端断开 */
+            /* 客户端断开或不可恢复错误 */
             close(cl->fd);
             /* 移除 */
             int j;
@@ -201,6 +205,21 @@ void tcp_poll(TcpServer* ts)
             ts->client_count--;
             /* i 不变, 继续处理新的 clients[i] */
         } else {
+            /* EAGAIN/EWOULDBLOCK 正常, 但计数持续错误 */
+            if (n < 0) {
+                cl->read_err_cnt++;
+                if (cl->read_err_cnt > TCP_READ_ERR_MAX) {
+                    fprintf(stderr, "[TcpServer] Closing fd=%d after %d consecutive read errors\n",
+                            cl->fd, cl->read_err_cnt);
+                    close(cl->fd);
+                    int j;
+                    for (j = i; j < ts->client_count - 1; j++) {
+                        ts->clients[j] = ts->clients[j + 1];
+                    }
+                    ts->client_count--;
+                    continue;  /* i 不变, 处理新 clients[i] */
+                }
+            }
             i++;
         }
     }

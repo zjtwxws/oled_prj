@@ -221,8 +221,7 @@ static void on_uart_frame_cb(const ProtoFrame* frame, void* user_data)
         int state = (frame->len >= 1) ? frame->data[0] : 0;
         const char* obj = disp_build_simple_obj_int("state", state);
         const char* evt = disp_build_event("led_status", obj);
-        disp_poll_event(d, NULL, 0); /* 仅触发 push */
-        /* 直接推送 (调用 poll_event 的 push 路径) */
+        /* 直接推送 LED 状态事件 */
         {
             pthread_mutex_lock(&d->event_mutex);
             if (d->event_count < DISP_EVENT_QUEUE_MAX) {
@@ -353,12 +352,14 @@ void disp_init(CmdDispatcher* d, UartAdapter* uart)
     d->humidity     = 60;
     d->wind_dir     = 0;
     pthread_mutex_init(&d->event_mutex, NULL);
+    pthread_mutex_init(&d->json_mutex, NULL);
 
     uart_on_frame(uart, on_uart_frame_cb, d);
 }
 
 void disp_deinit(CmdDispatcher* d)
 {
+    pthread_mutex_destroy(&d->json_mutex);
     pthread_mutex_destroy(&d->event_mutex);
 }
 
@@ -496,7 +497,7 @@ const char* disp_handle_json(CmdDispatcher* d, const char* json)
 
 void disp_tick_time_sync(CmdDispatcher* d)
 {
-    uint32_t now = (uint32_t)time(NULL);
+    time_t now = time(NULL);
     if (now - d->last_time_sync >= 1) {
         d->last_time_sync = now;
         struct tm* t = localtime((const time_t*)&now);

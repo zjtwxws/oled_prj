@@ -21,7 +21,7 @@
 "oled_cubemx\stm32f4xx_hal_cortex.o"
 "oled_cubemx\stm32f4xx_hal.o"
 "oled_cubemx\stm32f4xx_hal_exti.o"
-"oled_cubemx\stm32f4xx_hal_usart.o"
+"oled_cubemx\stm32f4xx_hal_uart.o"
 "oled_cubemx\system_stm32f4xx.o"
 "oled_cubemx\debug_console.o"
 "oled_cubemx\display_mgr.o"

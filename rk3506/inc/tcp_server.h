@@ -18,6 +18,7 @@ typedef struct {
     int    fd;
     char   buffer[4096];
     int    active;
+    int    read_err_cnt;  /* 连续读错误计数, 超过阈值后断开 */
 } TcpClient;
 
 typedef struct {

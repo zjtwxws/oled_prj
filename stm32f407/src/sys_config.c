@@ -100,6 +100,10 @@ int sys_config_save(void)
 void sys_config_set_boot_text(const char *text)
 {
     if (text) {
+        /* 仅内容变化时才擦写 Flash, 减少磨损 */
+        if (strncmp(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN) == 0) {
+            return;
+        }
         strncpy(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN - 1);
         config.boot_text[SYS_CONFIG_BOOT_TEXT_LEN - 1] = '\0';
         config.crc32 = crc32_simple((const uint8_t *)&config, sizeof(sys_config_t) - 4);

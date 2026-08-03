@@ -39,13 +39,16 @@ typedef struct {
     int         wind_dir;
 
     /* 时间同步 */
-    uint32_t    last_time_sync;
+    time_t      last_time_sync;
 
     /* OLED 显存同步重组 */
     uint8_t     oled_frame[OLED_FRAME_SIZE];
     uint8_t     frame_seg_total;
     uint8_t     frame_seg_mask;
     int         frame_ready;
+
+    /* JSON 响应构建锁 (保护静态缓冲区 disp_build_ack 的多线程竞态) */
+    pthread_mutex_t json_mutex;
 } CmdDispatcher;
 
 #ifdef __cplusplus
