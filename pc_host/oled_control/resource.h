@@ -27,7 +27,9 @@
 #define IDC_STC_LED_STATUS      1060
 #define IDC_STC_MODE_STATUS     1061
 #define IDC_STC_LATENCY         1062
+#define IDC_GRP_DEVICE_STATUS   1063
 #define IDC_LST_KEY_LOG         1070
+#define IDC_GRP_KEY_LOG         1071
 #define IDC_OLED_PREVIEW        1080
 
 // Next default values for new objects

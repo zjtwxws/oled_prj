@@ -18,7 +18,7 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-#include <queue>
+#include <deque>
 #include <ctime>
 #include "resource.h"
 #include "protocol.h"
@@ -41,12 +41,13 @@ static HWND        g_hEditBootText, g_hBtnSaveBoot;
 static HWND        g_hCboWeather, g_hEditTemp, g_hEditHumidity, g_hCboWind, g_hBtnSendWeather;
 static HWND        g_hBtnSyncTime;
 static HWND        g_hStcLedStatus, g_hStcModeStatus, g_hStcLatency;
+static HWND        g_hGrpDeviceStatus, g_hGrpKeyLog;
 static HWND        g_hLstKeyLog;
 static HWND        g_hOledPreview;
 
 static SerialPort  g_serial;
 static ProtocolParser g_parser;
-static std::queue<TxTask> g_pendingAcks;
+static std::deque<TxTask> g_pendingAcks;
 static uint8_t     g_seq = 0;
 static bool        g_connected = false;
 
@@ -90,7 +91,7 @@ static void SendCommand(uint8_t cmd, const uint8_t* data, uint8_t len) {
         task.seq = seq;
         task.sendTimeMs = GetTickCount64();
         task.retries = 0;
-        g_pendingAcks.push(task);
+        g_pendingAcks.push_back(task);
     }
 }
 
@@ -101,7 +102,7 @@ static void CheckRetransmit() {
         if (now - t.sendTimeMs < 500) break;
         if (t.retries >= 3) {
             AppendLog(L"通信超时：命令 0x%02X 未收到ACK", t.cmd);
-            g_pendingAcks.pop();
+            g_pendingAcks.pop_front();
             continue;
         }
         t.retries++;
@@ -112,13 +113,20 @@ static void CheckRetransmit() {
 
 static void ProcessFrame(const ProtoFrame& frame) {
     switch (frame.cmd) {
-    case CMD_ACK:
-        while (!g_pendingAcks.empty()) {
-            TxTask& t = g_pendingAcks.front();
-            if (t.seq == frame.seq) { g_pendingAcks.pop(); break; }
-            g_pendingAcks.pop();
+        case CMD_ACK: {
+        bool found = false;
+        for (auto it = g_pendingAcks.begin(); it != g_pendingAcks.end(); ++it) {
+            if (it->seq == frame.seq) {
+                g_pendingAcks.erase(it);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            AppendLog(L"ACK seq=%u 无匹配待确认命令", frame.seq);
         }
         break;
+    }
     case CMD_LED_STATUS:
         if (frame.len >= 1) {
             const wchar_t* states[] = {L"LED: 关", L"LED: 开", L"LED: 闪烁"};
@@ -141,9 +149,19 @@ static void ProcessFrame(const ProtoFrame& frame) {
 
 /* --- 串口数据到达回调 --- */
 static void OnSerialData(const uint8_t* data, size_t len) {
+    // Hex dump received raw bytes (first 40)
+    wchar_t hex[256], *p = hex;
+    for (size_t i = 0; i < len && i < 40; i++) {
+        p += _snwprintf_s(p, 256 - (p - hex), _TRUNCATE, L"%02X ", data[i]);
+    }
+    if (len > 40) { _snwprintf_s(p, 256 - (p - hex), _TRUNCATE, L"...(%zu)", len); }
+    AppendLog(L"RX: %s", hex);
+
     for (size_t i = 0; i < len; i++) {
         if (g_parser.FeedByte(data[i])) {
-            ProcessFrame(g_parser.GetFrame());
+            const ProtoFrame& f = g_parser.GetFrame();
+            AppendLog(L"  -> cmd=0x%02X seq=%u len=%u", f.cmd, f.seq, f.len);
+            ProcessFrame(f);
         }
     }
 }
@@ -179,6 +197,78 @@ static void SyncTime() {
     g_preview.SetTime(t.tm_hour, t.tm_min, t.tm_sec, t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_wday);
 }
 
+/* --- 对话框单位换算 --- */
+static void GetDlgUnitScale(HWND hDlg, int& unitX, int& unitY) {
+    RECT rc = { 0, 0, 100, 100 };
+    MapDialogRect(hDlg, &rc);
+    unitX = rc.right;
+    unitY = rc.bottom;
+}
+
+static int DluToPx(int dlu, int unit) {
+    return MulDiv(dlu, unit, 100);
+}
+
+static void LayoutMainDialog(HWND hDlg) {
+    if (!g_hOledPreview || !g_hGrpDeviceStatus || !g_hGrpKeyLog || !g_hLstKeyLog)
+        return;
+
+    RECT rcClient;
+    GetClientRect(hDlg, &rcClient);
+    int unitX = 100, unitY = 100;
+    GetDlgUnitScale(hDlg, unitX, unitY);
+
+    int rightX = DluToPx(220, unitX);
+    int margin = DluToPx(10, unitX);
+    int rightW = rcClient.right - rightX - margin;
+    if (rightW < DluToPx(200, unitX)) rightW = DluToPx(200, unitX);
+
+    SetWindowPos(g_hOledPreview, nullptr, rightX, DluToPx(10, unitY), rightW, DluToPx(270, unitY), SWP_NOZORDER);
+
+    int statusTop = DluToPx(290, unitY);
+    SetWindowPos(g_hGrpDeviceStatus, nullptr, rightX, statusTop, rightW, DluToPx(55, unitY), SWP_NOZORDER);
+
+    int innerX = rightX + DluToPx(10, unitX);
+    int innerW = rightW - 2 * DluToPx(10, unitX);
+    int labelW = DluToPx(90, unitX);
+    SetWindowPos(g_hStcConn, nullptr, innerX, statusTop + DluToPx(12, unitY), innerW, DluToPx(14, unitY), SWP_NOZORDER);
+    SetWindowPos(g_hStcLedStatus, nullptr, innerX, statusTop + DluToPx(28, unitY), labelW, DluToPx(14, unitY), SWP_NOZORDER);
+    SetWindowPos(g_hStcModeStatus, nullptr, innerX + DluToPx(100, unitX), statusTop + DluToPx(28, unitY), labelW, DluToPx(14, unitY), SWP_NOZORDER);
+    SetWindowPos(g_hStcLatency, nullptr, innerX + DluToPx(200, unitX), statusTop + DluToPx(28, unitY), labelW, DluToPx(14, unitY), SWP_NOZORDER);
+
+    int logTop = DluToPx(355, unitY);
+    int logBottom = rcClient.bottom - margin;
+    if (logBottom < logTop + DluToPx(80, unitY)) logBottom = logTop + DluToPx(80, unitY);
+    SetWindowPos(g_hGrpKeyLog, nullptr, rightX, logTop, rightW, logBottom - logTop, SWP_NOZORDER);
+
+    int listTop = DluToPx(373, unitY);
+    SetWindowPos(g_hLstKeyLog, nullptr, innerX, listTop, innerW, logBottom - DluToPx(8, unitY) - listTop, SWP_NOZORDER);
+
+    InvalidateRect(g_hOledPreview, nullptr, TRUE);
+}
+
+static void UpdatePreviewText() {
+    wchar_t buf[512] = { 0 };
+    GetWindowText(g_hEditText, buf, 512);
+    int len = WideCharToMultiByte(CP_UTF8, 0, buf, -1, nullptr, 0, nullptr, nullptr);
+    if (len > 201) len = 201;
+    std::vector<char> utf8(len);
+    WideCharToMultiByte(CP_UTF8, 0, buf, -1, utf8.data(), len, nullptr, nullptr);
+    utf8[len - 1] = '\0';
+    g_preview.SetText(utf8.data());
+}
+
+static void UpdatePreviewWeather() {
+    wchar_t tmp[16];
+    GetWindowText(g_hEditTemp, tmp, 16);
+    int temp = _wtoi(tmp);
+    GetWindowText(g_hEditHumidity, tmp, 16);
+    int humidity = _wtoi(tmp);
+    int weather = ComboBox_GetCurSel(g_hCboWeather);
+    int wind = ComboBox_GetCurSel(g_hCboWind);
+    g_preview.SetWeather(weather < 0 ? 0 : weather, temp, humidity, wind < 0 ? 0 : wind);
+}
+
 /* ============================================================
  * 对话框消息处理
  * ============================================================ */
@@ -208,6 +298,8 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
         g_hStcModeStatus = GetDlgItem(hDlg, IDC_STC_MODE_STATUS);
         g_hStcLatency   = GetDlgItem(hDlg, IDC_STC_LATENCY);
         g_hLstKeyLog    = GetDlgItem(hDlg, IDC_LST_KEY_LOG);
+        g_hGrpKeyLog    = GetDlgItem(hDlg, IDC_GRP_KEY_LOG);
+        g_hGrpDeviceStatus = GetDlgItem(hDlg, IDC_GRP_DEVICE_STATUS);
         g_hOledPreview  = GetDlgItem(hDlg, IDC_OLED_PREVIEW);
 
         // Init controls
@@ -233,6 +325,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         // Init OLED preview
         g_preview.Attach(g_hOledPreview);
+        LayoutMainDialog(hDlg);
 
         // Setup serial callbacks
         g_serial.onDataReceived = OnSerialData;
@@ -266,7 +359,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
         case IDC_BTN_CLOSE:
             g_serial.Close();
             g_connected = false;
-            while (!g_pendingAcks.empty()) g_pendingAcks.pop();
+            while (!g_pendingAcks.empty()) g_pendingAcks.pop_front();
             SetWindowText(g_hStcConn, L"○ 未连接");
             EnableWindow(g_hBtnOpen, TRUE);
             EnableWindow(g_hBtnClose, FALSE);
@@ -278,6 +371,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
             if (Button_GetCheck(g_hRadioLed[1]) == BST_CHECKED) state = 1;
             else if (Button_GetCheck(g_hRadioLed[2]) == BST_CHECKED) state = 2;
             SendCommand(CMD_LED_CTRL, &state, 1);
+            g_preview.SetLedState(state);
             break;
         }
         case IDC_BTN_SEND_TEXT: {
@@ -319,6 +413,17 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
             g_preview.SetWeather(d[0], d[1], d[2], d[3]);
             break;
         }
+        case IDC_EDIT_TEXT:
+            if (HIWORD(wParam) == EN_CHANGE) UpdatePreviewText();
+            break;
+        case IDC_EDIT_TEMP:
+        case IDC_EDIT_HUMIDITY:
+            if (HIWORD(wParam) == EN_CHANGE) UpdatePreviewWeather();
+            break;
+        case IDC_CBO_WEATHER_TYPE:
+        case IDC_CBO_WIND:
+            if (HIWORD(wParam) == CBN_SELCHANGE) UpdatePreviewWeather();
+            break;
         case IDC_BTN_SYNC_TIME:
             SyncTime();
             break;
@@ -340,6 +445,21 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
             break;
         }
         break;
+
+    case WM_GETMINMAXINFO: {
+        MINMAXINFO* mmi = (MINMAXINFO*)lParam;
+        RECT rcMin = { 0, 0, 620, 520 };
+        MapDialogRect(hDlg, &rcMin);
+        mmi->ptMinTrackSize.x = rcMin.right;
+        mmi->ptMinTrackSize.y = rcMin.bottom;
+        return 0;
+    }
+
+    case WM_SIZE:
+        if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
+            LayoutMainDialog(hDlg);
+        break;
+
 
     case WM_TIMER:
         if (wParam == 1) {

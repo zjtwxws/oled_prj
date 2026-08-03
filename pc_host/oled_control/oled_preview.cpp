@@ -56,6 +56,7 @@ OledPreview::~OledPreview() {
 
 void OledPreview::Attach(HWND hWnd) {
     m_hWnd = hWnd;
+    SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
     HDC hdc = GetDC(hWnd);
     m_hMemDC = CreateCompatibleDC(hdc);
     m_hBmp = CreateCompatibleBitmap(hdc, OLED_W, OLED_H);
