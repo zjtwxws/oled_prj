@@ -34,28 +34,36 @@
 static HINSTANCE   g_hInst;
 static HWND        g_hDlg;
 static HWND        g_hCboPort, g_hBtnOpen, g_hBtnClose, g_hStcConn;
+static HWND        g_hRadioRemote, g_hRadioLocal, g_hCboRemoteSub;  /* v3.1 */
 static HWND        g_hRadioLed[3];
 static HWND        g_hRadioMode[7];
 static HWND        g_hEditText, g_hBtnSendText;
 static HWND        g_hEditBootText, g_hBtnSaveBoot;
 static HWND        g_hCboWeather, g_hEditTemp, g_hEditHumidity, g_hCboWind, g_hBtnSendWeather;
 static HWND        g_hBtnSyncTime;
-static HWND        g_hStcLedStatus, g_hStcModeStatus, g_hStcLatency;
-static HWND        g_hGrpDeviceStatus, g_hGrpKeyLog;
+static HWND        g_hGrpWeather;        /* v3.2: 天气分组框 handle */
+static HWND        g_hStcLedStatus, g_hStcModeStatus, g_hStcRemoteMode;  /* v3.1: remote mode label */
+static HWND        g_hGrpKeyLog;
 static HWND        g_hLstKeyLog;
 static HWND        g_hOledPreview;
+static HWND        g_hStatusBar;      /* v3.2: 底部状态栏 */
 
 static SerialPort  g_serial;
 static ProtocolParser g_parser;
 static std::deque<TxTask> g_pendingAcks;
 static uint8_t     g_seq = 0;
 static bool        g_connected = false;
+static bool        g_userIsRemote = false;  /* 用户 UI 意图: true=远程, false=本地 */
 
 /* OLED preview instance */
 static OledPreview g_preview;
 
 static const wchar_t* g_modeNames[] = {
     L"静态", L"左滚", L"右滚", L"上滚", L"下滚", L"翻页", L"淡入淡出"
+};
+
+static const wchar_t* g_remoteSubNames[] = {
+    L"文字", L"时间", L"天气", L"日期"
 };
 
 /* ============================================================
@@ -135,7 +143,22 @@ static void ProcessFrame(const ProtoFrame& frame) {
         }
         break;
     case CMD_MODE_STATUS:
-        if (frame.len >= 1) {
+        /* v3.1: 2字节 [is_remote, sub_mode] */
+        if (frame.len >= 2) {
+            bool isRemote = frame.data[0] != 0;
+            uint8_t sub = frame.data[1];
+
+            /* 设备回传仅更新状态栏显示, 不覆盖用户意图 */
+            SetWindowText(g_hStcModeStatus, isRemote ? L"远程" : L"本地");
+            SetWindowText(g_hStcRemoteMode, g_remoteSubNames[sub < 4 ? sub : 0]);
+
+            /* 如果设备回传与 UI 不一致, 以 UI 为准 (防止竞态) */
+            if (g_userIsRemote == isRemote) {
+                g_preview.SetRemote(isRemote);
+                g_preview.SetSubMode(sub < 4 ? sub : 0);
+            }
+        } else if (frame.len >= 1) {
+            /* 兼容旧版 1 字节 */
             SetWindowText(g_hStcModeStatus, g_modeNames[frame.data[0] % 7]);
         }
         break;
@@ -149,18 +172,13 @@ static void ProcessFrame(const ProtoFrame& frame) {
 
 /* --- 串口数据到达回调 --- */
 static void OnSerialData(const uint8_t* data, size_t len) {
-    // Hex dump received raw bytes (first 40)
-    wchar_t hex[256], *p = hex;
-    for (size_t i = 0; i < len && i < 40; i++) {
-        p += _snwprintf_s(p, 256 - (p - hex), _TRUNCATE, L"%02X ", data[i]);
-    }
-    if (len > 40) { _snwprintf_s(p, 256 - (p - hex), _TRUNCATE, L"...(%zu)", len); }
-    AppendLog(L"RX: %s", hex);
-
     for (size_t i = 0; i < len; i++) {
         if (g_parser.FeedByte(data[i])) {
             const ProtoFrame& f = g_parser.GetFrame();
-            AppendLog(L"  -> cmd=0x%02X seq=%u len=%u", f.cmd, f.seq, f.len);
+            /* ACK 帧高频出现，不记录日志防止刷屏 */
+            if (f.cmd != CMD_ACK) {
+                AppendLog(L"RX: cmd=0x%02X seq=%u len=%u", f.cmd, f.seq, f.len);
+            }
             ProcessFrame(f);
         }
     }
@@ -183,6 +201,73 @@ static void PopulateComPorts() {
         ComboBox_AddString(g_hCboPort, p.name.c_str());
     if (ComboBox_GetCount(g_hCboPort) > 0)
         ComboBox_SetCurSel(g_hCboPort, 0);
+}
+
+/* v3.2: 更新底部状态栏 */
+static void UpdateStatusBar() {
+    if (!g_hStatusBar) return;
+
+    wchar_t text[256];
+    if (g_connected) {
+        /* 获取当前串口名 */
+        wchar_t portName[64] = L"---";
+        int sel = ComboBox_GetCurSel(g_hCboPort);
+        if (sel >= 0) {
+            auto ports = SerialPort::Enumerate();
+            if (sel < (int)ports.size())
+                wcsncpy_s(portName, ports[sel].name.c_str(), _TRUNCATE);
+        }
+
+        const wchar_t* modeStr = g_userIsRemote ? L"远程" : L"本地";
+        const wchar_t* subStr = L"";
+        if (g_userIsRemote) {
+            int sub = ComboBox_GetCurSel(g_hCboRemoteSub);
+            subStr = g_remoteSubNames[sub >= 0 && sub < 4 ? sub : 0];
+        }
+
+        _snwprintf_s(text, _TRUNCATE, L"  ● 已连接 %s  |  模式: %s %s  |  LED: %s",
+            portName, modeStr, subStr,
+            Button_GetCheck(g_hRadioLed[1]) ? L"开" :
+            Button_GetCheck(g_hRadioLed[2]) ? L"闪烁" : L"关");
+    } else {
+        _snwprintf_s(text, _TRUNCATE, L"  ○ 未连接  |  请选择串口并打开");
+    }
+    SetWindowText(g_hStatusBar, text);
+}
+
+/* 帧缓冲分段发送 (远程模式) */
+static DWORD g_lastFrameSend = 0;
+static void SendFrameBuffer() {
+    /* 双重守卫: 必须连接 + 用户选择了远程模式 */
+    if (!g_connected || !g_userIsRemote) return;
+
+    /* 帧率策略: TEXT 模式 25fps (40ms), TIME/WEATHER/DATE 1fps */
+    DWORD interval = (g_preview.GetSubMode() == 0) ? 40 : 1000;
+    DWORD now = GetTickCount();
+    if (now - g_lastFrameSend < interval) return;
+    g_lastFrameSend = now;
+
+    const uint8_t* fb = g_preview.GetFrameBuffer();
+    static const int PAYLOAD = 200;
+    static const int TOTAL = 1024;
+    int segTotal = (TOTAL + PAYLOAD - 1) / PAYLOAD;  /* 6 */
+
+    for (int seg = 0; seg < segTotal; seg++) {
+        int offset = seg * PAYLOAD;
+        int remain = TOTAL - offset;
+        int segLen = (remain > PAYLOAD) ? PAYLOAD : remain;
+
+        uint8_t data[203];
+        data[0] = (uint8_t)seg;
+        data[1] = (uint8_t)segTotal;
+        memcpy(&data[2], &fb[offset], segLen);
+
+        SendCommand(CMD_FRAME_SYNC, data, segLen + 2);
+        /* 段间留 2ms 给 STM32 处理 ACK, 防止 RX 溢出丢帧 */
+        if (seg < segTotal - 1) {
+            Sleep(2);
+        }
+    }
 }
 
 static void SyncTime() {
@@ -209,8 +294,19 @@ static int DluToPx(int dlu, int unit) {
     return MulDiv(dlu, unit, 100);
 }
 
+/*
+ * LayoutMainDialog — 处理窗口缩放时的控件重排
+ *
+ * 原则:
+ *   左侧面板: 所有控件位置/大小固定（来自 .rc 模板）,
+ *            仅底部 4 个分组框（文字/上电/天气/同步）的 Y 坐标
+ *            随窗口高度变化而平移，其内部子控件 Y 同步偏移。
+ *            左侧宽度不随窗口变化，保持 RC 模板值。
+ *
+ *   右侧面板: OLED 预览 + 按键日志 填满剩余空间。
+ */
 static void LayoutMainDialog(HWND hDlg) {
-    if (!g_hOledPreview || !g_hGrpDeviceStatus || !g_hGrpKeyLog || !g_hLstKeyLog)
+    if (!g_hOledPreview || !g_hGrpKeyLog || !g_hLstKeyLog)
         return;
 
     RECT rcClient;
@@ -218,31 +314,168 @@ static void LayoutMainDialog(HWND hDlg) {
     int unitX = 100, unitY = 100;
     GetDlgUnitScale(hDlg, unitX, unitY);
 
-    int rightX = DluToPx(220, unitX);
-    int margin = DluToPx(10, unitX);
+    int margin   = DluToPx(10, unitX);
+    int sbHeight = DluToPx(14, unitY);
+
+    /* ======================================================
+     * 右侧面板: OLED 预览 + 按键日志，填满左侧之外的空间
+     * ====================================================== */
+    /* 左侧固定宽度 = RC 模板中左侧控件的右边界: 220 DLU */
+    int leftFixedW = DluToPx(220, unitX);
+    int rightX = leftFixedW + margin;
     int rightW = rcClient.right - rightX - margin;
-    if (rightW < DluToPx(200, unitX)) rightW = DluToPx(200, unitX);
+    if (rightW < DluToPx(180, unitX)) rightW = DluToPx(180, unitX);
 
-    SetWindowPos(g_hOledPreview, nullptr, rightX, DluToPx(10, unitY), rightW, DluToPx(270, unitY), SWP_NOZORDER);
+    int availH = rcClient.bottom - sbHeight;
+    int previewH = rightW * 64 / 128;               /* 128:64 宽高比 */
+    int maxPreviewH = (availH - margin) / 3;
+    if (previewH > maxPreviewH) previewH = maxPreviewH;
+    if (previewH < DluToPx(64, unitY)) previewH = DluToPx(64, unitY);
+    SetWindowPos(g_hOledPreview, nullptr, rightX, margin, rightW, previewH, SWP_NOZORDER);
 
-    int statusTop = DluToPx(290, unitY);
-    SetWindowPos(g_hGrpDeviceStatus, nullptr, rightX, statusTop, rightW, DluToPx(55, unitY), SWP_NOZORDER);
+    int logTop   = margin + previewH + margin;
+    int logH     = availH - logTop;
+    if (logH < DluToPx(60, unitY)) logH = DluToPx(60, unitY);
+    SetWindowPos(g_hGrpKeyLog, nullptr, rightX, logTop, rightW, logH, SWP_NOZORDER);
 
-    int innerX = rightX + DluToPx(10, unitX);
-    int innerW = rightW - 2 * DluToPx(10, unitX);
-    int labelW = DluToPx(90, unitX);
-    SetWindowPos(g_hStcConn, nullptr, innerX, statusTop + DluToPx(12, unitY), innerW, DluToPx(14, unitY), SWP_NOZORDER);
-    SetWindowPos(g_hStcLedStatus, nullptr, innerX, statusTop + DluToPx(28, unitY), labelW, DluToPx(14, unitY), SWP_NOZORDER);
-    SetWindowPos(g_hStcModeStatus, nullptr, innerX + DluToPx(100, unitX), statusTop + DluToPx(28, unitY), labelW, DluToPx(14, unitY), SWP_NOZORDER);
-    SetWindowPos(g_hStcLatency, nullptr, innerX + DluToPx(200, unitX), statusTop + DluToPx(28, unitY), labelW, DluToPx(14, unitY), SWP_NOZORDER);
+    int innerM   = DluToPx(8, unitX);
+    int listTop  = logTop + DluToPx(18, unitY);
+    SetWindowPos(g_hLstKeyLog, nullptr,
+                 rightX + innerM, listTop,
+                 rightW - 2 * innerM, logH - DluToPx(26, unitY), SWP_NOZORDER);
 
-    int logTop = DluToPx(355, unitY);
-    int logBottom = rcClient.bottom - margin;
-    if (logBottom < logTop + DluToPx(80, unitY)) logBottom = logTop + DluToPx(80, unitY);
-    SetWindowPos(g_hGrpKeyLog, nullptr, rightX, logTop, rightW, logBottom - logTop, SWP_NOZORDER);
+    /* ======================================================
+     * 左侧底部 4 个分组框: Y 随窗口高度平移
+     * ====================================================== */
+    /* 左侧上部固定区域底部边界: "显示特效" 分组框的底边 */
+    int fixedBottom = 0;
+    for (int i = 0; i < 7; i++) {
+        if (g_hRadioMode[i]) {
+            RECT r;
+            if (GetWindowRect(g_hRadioMode[i], &r)) {
+                MapWindowPoints(HWND_DESKTOP, hDlg, (POINT*)&r, 2);
+                if (r.bottom > fixedBottom) fixedBottom = r.bottom;
+            }
+        }
+    }
+    if (fixedBottom < DluToPx(280, unitY)) fixedBottom = DluToPx(280, unitY);
 
-    int listTop = DluToPx(373, unitY);
-    SetWindowPos(g_hLstKeyLog, nullptr, innerX, listTop, innerW, logBottom - DluToPx(8, unitY) - listTop, SWP_NOZORDER);
+    int availBottom = availH - margin;
+    int totalBelow  = availBottom - fixedBottom - margin;
+    if (totalBelow < DluToPx(80, unitY)) totalBelow = DluToPx(80, unitY);
+
+    /* 4 组固定逻辑高度（DLU）: 文字65, 上电50, 天气60, 同步22 */
+    int rawDLU[4] = { 65, 50, 60, 22 };
+    int rawTotalDLU = rawDLU[0] + rawDLU[1] + rawDLU[2] + rawDLU[3] + 4 * 10;  /* 含间隙 */
+    float yScale = (float)totalBelow / (float)DluToPx(rawTotalDLU, unitY);
+    if (yScale > 1.0f) yScale = 1.0f;
+
+    HWND hGrpText = GetDlgItem(hDlg, IDC_GRP_TEXT);
+    HWND hGrpBoot = GetDlgItem(hDlg, IDC_GRP_SAVE_BOOT);
+    HWND hGrpWth  = g_hGrpWeather;
+    HWND hBtnSync = g_hBtnSyncTime;
+
+    /* ===== 记录原始的 RC 模板 Y 坐标 (计算 delta) ===== */
+    RECT rcGrpTextOrig, rcGrpBootOrig, rcGrpWthOrig, rcBtnSyncOrig;
+    /* 模板值来自 .rc:
+       IDC_GRP_TEXT        y=295 h=65
+       IDC_GRP_SAVE_BOOT   y=370 h=50
+       IDC_GRP_WEATHER     y=430 h=60
+       IDC_BTN_SYNC_TIME   y=497 h=22  */
+
+    /* 先获取当前屏幕坐标 */
+    GetWindowRect(hGrpText,  &rcGrpTextOrig);
+    GetWindowRect(hGrpBoot,  &rcGrpBootOrig);
+    GetWindowRect(hGrpWth,   &rcGrpWthOrig);
+    GetWindowRect(hBtnSync,  &rcBtnSyncOrig);
+
+    int textOrigY = 295, bootOrigY = 370, wthOrigY = 430, syncOrigY = 497;
+    int textOrigH = 65,  bootOrigH = 50,  wthOrigH  = 60,  syncOrigH  = 22;
+
+    int dluToPxY = unitY;  /* 每 100 DLU = unitY 像素, 即 1 DLU = unitY/100 px */
+
+    /* Y 从 fixedBottom + margin 开始放 */
+    int cy = fixedBottom + margin;
+    int gap = (int)(DluToPx(10, unitX) * yScale);
+    if (gap < DluToPx(3, unitX)) gap = DluToPx(3, unitX);
+
+    /* 文字内容 */
+    int h1 = (int)(DluToPx(textOrigH, unitY) * yScale);
+    if (h1 < DluToPx(30, unitY)) h1 = DluToPx(30, unitY);
+    /* 按比例缩放组框宽度不起作用，因为 yScale 只影响高度 */
+    int textGrpW = DluToPx(200, unitX);
+    SetWindowPos(hGrpText, nullptr, DluToPx(10, unitX), cy, textGrpW, h1, SWP_NOZORDER);
+
+    /* 文字内容子控件: 编辑框 + 发送按钮，Y 跟随分组框 */
+    int editH = h1 - DluToPx(30, unitY);
+    if (editH < DluToPx(14, unitY)) editH = DluToPx(14, unitY);
+    SetWindowPos(g_hEditText, nullptr, DluToPx(20, unitX), cy + DluToPx(18, unitY),
+                 DluToPx(180, unitX), editH, SWP_NOZORDER);
+    SetWindowPos(g_hBtnSendText, nullptr, DluToPx(150, unitX),
+                 cy + h1 - DluToPx(18, unitY),
+                 DluToPx(50, unitX), DluToPx(16, unitY), SWP_NOZORDER);
+
+    cy += h1 + gap;
+
+    /* 上电文字 */
+    int h2 = (int)(DluToPx(bootOrigH, unitY) * yScale);
+    if (h2 < DluToPx(25, unitY)) h2 = DluToPx(25, unitY);
+    SetWindowPos(hGrpBoot, nullptr, DluToPx(10, unitX), cy, textGrpW, h2, SWP_NOZORDER);
+    SetWindowPos(g_hEditBootText, nullptr, DluToPx(20, unitX), cy + DluToPx(18, unitY),
+                 DluToPx(140, unitX), DluToPx(14, unitY), SWP_NOZORDER);
+    SetWindowPos(g_hBtnSaveBoot, nullptr, DluToPx(170, unitX), cy + DluToPx(17, unitY),
+                 DluToPx(35, unitX), DluToPx(16, unitY), SWP_NOZORDER);
+
+    cy += h2 + gap;
+
+    /* 天气 */
+    int h3 = (int)(DluToPx(wthOrigH, unitY) * yScale);
+    if (h3 < DluToPx(30, unitY)) h3 = DluToPx(30, unitY);
+    SetWindowPos(hGrpWth, nullptr, DluToPx(10, unitX), cy, textGrpW, h3, SWP_NOZORDER);
+
+    int rowH = DluToPx(14, unitY);
+    if (h3 < 2 * rowH + DluToPx(4, unitY)) {
+        rowH = (h3 - DluToPx(8, unitY)) / 2;
+        if (rowH < DluToPx(10, unitY)) rowH = DluToPx(10, unitY);
+    }
+    int wy1 = cy + DluToPx(6, unitY);
+    int wy2 = wy1 + rowH + DluToPx(2, unitY);
+
+    /* 第1行 */
+    SetWindowPos(GetDlgItem(hDlg, IDC_STC_WTH_TYPE), nullptr,
+                 DluToPx(20, unitX), wy1, DluToPx(30, unitX), rowH, SWP_NOZORDER);
+    SetWindowPos(g_hCboWeather, nullptr,
+                 DluToPx(50, unitX), wy1 - 1, DluToPx(60, unitX), DluToPx(100, unitY), SWP_NOZORDER);
+    SetWindowPos(GetDlgItem(hDlg, IDC_STC_WTH_TEMP), nullptr,
+                 DluToPx(120, unitX), wy1, DluToPx(30, unitX), rowH, SWP_NOZORDER);
+    SetWindowPos(g_hEditTemp, nullptr,
+                 DluToPx(152, unitX), wy1 - 1, DluToPx(30, unitX), rowH, SWP_NOZORDER);
+    SetWindowPos(GetDlgItem(hDlg, IDC_STC_WTH_CELSIUS), nullptr,
+                 DluToPx(185, unitX), wy1, DluToPx(12, unitX), rowH, SWP_NOZORDER);
+    /* 第2行 */
+    SetWindowPos(GetDlgItem(hDlg, IDC_STC_WTH_HUMID), nullptr,
+                 DluToPx(20, unitX), wy2, DluToPx(30, unitX), rowH, SWP_NOZORDER);
+    SetWindowPos(g_hEditHumidity, nullptr,
+                 DluToPx(50, unitX), wy2 - 1, DluToPx(30, unitX), rowH, SWP_NOZORDER);
+    SetWindowPos(GetDlgItem(hDlg, IDC_STC_WTH_PERCENT), nullptr,
+                 DluToPx(83, unitX), wy2, DluToPx(12, unitX), rowH, SWP_NOZORDER);
+    SetWindowPos(GetDlgItem(hDlg, IDC_STC_WTH_WIND), nullptr,
+                 DluToPx(100, unitX), wy2, DluToPx(30, unitX), rowH, SWP_NOZORDER);
+    SetWindowPos(g_hCboWind, nullptr,
+                 DluToPx(132, unitX), wy2 - 1, DluToPx(50, unitX), DluToPx(100, unitY), SWP_NOZORDER);
+    SetWindowPos(g_hBtnSendWeather, nullptr,
+                 DluToPx(190, unitX), wy2, DluToPx(18, unitX), rowH, SWP_NOZORDER);
+
+    cy += h3 + gap;
+
+    /* 同步时间 */
+    int h4 = DluToPx(syncOrigH, unitY);
+    SetWindowPos(hBtnSync, nullptr, DluToPx(10, unitX), cy, textGrpW, h4, SWP_NOZORDER);
+
+    /* ===== 底部状态栏 ===== */
+    if (g_hStatusBar)
+        SetWindowPos(g_hStatusBar, nullptr, 0, rcClient.bottom - sbHeight,
+                     rcClient.right, sbHeight, SWP_NOZORDER);
 
     InvalidateRect(g_hOledPreview, nullptr, TRUE);
 }
@@ -282,6 +515,9 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
         g_hBtnOpen      = GetDlgItem(hDlg, IDC_BTN_OPEN);
         g_hBtnClose     = GetDlgItem(hDlg, IDC_BTN_CLOSE);
         g_hStcConn      = GetDlgItem(hDlg, IDC_STC_CONN_STATUS);
+        g_hRadioRemote  = GetDlgItem(hDlg, IDC_RADIO_REMOTE);      /* v3.1 */
+        g_hRadioLocal   = GetDlgItem(hDlg, IDC_RADIO_LOCAL);       /* v3.1 */
+        g_hCboRemoteSub = GetDlgItem(hDlg, IDC_CBO_REMOTE_SUB);   /* v3.1 */
         for (int i = 0; i < 3; i++) g_hRadioLed[i] = GetDlgItem(hDlg, IDC_RADIO_LED_OFF + i);
         for (int i = 0; i < 7; i++) g_hRadioMode[i] = GetDlgItem(hDlg, IDC_RADIO_MODE_BASE + i);
         g_hEditText     = GetDlgItem(hDlg, IDC_EDIT_TEXT);
@@ -296,13 +532,19 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
         g_hBtnSyncTime  = GetDlgItem(hDlg, IDC_BTN_SYNC_TIME);
         g_hStcLedStatus = GetDlgItem(hDlg, IDC_STC_LED_STATUS);
         g_hStcModeStatus = GetDlgItem(hDlg, IDC_STC_MODE_STATUS);
-        g_hStcLatency   = GetDlgItem(hDlg, IDC_STC_LATENCY);
+        g_hStcRemoteMode = GetDlgItem(hDlg, IDC_STC_REMOTE_MODE);  /* v3.1 */
         g_hLstKeyLog    = GetDlgItem(hDlg, IDC_LST_KEY_LOG);
         g_hGrpKeyLog    = GetDlgItem(hDlg, IDC_GRP_KEY_LOG);
-        g_hGrpDeviceStatus = GetDlgItem(hDlg, IDC_GRP_DEVICE_STATUS);
+        g_hGrpWeather   = GetDlgItem(hDlg, IDC_GRP_WEATHER);  /* v3.2 */
         g_hOledPreview  = GetDlgItem(hDlg, IDC_OLED_PREVIEW);
 
+        // v3.2: Create status bar
+        g_hStatusBar = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr,
+            WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
+            0, 0, 0, 0, hDlg, (HMENU)IDC_STATUS_BAR, g_hInst, nullptr);
+
         // Init controls
+        Button_SetCheck(g_hRadioLocal, BST_CHECKED);  /* v3.1: default local */
         Button_SetCheck(g_hRadioLed[0], BST_CHECKED);
         Button_SetCheck(g_hRadioMode[0], BST_CHECKED);
         SetWindowText(g_hEditBootText, L"欢迎进入系统");
@@ -319,6 +561,11 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
         for (int i = 0; i < 8; i++) ComboBox_AddString(g_hCboWind, wind[i]);
         ComboBox_SetCurSel(g_hCboWind, 0);
 
+        // Remote sub mode combo (v3.1)
+        for (int i = 0; i < 4; i++) ComboBox_AddString(g_hCboRemoteSub, g_remoteSubNames[i]);
+        ComboBox_SetCurSel(g_hCboRemoteSub, 0);
+        SetWindowText(g_hStcRemoteMode, L"远程: 文字");
+
         PopulateComPorts();
         SetWindowText(g_hStcConn, L"○ 未连接");
         EnableWindow(g_hBtnClose, FALSE);
@@ -326,6 +573,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
         // Init OLED preview
         g_preview.Attach(g_hOledPreview);
         LayoutMainDialog(hDlg);
+        UpdateStatusBar();  /* v3.2 */
 
         // Setup serial callbacks
         g_serial.onDataReceived = OnSerialData;
@@ -349,6 +597,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
                     EnableWindow(g_hBtnClose, TRUE);
                     g_seq = 0;
                     SyncTime();
+                    UpdateStatusBar();  /* v3.2 */
                     AppendLog(L"串口已连接");
                 } else {
                     MessageBox(hDlg, L"无法打开串口", L"错误", MB_ICONERROR);
@@ -363,6 +612,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
             SetWindowText(g_hStcConn, L"○ 未连接");
             EnableWindow(g_hBtnOpen, TRUE);
             EnableWindow(g_hBtnClose, FALSE);
+            UpdateStatusBar();  /* v3.2 */
             AppendLog(L"串口已断开");
             break;
 
@@ -372,6 +622,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
             else if (Button_GetCheck(g_hRadioLed[2]) == BST_CHECKED) state = 2;
             SendCommand(CMD_LED_CTRL, &state, 1);
             g_preview.SetLedState(state);
+            UpdateStatusBar();  /* v3.2 */
             break;
         }
         case IDC_BTN_SEND_TEXT: {
@@ -428,6 +679,48 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
             SyncTime();
             break;
 
+        // v3.1: Local/Remote radio
+        case IDC_RADIO_LOCAL:
+        case IDC_RADIO_REMOTE:
+            if (HIWORD(wParam) == BN_CLICKED) {
+                bool isRemote = Button_GetCheck(g_hRadioRemote) == BST_CHECKED;
+                g_userIsRemote = isRemote;  /* 记录用户意图 */
+                int sub = ComboBox_GetCurSel(g_hCboRemoteSub);
+                if (sub < 0) sub = 0;
+                /* data[0]: bit7=1 远程, bit7=0 本地 */
+                uint8_t d;
+                if (isRemote) {
+                    d = (uint8_t)(0x80 | sub);
+                } else {
+                    d = 0;
+                    for (int i = 0; i < 7; i++) {
+                        if (Button_GetCheck(g_hRadioMode[i]) == BST_CHECKED) { d = (uint8_t)i; break; }
+                    }
+                }
+                SendCommand(CMD_DISPLAY_MODE, &d, 1);
+                g_preview.SetRemote(isRemote);
+                g_preview.SetSubMode(sub);
+                UpdateStatusBar();  /* v3.2 */
+            }
+            break;
+
+        // v3.1: Remote sub mode combo
+        case IDC_CBO_REMOTE_SUB:
+            if (HIWORD(wParam) == CBN_SELCHANGE) {
+                int sub = ComboBox_GetCurSel(g_hCboRemoteSub);
+                if (sub >= 0 && sub < 4) {
+                    bool isRemote = Button_GetCheck(g_hRadioRemote) == BST_CHECKED;
+                    g_userIsRemote = isRemote;  /* 记录用户意图 */
+                    uint8_t d = isRemote ? (uint8_t)(0x80 | sub) : (uint8_t)sub;
+                    SendCommand(CMD_DISPLAY_MODE, &d, 1);
+                    SetWindowText(g_hStcRemoteMode, g_remoteSubNames[sub]);
+                    g_preview.SetRemote(isRemote);
+                    g_preview.SetSubMode(sub);
+                    UpdateStatusBar();  /* v3.2 */
+                }
+            }
+            break;
+
         // Mode radios
         case IDC_RADIO_MODE_BASE: case IDC_RADIO_MODE_BASE+1: case IDC_RADIO_MODE_BASE+2:
         case IDC_RADIO_MODE_BASE+3: case IDC_RADIO_MODE_BASE+4:
@@ -435,9 +728,14 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
             if (HIWORD(wParam) == BN_CLICKED) {
                 for (int i = 0; i < 7; i++) {
                     if (Button_GetCheck(g_hRadioMode[i]) == BST_CHECKED) {
-                        uint8_t m = (uint8_t)i;
-                        SendCommand(CMD_DISPLAY_MODE, &m, 1);
+                        bool isRemote = Button_GetCheck(g_hRadioRemote) == BST_CHECKED;
+                        g_userIsRemote = isRemote;  /* 记录用户意图 */
+                        int sub = ComboBox_GetCurSel(g_hCboRemoteSub);
+                        if (sub < 0) sub = 0;
+                        uint8_t d = isRemote ? (uint8_t)(0x80 | sub) : (uint8_t)i;
+                        SendCommand(CMD_DISPLAY_MODE, &d, 1);
                         g_preview.SetMode(i);
+                        UpdateStatusBar();  /* v3.2 */
                         break;
                     }
                 }
@@ -448,7 +746,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 
     case WM_GETMINMAXINFO: {
         MINMAXINFO* mmi = (MINMAXINFO*)lParam;
-        RECT rcMin = { 0, 0, 620, 520 };
+        RECT rcMin = { 0, 0, 620, 580 };
         MapDialogRect(hDlg, &rcMin);
         mmi->ptMinTrackSize.x = rcMin.right;
         mmi->ptMinTrackSize.y = rcMin.bottom;
@@ -456,14 +754,14 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
     }
 
     case WM_SIZE:
-        if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
-            LayoutMainDialog(hDlg);
+        LayoutMainDialog(hDlg);
         break;
 
 
     case WM_TIMER:
         if (wParam == 1) {
             g_preview.Tick();
+            SendFrameBuffer();       /* v3.1: 远程模式帧缓冲发送 */
             CheckRetransmit();
             g_parser.CheckTimeout(GetTickCount64());
         }
@@ -472,7 +770,11 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
     case WM_CLOSE:
         KillTimer(hDlg, 1);
         g_serial.Close();
-        EndDialog(hDlg, 0);
+        DestroyWindow(hDlg);
+        return TRUE;
+
+    case WM_DESTROY:
+        PostQuitMessage(0);
         break;
     }
     return FALSE;
@@ -490,7 +792,24 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmdShow) {
     // Register OLED preview window class
     OledPreview::RegisterClass(hInstance);
 
-    DialogBox(hInstance, MAKEINTRESOURCE(IDD_OLED_CONTROL_DIALOG), nullptr, DlgProc);
-    return 0;
+    // 非模态对话框: 创建后进入标准消息循环, 支持窗口拖拽缩放
+    HWND hDlg = CreateDialogParamW(hInstance, MAKEINTRESOURCE(IDD_OLED_CONTROL_DIALOG),
+        nullptr, DlgProc, 0);
+    if (!hDlg) {
+        MessageBoxW(nullptr, L"创建主窗口失败", L"错误", MB_ICONERROR);
+        return 1;
+    }
+
+    ShowWindow(hDlg, nCmdShow);
+    UpdateWindow(hDlg);
+
+    MSG msg;
+    while (GetMessageW(&msg, nullptr, 0, 0)) {
+        if (!IsDialogMessageW(hDlg, &msg)) {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+    }
+    return (int)msg.wParam;
 }
 

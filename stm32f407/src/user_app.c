@@ -33,15 +33,12 @@ static void send_mode_status(void);
 static volatile uint8_t tx_seq = 0;
 
 /*
- * 发送临界区: proto_build_frame 使用全局 tx_buf,
- * 在 build → send 之间需关中断防止 ISR 中覆盖。
- * 注意: 关中断时间极短 (微秒级), 不影响实时性。
+ * 发送辅助函数: 所有 send_* 调用均在主循环上下文中,
+ * UART RX ISR 只写环形缓冲区, 不碰 tx_buf, 无需关中断。
  */
 static void safe_send(const uint8_t *data, uint16_t len)
 {
-    __disable_irq();
     uart_drv_send(data, len);
-    __enable_irq();
 }
 
 int user_app_init(void)
@@ -70,6 +67,7 @@ int user_app_handle(void)
     static uint32_t last_tick = 0;
     static uint32_t last_key_scan = 0;
     static uint32_t led_tick_acc = 0;
+    uint32_t bytes_read_this_loop = 0;
     key_info_t key_info;
     uint8_t rx_byte;
 
@@ -84,10 +82,30 @@ int user_app_handle(void)
 
     while (uart_drv_available()) {
         uart_drv_read_byte(&rx_byte);
+        bytes_read_this_loop++;
         if (proto_feed_byte(rx_byte)) {
             const proto_frame_t *f = proto_get_frame();
             DEBUG_PRINTF("RX: cmd=0x%02X seq=%d len=%d", f->cmd, f->seq, f->len);
             process_frame(f);
+        }
+    }
+
+    /* 远程模式超时提示: 5秒无串口数据则在OLED显示"串口已断开" */
+    {
+        static uint32_t last_rx_tick = 0;
+        static bool     disconnect_shown = false;
+        if (bytes_read_this_loop > 0) {
+            last_rx_tick = sys_tick_ms();
+            if (disconnect_shown) {
+                disconnect_shown = false;
+                display_mgr_hide_disconnect();
+            }
+        }
+        if (display_mgr_is_remote() && last_rx_tick > 0 &&
+            sys_tick_ms() - last_rx_tick > 5000 && !disconnect_shown) {
+            disconnect_shown = true;
+            DEBUG_PRINTF("MODE: serial disconnected");
+            display_mgr_show_disconnect();
         }
     }
 
@@ -105,6 +123,15 @@ int user_app_handle(void)
                     uint8_t next = (led_mgr_get_state() + 1) % 3;
                     led_mgr_set_state((led_state_t)next);
                     send_led_status();
+                }
+                break;
+            case 4:
+                /* KEY4 长按 → 切换本地/远程模式 */
+                if (key_info.event == KEY_EVENT_LONG_PRESS) {
+                    display_mgr_set_remote(!display_mgr_is_remote());
+                    DEBUG_PRINTF("MODE: switched to %s",
+                                 display_mgr_is_remote() ? "remote" : "local");
+                    send_mode_status();
                 }
                 break;
             }
@@ -153,9 +180,29 @@ static void process_frame(const proto_frame_t *frame)
         break;
 
     case CMD_DISPLAY_MODE:
-        if (frame->len >= 1 && frame->data[0] < DISP_MODE_COUNT) {
-            DEBUG_PRINTF("DISP: set mode=%d", frame->data[0]);
-            display_mgr_set_mode((display_mode_t)frame->data[0]);
+        if (frame->len >= 1) {
+            /*
+             * data[0]: bit7=0 本地, bit7=1 远程; 低7位=子模式
+             * 本地模式: 低7位=特效号
+             * 远程模式: 低7位=子模式 (0=TEXT,1=TIME,2=WEATHER,3=DATE)
+             */
+            bool to_remote = (frame->data[0] & 0x80) != 0;
+            uint8_t sub = frame->data[0] & 0x7F;
+
+            DEBUG_PRINTF("DISP: to=%s sub=%d",
+                         to_remote ? "remote" : "local", sub);
+
+            display_mgr_set_remote(to_remote);
+
+            if (to_remote) {
+                if (sub <= REMOTE_SUB_DATE)
+                    display_mgr_set_sub_mode(sub);
+                /* 远程模式下 EFFECT 切换通过 CMD_DISPLAY_MODE bit7=0 实现 */
+            } else {
+                if (sub < DISP_MODE_COUNT)
+                    display_mgr_set_mode((display_mode_t)sub);
+            }
+
             send_ack(frame->seq);
             send_mode_status();
         } else {
@@ -214,6 +261,25 @@ static void process_frame(const proto_frame_t *frame)
         }
         break;
 
+    case CMD_FRAME_SYNC:
+        /* 仅远程模式处理帧缓冲分段 */
+        if (!display_mgr_is_remote()) {
+            DEBUG_PRINTF("FRAME: ignored (local mode)");
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+        if (frame->len >= 2) {
+            uint8_t seg   = frame->data[0];
+            uint8_t total = frame->data[1];
+            uint8_t payload_len = frame->len - 2;
+            DEBUG_PRINTF("FRAME: seg=%d/%d len=%d", seg, total, payload_len);
+            display_mgr_rx_frame_seg(seg, total, frame->data + 2, payload_len);
+            send_ack(frame->seq);
+        } else {
+            send_nak(frame->seq, NAK_PARAM_ERROR);
+        }
+        break;
+
     case CMD_BOOT_TEXT:
         if (frame->len > 0) {
             DEBUG_PRINTF("BOOT: text len=%d", frame->len);
@@ -247,7 +313,7 @@ static void process_frame(const proto_frame_t *frame)
 /*
  * send_ack / send_nak / send_key_event / send_led_status / send_mode_status
  * 使用 safe_send() 替代裸 uart_drv_send, 防止 proto_build_frame → uart_drv_send
- * 之间被 ISR (如 display_mgr_sync_frame) 覆盖全局 tx_buf。
+ * 之间被 ISR 覆盖全局 tx_buf。
  */
 static void send_ack(uint8_t seq)
 {
@@ -277,8 +343,11 @@ static void send_led_status(void)
 
 static void send_mode_status(void)
 {
-    uint8_t data = (uint8_t)display_mgr_get_mode();
-    uint16_t len = proto_build_frame(CMD_MODE_STATUS, tx_seq++, &data, 1);
+    /* v3.1: 2字节 [is_remote, sub_mode] */
+    uint8_t data[2];
+    data[0] = display_mgr_is_remote() ? 1 : 0;
+    data[1] = display_mgr_get_sub_mode();
+    uint16_t len = proto_build_frame(CMD_MODE_STATUS, tx_seq++, data, 2);
     safe_send(proto_get_tx_buf(), len);
 }
 

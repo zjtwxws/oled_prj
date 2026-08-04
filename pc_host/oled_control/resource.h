@@ -10,6 +10,9 @@
 #define IDC_BTN_OPEN            1002
 #define IDC_BTN_CLOSE           1003
 #define IDC_STC_CONN_STATUS     1004
+#define IDC_RADIO_REMOTE       1005  /* v3.1: 远程模式 */
+#define IDC_RADIO_LOCAL        1006  /* v3.1: 本地模式 */
+#define IDC_CBO_REMOTE_SUB     1007  /* v3.1: 远程子模式 */
 #define IDC_RADIO_LED_OFF       1010
 #define IDC_RADIO_LED_ON        1011
 #define IDC_RADIO_LED_BLINK     1012
@@ -30,7 +33,18 @@
 #define IDC_GRP_DEVICE_STATUS   1063
 #define IDC_LST_KEY_LOG         1070
 #define IDC_GRP_KEY_LOG         1071
-#define IDC_OLED_PREVIEW        1080
+#define IDC_GRP_WEATHER         1072  /* v3.2: 天气模拟分组框 */
+#define IDC_GRP_TEXT            1073  /* v3.2: 文字内容分组框 */
+#define IDC_GRP_SAVE_BOOT       1074  /* v3.2: 上电默认文字分组框 */
+#define IDC_STC_WTH_TYPE        1075  /* v3.2: 天气"类型:"标签 */
+#define IDC_STC_WTH_TEMP        1076  /* v3.2: 天气"温度:"标签 */
+#define IDC_STC_WTH_HUMID       1077  /* v3.2: 天气"湿度:"标签 */
+#define IDC_STC_WTH_WIND        1078  /* v3.2: 天气"风向:"标签 */
+#define IDC_STC_WTH_CELSIUS     1079  /* v3.2: 天气"℃"标签 */
+#define IDC_STC_WTH_PERCENT     1080  /* v3.2: 天气"%"标签 */
+#define IDC_OLED_PREVIEW        1081
+#define IDC_STC_REMOTE_MODE     1085  /* v3.1: 远程子模式文本标签 */
+#define IDC_STATUS_BAR          1090  /* v3.2: 底部状态栏 */
 
 // Next default values for new objects
 #ifdef APSTUDIO_INVOKED

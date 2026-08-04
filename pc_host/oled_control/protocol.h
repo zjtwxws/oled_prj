@@ -28,7 +28,7 @@ constexpr uint8_t CMD_BOOT_TEXT     = 0x06;
 constexpr uint8_t CMD_LED_STATUS    = 0x10;
 constexpr uint8_t CMD_MODE_STATUS   = 0x11;
 constexpr uint8_t CMD_KEY_EVENT     = 0x12;
-constexpr uint8_t CMD_FRAME_SYNC    = 0x20;  // v2.0: 上位机不再使用，保留定义
+constexpr uint8_t CMD_FRAME_SYNC    = 0x20;  /* v3.1: 远程模式帧缓冲分段下发 */
 constexpr uint8_t CMD_ACK           = 0xF0;
 constexpr uint8_t CMD_NAK           = 0xFF;
 

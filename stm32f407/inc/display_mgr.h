@@ -1,19 +1,26 @@
 /**
  * @file    display_mgr.h
- * @brief   显示管理器 — OLED 区域划分 + 7种特效调度
+ * @brief   显示管理器 — 本地/远程双模式 + 7种特效调度 (v3.1)
+ *
+ * 本地模式: STM32 全屏渲染文字+7种特效 (128×64, 无状态栏)
+ * 远程模式: 接收 PC 帧缓冲分段→拼装→刷屏 (STM32 不自行渲染)
  */
 
 #ifndef __DISPLAY_MGR_H
 #define __DISPLAY_MGR_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
-/* 显示区域定义 */
-#define DISP_STATUS_BAR_H   16      /* 状态栏高度(像素) */
-#define DISP_CONTENT_Y      DISP_STATUS_BAR_H
-#define DISP_CONTENT_H      (64 - DISP_STATUS_BAR_H)  /* 内容区 48px */
+/* 远程子模式枚举 */
+typedef enum {
+    REMOTE_SUB_TEXT    = 0,  /* 文字 (支持7种特效,PC端渲染) */
+    REMOTE_SUB_TIME    = 1,  /* 时钟 (静态,PC端渲染) */
+    REMOTE_SUB_WEATHER = 2,  /* 天气 (静态,PC端渲染) */
+    REMOTE_SUB_DATE    = 3,  /* 日期 (静态,PC端渲染) */
+} remote_sub_mode_t;
 
-/* 显示模式枚举 */
+/* 显示特效枚举 (本地模式+远程文字子模式) */
 typedef enum {
     DISP_MODE_STATIC   = 0,
     DISP_MODE_SCROLL_L = 1,   /* 左滚 */
@@ -25,28 +32,49 @@ typedef enum {
     DISP_MODE_COUNT           /* 模式总数 */
 } display_mode_t;
 
-/* 天气 & 时间信息 (用于状态栏绘制) */
+/* 时间/天气信息 (仅存储, 本地+远程均不绘制状态栏) */
 typedef struct {
-    uint8_t  weather_type;     /* 0=晴...6=雪 */
-    int8_t   temperature;      /* ℃ */
-    uint8_t  humidity;         /* % */
-    uint8_t  wind_dir;         /* 0=北...7=西北 */
+    uint8_t  weather_type;
+    int8_t   temperature;
+    uint8_t  humidity;
+    uint8_t  wind_dir;
     uint8_t  year, month, day;
     uint8_t  hour, minute, second;
-    uint8_t  week_day;         /* 0=日 */
-    uint8_t  led_state;        /* 0=关,1=开,2=闪烁 */
+    uint8_t  week_day;
+    uint8_t  led_state;
 } display_status_t;
 
+/* ---- 初始化 ---- */
 void display_mgr_init(const char *boot_text);
+
+/* ---- 本地/远程模式切换 ---- */
+void display_mgr_set_remote(bool remote);
+bool display_mgr_is_remote(void);
+
+/* ---- 远程子模式 ---- */
+void display_mgr_set_sub_mode(uint8_t sub_mode);
+uint8_t display_mgr_get_sub_mode(void);
+
+/* ---- 远程帧缓冲接收 ---- */
+void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, uint8_t len);
+
+/* ---- 本地模式: 文字+特效 ---- */
 void display_mgr_set_text(const char *text);
 void display_mgr_set_boot_text(const char *text);
 const char* display_mgr_get_boot_text(void);
 void display_mgr_set_mode(display_mode_t mode);
 display_mode_t display_mgr_get_mode(void);
 void display_mgr_next_mode(void);
+
+/* ---- 时间/天气数据存储 (不影响渲染) ---- */
 void display_mgr_update_status(const display_status_t *status);
 const display_status_t* display_mgr_get_status(void);
+
+/* ---- 远程模式串口断开提示 ---- */
+void display_mgr_show_disconnect(void);
+void display_mgr_hide_disconnect(void);
+
+/* ---- 主 tick (双模式调度) ---- */
 void display_mgr_tick(void);
-void display_mgr_sync_frame(void);
 
 #endif
