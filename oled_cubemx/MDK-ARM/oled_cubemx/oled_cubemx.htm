@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Tue Aug 04 19:05:31 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Tue Aug 04 19:48:17 2026
 <BR><P>
 <H3>Maximum Stack Usage =        656 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1093,6 +1093,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 <LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
 <LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_c
 <LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_b
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_a
@@ -1290,11 +1291,12 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
-<P><STRONG><a name="[fd]"></a>key_drv_scan</STRONG> (Thumb, 222 bytes, Stack size 32 bytes, key_drv.o(i.key_drv_scan))
-<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = key_drv_scan
+<P><STRONG><a name="[fd]"></a>key_drv_scan</STRONG> (Thumb, 276 bytes, Stack size 32 bytes, key_drv.o(i.key_drv_scan))
+<BR><BR>[Stack]<UL><LI>Max Depth = 384<LI>Call Chain = key_drv_scan &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
@@ -1378,8 +1380,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
-<P><STRONG><a name="[10a]"></a>menu_mgr_handle_key</STRONG> (Thumb, 312 bytes, Stack size 24 bytes, menu_mgr.o(i.menu_mgr_handle_key))
-<BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = menu_mgr_handle_key &rArr; menu_mgr_deactivate &rArr; display_mgr_redraw &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
+<P><STRONG><a name="[10a]"></a>menu_mgr_handle_key</STRONG> (Thumb, 326 bytes, Stack size 32 bytes, menu_mgr.o(i.menu_mgr_handle_key))
+<BR><BR>[Stack]<UL><LI>Max Depth = 232<LI>Call Chain = menu_mgr_handle_key &rArr; menu_mgr_deactivate &rArr; display_mgr_redraw &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_deactivate
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_confirm
@@ -2118,8 +2120,10 @@ Local Symbols
 <BR>[Address Reference Count : 2]<UL><LI> menu_items.o(.constdata)
 <LI> menu_items.o(.constdata)
 </UL>
-<P><STRONG><a name="[f7]"></a>adjust_scroll</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, menu_mgr.o(i.adjust_scroll))
-<BR><BR>[Called By]<UL><LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit_submenu
+<P><STRONG><a name="[f7]"></a>adjust_scroll</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, menu_mgr.o(i.adjust_scroll))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = adjust_scroll
+</UL>
+<BR>[Called By]<UL><LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit_submenu
 <LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
@@ -2196,7 +2200,7 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[f5]"></a>exit_submenu</STRONG> (Thumb, 112 bytes, Stack size 8 bytes, menu_mgr.o(i.exit_submenu))
-<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = exit_submenu
+<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = exit_submenu &rArr; adjust_scroll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_scroll
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
@@ -2223,8 +2227,8 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
-<P><STRONG><a name="[10e]"></a>render_menu</STRONG> (Thumb, 188 bytes, Stack size 24 bytes, menu_mgr.o(i.render_menu))
-<BR><BR>[Stack]<UL><LI>Max Depth = 140<LI>Call Chain = render_menu &rArr; draw_scroll_indicator &rArr; draw_text &rArr; draw_chinese_normal &rArr; font_get_chinese_utf8
+<P><STRONG><a name="[10e]"></a>render_menu</STRONG> (Thumb, 320 bytes, Stack size 32 bytes, menu_mgr.o(i.render_menu))
+<BR><BR>[Stack]<UL><LI>Max Depth = 148<LI>Call Chain = render_menu &rArr; draw_scroll_indicator &rArr; draw_text &rArr; draw_chinese_normal &rArr; font_get_chinese_utf8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
 <LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr

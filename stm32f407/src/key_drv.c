@@ -9,6 +9,7 @@
 #include "key_drv.h"
 #include "stm32f4xx_hal.h"
 #include <string.h>
+#include "debug_console.h"
 
 #define DEBOUNCE_SAMPLES    3   /* 连续 3 次相同 → 消抖完成 (3×20ms=60ms) */
 
@@ -86,6 +87,7 @@ int key_drv_scan(key_info_t *info)
 
                 if (raw == 0) {
                     /* 确认按下: 记录起始时刻 */
+                    DEBUG_PRINTF("[KEY%d] Press", i + 1);
                     keys[i].press_start_tick = now;
                     keys[i].long_press_fired = 0;
                     keys[i].last_repeat_tick = 0;
@@ -94,12 +96,14 @@ int key_drv_scan(key_info_t *info)
                     /* 确认释放 */
                     if (keys[i].long_press_fired) {
                         /* 长按后释放: 产生 RELEASE 事件 */
+                        DEBUG_PRINTF("[KEY%d] Release (after long press)", i + 1);
                         keys[i].release_pending = 1;
                         keys[i].pending_event = KEY_EVENT_RELEASE;
                         keys[i].event_pending = 1;
                         keys[i].long_press_fired = 0;
                     } else {
                         /* 短按: 产生 SHORT_PRESS 事件 */
+                        DEBUG_PRINTF("[KEY%d] Short Press", i + 1);
                         keys[i].pending_event = KEY_EVENT_SHORT_PRESS;
                         keys[i].event_pending = 1;
                     }
@@ -117,6 +121,7 @@ int key_drv_scan(key_info_t *info)
         if (keys[i].stable_state == 0 && !keys[i].long_press_fired) {
             if (now - keys[i].press_start_tick >= KEY_LONG_PRESS_MS) {
                 keys[i].long_press_fired = 1;
+                DEBUG_PRINTF("[KEY%d] Long Press", i + 1);
                 keys[i].last_repeat_tick = now;
                 keys[i].pending_event = KEY_EVENT_LONG_PRESS;
                 keys[i].event_pending = 1;
@@ -130,6 +135,7 @@ int key_drv_scan(key_info_t *info)
         if (keys[i].stable_state == 0 && keys[i].long_press_fired) {
             if (now - keys[i].last_repeat_tick >= KEY_LONG_REPEAT_MS) {
                 keys[i].last_repeat_tick = now;
+                DEBUG_PRINTF("[KEY%d] Repeat", i + 1);
                 keys[i].pending_event = KEY_EVENT_LONG_PRESS_REPEAT;
                 keys[i].event_pending = 1;
             }

@@ -225,6 +225,43 @@ static void draw_scroll_indicator(uint8_t page, uint8_t total)
     draw_text(page, 0, buf, false);
 }
 
+
+/* ================================================================
+ * 文本像素宽度测量 (供 render_menu 使用)
+ * ================================================================ */
+
+static uint8_t measure_text_width(const char *text)
+{
+    const char *p = text;
+    uint8_t w = 0;
+    while (*p) {
+        uint8_t first = (uint8_t)*p;
+        if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+            w += FONT_CHINESE_W;
+            p += 3;
+        } else if ((first & 0x80) && (first & 0xE0) == 0xC0) {
+            p += 2;
+        } else {
+            w += FONT_ASCII_W;
+            p++;
+        }
+    }
+    return w;
+}
+
+static uint8_t get_suffix_width(const menu_item_t *item)
+{
+    if (item->type == MENU_TYPE_TOGGLE) {
+        return 24;  /* [x] 或 [ ] */
+    } else if (item->type == MENU_TYPE_VALUE) {
+        uint8_t val = *(item->value.value_ptr);
+        if (val >= 100) return 40;   /* [NNN] */
+        if (val >= 10)  return 32;   /* [ NN] */
+        return 24;                    /* [  N] */
+    }
+    return 0;
+}
+
 /* ================================================================
  * 菜单渲染
  * ================================================================ */
@@ -251,10 +288,17 @@ static void render_menu(void)
         if (item_idx == g_menu.cursor) {
             /* 光标选中行: 反白显示 */
             fill_row_white(page);
-            uint8_t x = 0;
-            /* "> " 箭头 */
-            x = draw_text(page, x, MENU_ARROW_STR, true);
-            x = draw_ascii_inverted(page, x, ' ');  /* 间距 */
+            /* "> " 箭头始终在固定位置 */
+            draw_text(page, 0, MENU_ARROW_STR, true);
+            uint8_t x = draw_ascii_inverted(page, 8, ' ');  /* 间距 */
+            /* 长文本自动左移, 使右端贴齐屏幕右侧 */
+            uint8_t text_w = measure_text_width(item->text);
+            uint8_t suffix_w = get_suffix_width(item);
+            uint8_t space_for_text = SSD1306_WIDTH - x - suffix_w;
+            if (text_w > space_for_text) {
+                x = SSD1306_WIDTH - suffix_w - text_w;
+                if (x < 16) x = 16;  /* 不覆盖箭头 */
+            }
             /* 菜单项文字 */
             x = draw_text(page, x, item->text, true);
             /* 右侧后缀 */
@@ -316,10 +360,20 @@ static void adjust_scroll(void)
         return;
     }
 
+    /*
+     * 当底部还有未显示项时, render_menu() 会用最后一
+     * 行显示滚动指示器 "??(共N项)"。此时实际可见
+     * 菜单项只有 MENU_ROWS_VISIBLE-1 行, 需据此调整窗口。
+     */
+    uint8_t visible_items = MENU_ROWS_VISIBLE;
+    if (g_menu.current_menu_count - g_menu.scroll_offset > MENU_ROWS_VISIBLE) {
+        visible_items = MENU_ROWS_VISIBLE - 1;
+    }
+
     if (g_menu.cursor < g_menu.scroll_offset) {
         g_menu.scroll_offset = g_menu.cursor;
-    } else if (g_menu.cursor >= g_menu.scroll_offset + MENU_ROWS_VISIBLE) {
-        g_menu.scroll_offset = g_menu.cursor - MENU_ROWS_VISIBLE + 1;
+    } else if (g_menu.cursor >= g_menu.scroll_offset + visible_items) {
+        g_menu.scroll_offset = g_menu.cursor - visible_items + 1;
     }
 
     /* 确保不会滚过头 */
@@ -406,6 +460,7 @@ static void goto_root(void)
 
 static void cursor_up(void)
 {
+    if (g_menu.current_menu_count == 0) return;
     if (g_menu.cursor > 0) {
         g_menu.cursor--;
     } else {
@@ -418,7 +473,8 @@ static void cursor_up(void)
 
 static void cursor_down(void)
 {
-    if (g_menu.cursor < g_menu.current_menu_count - 1) {
+    if (g_menu.current_menu_count == 0) return;
+    if (g_menu.cursor + 1 < g_menu.current_menu_count) {
         g_menu.cursor++;
     } else {
         /* 循环到开头 */
@@ -532,8 +588,8 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
         switch (event) {
         case KEY_EVENT_SHORT_PRESS:
         case KEY_EVENT_LONG_PRESS_REPEAT:
-            if (key_id == 1) value_edit_up();
-            if (key_id == 2) value_edit_down();
+            if (key_id == 1) value_edit_down();
+            if (key_id == 2) value_edit_up();
             break;
         default:
             break;
@@ -553,9 +609,9 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
     case KEY_EVENT_SHORT_PRESS:
     case KEY_EVENT_LONG_PRESS_REPEAT:
         if (key_id == 1) {
-            cursor_up();
-        } else if (key_id == 2) {
             cursor_down();
+        } else if (key_id == 2) {
+            cursor_up();
         } else if (key_id == 3 && event == KEY_EVENT_SHORT_PRESS) {
             handle_confirm();
         } else if (key_id == 4 && event == KEY_EVENT_SHORT_PRESS) {
