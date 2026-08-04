@@ -52,6 +52,9 @@ static uint8_t  frame_seg_total = 0;
 /* 远程模式串口断开提示状态 */
 static bool     disconnect_msg_shown = false;
 
+/* 菜单激活时抑制 display_mgr 内部刷屏 */
+static bool     menu_suppress = false;
+
 /* 特效函数指针表 */
 typedef void (*effect_func_t)(void);
 static effect_func_t effects[DISP_MODE_COUNT];
@@ -71,6 +74,14 @@ static void clear_full_screen(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
     memset(buf, 0x00, FRAME_BUF_SIZE);
+}
+
+/* 仅在 menu_suppress 为 false 时刷屏 */
+static void update_screen_if_allowed(void)
+{
+    if (!menu_suppress) {
+        ssd1306_update_screen();
+    }
 }
 
 /* 绘制 16px 高 ASCII 字符, 跨两个 page */
@@ -275,7 +286,7 @@ void display_mgr_set_remote(bool remote)
     if (remote) {
         /* 切换到远程模式: 清屏准备接收帧缓冲 */
         clear_full_screen();
-        ssd1306_update_screen();
+        update_screen_if_allowed();
         memset(frame_buf, 0, FRAME_BUF_SIZE);
         frame_seg_received = 0;
         frame_seg_total = 0;
@@ -287,7 +298,7 @@ void display_mgr_set_remote(bool remote)
         fade_step = 0;
         fade_dir = 0;
         draw_text_fullscreen(content_text);
-        ssd1306_update_screen();
+        update_screen_if_allowed();
     }
 }
 
@@ -333,7 +344,10 @@ void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, u
     if (frame_seg_received >= frame_seg_total) {
         uint8_t *buf = ssd1306_get_buffer();
         memcpy(buf, frame_buf, FRAME_BUF_SIZE);
-        ssd1306_update_screen();
+        /* 菜单激活期间只拼装帧缓冲, 不直接刷屏 */
+        if (!menu_suppress) {
+            ssd1306_update_screen();
+        }
         frame_seg_received = 0;
     }
 }
@@ -348,7 +362,7 @@ void display_mgr_set_text(const char *text)
         scroll_offset_x = 0;
         if (!is_remote) {
             draw_text_fullscreen(content_text);
-            ssd1306_update_screen();
+            update_screen_if_allowed();
         }
     }
 }
@@ -386,7 +400,7 @@ void display_mgr_set_mode(display_mode_t mode)
     }
 
     if (!is_remote) {
-        ssd1306_update_screen();
+        update_screen_if_allowed();
     }
 }
 
@@ -425,7 +439,6 @@ void display_mgr_show_disconnect(void)
     clear_full_screen();
     /* 在 OLED 中央显示 "串口已断开" */
     const char *msg = "\xe4\xb8\xb2\xe5\x8f\xa3\xe5\xb7\xb2\xe6\x96\xad\xe5\xbc\x80"; /* UTF-8: 串口已断开 */
-	  //const char *msg = "1串口123已断开"; /* UTF-8: 串口已断开 */
     uint8_t *buf = ssd1306_get_buffer();
     memset(buf, 0, FRAME_BUF_SIZE);
 
@@ -497,6 +510,36 @@ void display_mgr_tick(void)
 
     default:
         break;
+    }
+}
+
+/* --- 公开接口: 菜单激活期间抑制远程帧刷屏 --- */
+
+void display_mgr_set_menu_suppress(bool suppress)
+{
+    menu_suppress = suppress;
+}
+
+/* --- 公开接口: 菜单退出后恢复显示 --- */
+
+void display_mgr_redraw(void)
+{
+    menu_suppress = false;
+
+    if (is_remote) {
+        /* 远程模式: 将最近拼装完成的帧刷到屏幕 */
+        uint8_t *buf = ssd1306_get_buffer();
+        memcpy(buf, frame_buf, FRAME_BUF_SIZE);
+        ssd1306_update_screen();
+    } else {
+        /* 本地模式: 重绘当前文字 + 特效 */
+        ssd1306_set_contrast(255);
+        scroll_offset_x = 0;
+        flip_phase = 0;
+        fade_step = 0;
+        fade_dir = 0;
+        draw_text_fullscreen(content_text);
+        ssd1306_update_screen();
     }
 }
 

@@ -17,6 +17,7 @@
 #include "sys_config.h"
 #include "sys_tick.h"
 #include "debug_console.h"
+#include "menu_mgr.h"
 
 /* 外设定义 */
 extern I2C_HandleTypeDef  hi2c2; //用于oled通讯
@@ -54,11 +55,12 @@ int user_app_init(void)
     key_drv_init();
     iwdg_drv_init();
 	
-	display_mgr_init(sys_config_get_boot_text());
+    display_mgr_init(sys_config_get_boot_text());
+    menu_mgr_init();
 	
-	DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
+    DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
 
-	return 0;
+    return 0;
 }
 
 //需要在main里面的while(1)里面调用
@@ -101,7 +103,7 @@ int user_app_handle(void)
                 display_mgr_hide_disconnect();
             }
         }
-        if (display_mgr_is_remote() && last_rx_tick > 0 &&
+        if (!menu_mgr_is_active() && display_mgr_is_remote() && last_rx_tick > 0 &&
             sys_tick_ms() - last_rx_tick > 5000 && !disconnect_shown) {
             disconnect_shown = true;
             DEBUG_PRINTF("MODE: serial disconnected");
@@ -113,29 +115,35 @@ int user_app_handle(void)
         last_key_scan = sys_tick_ms();
         if (key_drv_scan(&key_info)) {
             DEBUG_PRINTF("KEY: id=%d event=%d", key_info.key_id, key_info.event);
-            switch (key_info.key_id) {
-            case 1:
-                display_mgr_next_mode();
-                send_mode_status();
-                break;
-            case 2:
-                {
-                    uint8_t next = (led_mgr_get_state() + 1) % 3;
-                    led_mgr_set_state((led_state_t)next);
-                    send_led_status();
-                }
-                break;
-            case 4:
-                /* KEY4 长按 → 切换本地/远程模式 */
-                if (key_info.event == KEY_EVENT_LONG_PRESS) {
-                    display_mgr_set_remote(!display_mgr_is_remote());
-                    DEBUG_PRINTF("MODE: switched to %s",
-                                 display_mgr_is_remote() ? "remote" : "local");
+            if (menu_mgr_is_active()) {
+                /* 菜单激活: 按键全部交给 menu_mgr */
+                menu_mgr_handle_key(key_info.key_id, key_info.event);
+            } else {
+                /* 正常显示: 原有按键逻辑 */
+                switch (key_info.key_id) {
+                case 1:
+                    display_mgr_next_mode();
                     send_mode_status();
+                    break;
+                case 2:
+                    {
+                        uint8_t next = (led_mgr_get_state() + 1) % 3;
+                        led_mgr_set_state((led_state_t)next);
+                        send_led_status();
+                    }
+                    break;
+                case 4:
+                    /* KEY4 长按 → 激活菜单 */
+                    if (key_info.event == KEY_EVENT_LONG_PRESS) {
+                        menu_mgr_activate();
+                    }
+                    break;
                 }
-                break;
             }
-            send_key_event(key_info.key_id, key_info.event);
+            /* REPEAT 事件不上报上位机 */
+            if (key_info.event != KEY_EVENT_LONG_PRESS_REPEAT) {
+                send_key_event(key_info.key_id, key_info.event);
+            }
         }
     }
 
@@ -155,13 +163,17 @@ int user_app_handle(void)
         uint32_t now = sys_tick_ms();
         if (now - disp_tick >= 50) {
             disp_tick = now;
-            display_mgr_tick();
+            if (menu_mgr_is_active()) {
+                menu_mgr_tick();
+            } else {
+                display_mgr_tick();
+            }
         }
     }
 
     iwdg_drv_feed();
 
-	return 0;
+    return 0;
 }
 
 static void process_frame(const proto_frame_t *frame)
@@ -350,5 +362,3 @@ static void send_mode_status(void)
     uint16_t len = proto_build_frame(CMD_MODE_STATUS, tx_seq++, data, 2);
     safe_send(proto_get_tx_buf(), len);
 }
-
-

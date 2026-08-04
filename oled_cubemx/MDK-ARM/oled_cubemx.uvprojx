@@ -638,6 +638,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\user_app.c</FilePath>
             </File>
+            <File>
+              <FileName>menu_items.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\menu_items.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu_mgr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\menu_mgr.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

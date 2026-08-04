@@ -36,6 +36,8 @@
 "oled_cubemx\sys_tick.o"
 "oled_cubemx\uart_drv.o"
 "oled_cubemx\user_app.o"
+"oled_cubemx\menu_items.o"
+"oled_cubemx\menu_mgr.o"
 --library_type=microlib --strict --scatter "oled_cubemx\oled_cubemx.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

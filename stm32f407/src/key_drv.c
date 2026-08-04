@@ -1,6 +1,6 @@
 /**
  * @file    key_drv.c
- * @brief   按键驱动实现 (轮询扫描 + 消抖 + 长按)
+ * @brief   按键驱动实现 (轮询扫描 + 消抖 + 长按 + 长按重复)
  *
  * 长按计时基于 HAL_GetTick() 真实时间, 不受主循环负载影响。
  * GPIO 初始化由 CubeMX 生成的 MX_GPIO_Init() 完成。
@@ -22,6 +22,8 @@ typedef struct {
     uint8_t       event_pending;
     key_event_t   pending_event;
     uint8_t       long_press_fired;
+    uint32_t      last_repeat_tick;   /* 上次重复触发时刻 */
+    uint8_t       release_pending;    /* 是否有释放事件待处理 */
 } key_dev_t;
 
 static key_dev_t keys[KEY_COUNT];
@@ -40,7 +42,7 @@ void key_drv_init(void)
     memset(keys, 0, sizeof(keys));
 
     /*
-     * 引脚映射: 与厂家模组接线一致 (PA1~PA4)。
+     * 引脚映射: 与厂家模组接线一致 (PE1~PE4)。
      * 如只启用 KEY_COUNT=2, 只初始化前两个。
      */
 #if KEY_COUNT >= 1
@@ -86,9 +88,18 @@ int key_drv_scan(key_info_t *info)
                     /* 确认按下: 记录起始时刻 */
                     keys[i].press_start_tick = now;
                     keys[i].long_press_fired = 0;
+                    keys[i].last_repeat_tick = 0;
+                    keys[i].release_pending = 0;
                 } else {
-                    /* 确认释放: 短按事件 */
-                    if (!keys[i].long_press_fired) {
+                    /* 确认释放 */
+                    if (keys[i].long_press_fired) {
+                        /* 长按后释放: 产生 RELEASE 事件 */
+                        keys[i].release_pending = 1;
+                        keys[i].pending_event = KEY_EVENT_RELEASE;
+                        keys[i].event_pending = 1;
+                        keys[i].long_press_fired = 0;
+                    } else {
+                        /* 短按: 产生 SHORT_PRESS 事件 */
                         keys[i].pending_event = KEY_EVENT_SHORT_PRESS;
                         keys[i].event_pending = 1;
                     }
@@ -106,7 +117,20 @@ int key_drv_scan(key_info_t *info)
         if (keys[i].stable_state == 0 && !keys[i].long_press_fired) {
             if (now - keys[i].press_start_tick >= KEY_LONG_PRESS_MS) {
                 keys[i].long_press_fired = 1;
+                keys[i].last_repeat_tick = now;
                 keys[i].pending_event = KEY_EVENT_LONG_PRESS;
+                keys[i].event_pending = 1;
+            }
+        }
+
+        /*
+         * 长按已触发后, 周期性产生 REPEAT 事件
+         * 用于菜单快速滚动, 每 KEY_LONG_REPEAT_MS 一次
+         */
+        if (keys[i].stable_state == 0 && keys[i].long_press_fired) {
+            if (now - keys[i].last_repeat_tick >= KEY_LONG_REPEAT_MS) {
+                keys[i].last_repeat_tick = now;
+                keys[i].pending_event = KEY_EVENT_LONG_PRESS_REPEAT;
                 keys[i].event_pending = 1;
             }
         }

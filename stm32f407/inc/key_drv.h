@@ -15,12 +15,14 @@
 
 #define KEY_DEBOUNCE_MS    20
 #define KEY_LONG_PRESS_MS  2000
+#define KEY_LONG_REPEAT_MS  150
 
 typedef enum {
     KEY_EVENT_NONE        = 0,
     KEY_EVENT_SHORT_PRESS = 1,
     KEY_EVENT_LONG_PRESS  = 2,
-    KEY_EVENT_RELEASE     = 3
+    KEY_EVENT_RELEASE     = 3,
+    KEY_EVENT_LONG_PRESS_REPEAT = 4
 } key_event_t;
 
 typedef struct {

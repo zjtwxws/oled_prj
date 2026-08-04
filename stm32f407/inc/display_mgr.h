@@ -77,4 +77,8 @@ void display_mgr_hide_disconnect(void);
 /* ---- 主 tick (双模式调度) ---- */
 void display_mgr_tick(void);
 
+/* ---- 菜单退出后恢复显示 ---- */
+void display_mgr_redraw(void);
+void display_mgr_set_menu_suppress(bool suppress);
+
 #endif
