@@ -84,22 +84,7 @@ static void update_screen_if_allowed(void)
     }
 }
 
-/* 绘制 16px 高 ASCII 字符, 跨两个 page */
-static void draw_str_16h(uint8_t x, uint8_t y, const char *str)
-{
-    assert((y & 0x07) == 0);
-    uint8_t page = y >> 3;
-    uint8_t *buf = ssd1306_get_buffer();
 
-    while (*str && x < SSD1306_WIDTH) {
-        const uint8_t *bm = font_get_ascii(*str);
-        for (uint8_t c = 0; c < FONT_ASCII_W && x < SSD1306_WIDTH; c++, x++) {
-            if (page     < SSD1306_PAGES) buf[page     * SSD1306_WIDTH + x] = bm[c];
-            if (page + 1 < SSD1306_PAGES) buf[(page + 1) * SSD1306_WIDTH + x] = bm[c + 8];
-        }
-        str++;
-    }
-}
 
 static void draw_chinese_char(uint8_t x, uint8_t page, const uint8_t *glyph)
 {
@@ -472,6 +457,9 @@ void display_mgr_tick(void)
     /* --- 本地模式: 特效 tick --- */
 
     switch (current_mode) {
+    case DISP_MODE_STATIC:
+        break;
+
     case DISP_MODE_SCROLL_L:
     case DISP_MODE_SCROLL_R:
     case DISP_MODE_SCROLL_U:
@@ -508,6 +496,7 @@ void display_mgr_tick(void)
         }
         break;
 
+    case DISP_MODE_COUNT:
     default:
         break;
     }

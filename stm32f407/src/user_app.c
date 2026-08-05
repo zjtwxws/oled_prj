@@ -13,6 +13,7 @@
 #include "display_mgr.h"
 #include "led_mgr.h"
 #include "key_drv.h"
+#include "user_app.h"
 #include "iwdg_drv.h"
 #include "sys_config.h"
 #include "sys_tick.h"
@@ -348,7 +349,8 @@ static void send_key_event(uint8_t key_id, uint8_t action)
 
 static void send_led_status(void)
 {
-    uint8_t data = (uint8_t)led_mgr_get_state();
+    led_state_t state = led_mgr_get_state();
+    uint8_t data = (uint8_t)state;
     uint16_t len = proto_build_frame(CMD_LED_STATUS, tx_seq++, &data, 1);
     safe_send(proto_get_tx_buf(), len);
 }

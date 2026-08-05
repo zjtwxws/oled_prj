@@ -1,0 +1,305 @@
+*** Using Compiler 'V6.13.1', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
+Build target 'oled_cubemx'
+assembling startup_stm32f407xx.s...
+compiling stm32f4xx_hal_flash_ramfunc.c...
+compiling stm32f4xx_hal_msp.c...
+compiling gpio.c...
+compiling stm32f4xx_hal_i2c_ex.c...
+compiling main.c...
+../Src/stm32f4xx_it.c(21): warning: In file included from...../Inc\main.h(30): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(411): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_uart.h(195): warning: padding struct 'struct __UART_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t                 ErrorCode;        /*!< UART Error code                    */
+                                ^
+../Src/stm32f4xx_it.c(21): warning: In file included from...../Inc\main.h(30): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+2 warnings generated.
+compiling stm32f4xx_it.c...
+../Src/i2c.c(21): warning: In file included from...../Inc\i2c.h(29): warning: In file included from...../Inc/main.h(30): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(363): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_i2c.h(215): warning: padding struct 'I2C_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t              ErrorCode;      /*!< I2C Error code                           */
+                             ^
+../Src/i2c.c(21): warning: In file included from...../Inc\i2c.h(29): warning: In file included from...../Inc/main.h(30): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+2 warnings generated.
+compiling i2c.c...
+../Src/usart.c(21): warning: In file included from...../Inc\usart.h(29): warning: In file included from...../Inc/main.h(30): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(411): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_uart.h(195): warning: padding struct 'struct __UART_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t                 ErrorCode;        /*!< UART Error code                    */
+                                ^
+../Src/usart.c(21): warning: In file included from...../Inc\usart.h(29): warning: In file included from...../Inc/main.h(30): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+2 warnings generated.
+compiling usart.c...
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c(104): warning: no previous extern declaration for non-static variable 'pFlash' [-Wmissing-variable-declarations]
+FLASH_ProcessTypeDef pFlash  = {.ProcedureOnGoing = FLASH_PROC_NONE,
+                     ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c(104): note: declare 'static' if the variable is not intended to be used outside of this translation unit
+FLASH_ProcessTypeDef pFlash  = {.ProcedureOnGoing = FLASH_PROC_NONE,
+^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c(76): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(335): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_flash.h(60): warning: padding struct 'FLASH_ProcessTypeDef' with 3 bytes to align 'NbSectorsToErase' [-Wpadded]
+  __IO uint32_t               NbSectorsToErase;   /*Internal variable to save the remaining sectors to erase in IT context*/
+                              ^
+../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_flash.h(64): warning: padding struct 'FLASH_ProcessTypeDef' with 3 bytes to align 'Sector' [-Wpadded]
+  __IO uint32_t               Sector;             /*Internal variable to define the current sector which is erasing*/
+                              ^
+../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_flash.h(72): warning: padding struct 'FLASH_ProcessTypeDef' with 3 bytes to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t               ErrorCode;          /* FLASH error code                    */
+                              ^
+4 warnings generated.
+compiling stm32f4xx_hal_flash.c...
+compiling stm32f4xx_hal_gpio.c...
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c(62): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(335): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_flash.h(60): warning: padding struct 'FLASH_ProcessTypeDef' with 3 bytes to align 'NbSectorsToErase' [-Wpadded]
+  __IO uint32_t               NbSectorsToErase;   /*Internal variable to save the remaining sectors to erase in IT context*/
+                              ^
+../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_flash.h(64): warning: padding struct 'FLASH_ProcessTypeDef' with 3 bytes to align 'Sector' [-Wpadded]
+  __IO uint32_t               Sector;             /*Internal variable to define the current sector which is erasing*/
+                              ^
+../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_flash.h(72): warning: padding struct 'FLASH_ProcessTypeDef' with 3 bytes to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t               ErrorCode;          /* FLASH error code                    */
+                              ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c(268): warning: implicit conversion loses integer precision: 'uint32_t' (aka 'unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
+    FLASH_Erase_Sector(pEraseInit->Sector, pEraseInit->VoltageRange);
+    ~~~~~~~~~~~~~~~~~~                     ~~~~~~~~~~~~^~~~~~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c(310): warning: implicit conversion loses integer precision: 'uint32_t' (aka 'unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
+    status = FLASH_OB_RDP_LevelConfig(pOBInit->RDPLevel);
+             ~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~^~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c(324): warning: implicit conversion loses integer precision: 'uint32_t' (aka 'unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
+    status = FLASH_OB_BOR_LevelConfig(pOBInit->BORLevel);
+             ~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~^~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c(62): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(335): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_flash.h(295): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h(67): warning: padding size of 'FLASH_OBProgramInitTypeDef' with 3 bytes to alignment boundary [-Wpadded]
+typedef struct
+        ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c(948): warning: unused parameter 'Banks' [-Wunused-parameter]
+static void FLASH_MassErase(uint8_t VoltageRange, uint32_t Banks)
+                                                           ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c(1027): warning: unused parameter 'Banks' [-Wunused-parameter]
+static HAL_StatusTypeDef FLASH_OB_EnableWRP(uint32_t WRPSector, uint32_t Banks)
+                                                                         ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c(1063): warning: unused parameter 'Banks' [-Wunused-parameter]
+static HAL_StatusTypeDef FLASH_OB_DisableWRP(uint32_t WRPSector, uint32_t Banks)
+                                                                          ^
+10 warnings generated.
+compiling stm32f4xx_hal_flash_ex.c...
+compiling stm32f4xx_hal_rcc_ex.c...
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c(39): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+1 warning generated.
+compiling stm32f4xx_hal_dma_ex.c...
+compiling stm32f4xx_hal_rcc.c...
+compiling stm32f4xx_hal_pwr_ex.c...
+compiling stm32f4xx_hal_pwr.c...
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c(289): warning: cast from function call of type 'uint32_t' (aka 'unsigned int') to non-matching type 'DMA_Base_Registers *' [-Wbad-function-cast]
+  regs = (DMA_Base_Registers *)DMA_CalcBaseAndBitshift(hdma);
+                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c(97): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c(351): warning: cast from function call of type 'uint32_t' (aka 'unsigned int') to non-matching type 'DMA_Base_Registers *' [-Wbad-function-cast]
+  regs = (DMA_Base_Registers *)DMA_CalcBaseAndBitshift(hdma);
+                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c(977): warning: enumeration value 'HAL_DMA_XFER_ALL_CB_ID' not explicitly handled in switch [-Wswitch-enum]
+    switch (CallbackID)
+            ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c(1073): warning: default label in switch which covers all enumeration values [-Wcovered-switch-default]
+    default:
+    ^
+5 warnings generated.
+compiling stm32f4xx_hal_dma.c...
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c(215): warning: function 'HAL_NVIC_SystemReset' could be declared with attribute 'noreturn' [-Wmissing-noreturn]
+{
+^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c(81): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(291): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_cortex.h(52): warning: padding struct 'MPU_Region_InitTypeDef' with 2 bytes to align 'BaseAddress' [-Wpadded]
+  uint32_t               BaseAddress;           /*!< Specifies the base address of the region to protect.                           */
+                         ^
+2 warnings generated.
+compiling stm32f4xx_hal_cortex.c...
+compiling stm32f4xx_hal.c...
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c(301): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(363): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_i2c.h(215): warning: padding struct 'I2C_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t              ErrorCode;      /*!< I2C Error code                           */
+                             ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c(301): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+2 warnings generated.
+compiling stm32f4xx_hal_i2c.c...
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c(379): warning: default label in switch which covers all enumeration values [-Wcovered-switch-default]
+    default:
+    ^
+1 warning generated.
+compiling stm32f4xx_hal_exti.c...
+compiling system_stm32f4xx.c...
+../../stm32f407/src/debug_console.c(14): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(411): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_uart.h(195): warning: padding struct 'struct __UART_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t                 ErrorCode;        /*!< UART Error code                    */
+                                ^
+../../stm32f407/src/debug_console.c(14): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+../../stm32f407/src/debug_console.c(54): warning: format string is not a string literal [-Wformat-nonliteral]
+    int len = vsnprintf(buf, sizeof(buf), fmt, args);
+                                          ^~~
+3 warnings generated.
+compiling debug_console.c...
+../../stm32f407/src/display_mgr.c(500): warning: default label in switch which covers all enumeration values [-Wcovered-switch-default]
+    default:
+    ^
+1 warning generated.
+compiling display_mgr.c...
+../../stm32f407/src/i2c_drv.c(10): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(363): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_i2c.h(215): warning: padding struct 'I2C_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t              ErrorCode;      /*!< I2C Error code                           */
+                             ^
+../../stm32f407/src/i2c_drv.c(10): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+2 warnings generated.
+compiling i2c_drv.c...
+../../stm32f407/src/font.c(729): warning: padding struct 'font_lru_entry_t' with 3 bytes to align 'glyph' [-Wpadded]
+    const uint8_t *glyph;  /* 字模指针 (或 NULL) */
+                   ^
+1 warning generated.
+compiling font.c...
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c(258): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(411): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_uart.h(195): warning: padding struct 'struct __UART_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t                 ErrorCode;        /*!< UART Error code                    */
+                                ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c(258): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c(1162): warning: cast from 'const uint8_t *' (aka 'const unsigned char *') to 'const uint16_t *' (aka 'const unsigned short *') increases required alignment from 1 to 2 [-Wcast-align]
+      pdata16bits = (const uint16_t *) pData;
+                    ^~~~~~~~~~~~~~~~~~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c(1249): warning: cast from 'uint8_t *' (aka 'unsigned char *') to 'uint16_t *' (aka 'unsigned short *') increases required alignment from 1 to 2 [-Wcast-align]
+      pdata16bits = (uint16_t *) pData;
+                    ^~~~~~~~~~~~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c(1626): warning: cast from 'uint8_t *' (aka 'unsigned char *') to 'uint16_t *' (aka 'unsigned short *') increases required alignment from 1 to 2 [-Wcast-align]
+      pdata16bits = (uint16_t *) pData;
+                    ^~~~~~~~~~~~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c(3572): warning: cast from 'const uint8_t *' (aka 'const unsigned char *') to 'const uint16_t *' (aka 'const unsigned short *') increases required alignment from 1 to 2 [-Wcast-align]
+      tmp = (const uint16_t *) huart->pTxBuffPtr;
+            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c(3640): warning: cast from 'uint8_t *' (aka 'unsigned char *') to 'uint16_t *' (aka 'unsigned short *') increases required alignment from 1 to 2 [-Wcast-align]
+      pdata16bits = (uint16_t *) huart->pRxBuffPtr;
+                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+7 warnings generated.
+compiling stm32f4xx_hal_uart.c...
+compiling led_mgr.c...
+compiling iwdg_drv.c...
+compiling ssd1306.c...
+../../stm32f407/src/key_drv.c(22): warning: padding struct 'key_dev_t' with 3 bytes to align 'press_start_tick' [-Wpadded]
+    uint32_t      press_start_tick;  /* 按下起始 tick, 用于真实时间长按检测 */
+                  ^
+../../stm32f407/src/key_drv.c(26): warning: padding struct 'key_dev_t' with 1 byte to align 'last_repeat_tick' [-Wpadded]
+    uint32_t      last_repeat_tick;   /* 上次重复触发时刻 */
+                  ^
+../../stm32f407/src/key_drv.c(16): warning: padding size of 'key_dev_t' with 3 bytes to alignment boundary [-Wpadded]
+typedef struct {
+        ^
+../../stm32f407/src/key_drv.c(68): warning: implicit conversion loses integer precision: 'int' to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
+            info->key_id = i + 1;
+                         ~ ~~^~~
+../../stm32f407/src/key_drv.c(12): warning: In file included from...../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
+                                                   ^
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+9 warnings generated.
+compiling key_drv.c...
+compiling protocol.c...
+compiling sys_tick.c...
+../../stm32f407/src/uart_drv.c(7): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(411): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_uart.h(195): warning: padding struct 'struct __UART_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t                 ErrorCode;        /*!< UART Error code                    */
+                                ^
+../../stm32f407/src/uart_drv.c(7): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+2 warnings generated.
+compiling uart_drv.c...
+compiling sys_config.c...
+../../stm32f407/src/menu_items.c(17): warning: In file included from...../../stm32f407/inc\menu_mgr.h(38): warning: padding size of 'struct menu_item::(anonymous at ../../stm32f407/inc\menu_mgr.h:38:9)' with 3 bytes to alignment boundary [-Wpadded]
+        struct {
+        ^
+../../stm32f407/src/menu_items.c(22): warning: In file included from...../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
+                                                 ^
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/src/menu_items.c(17): warning: In file included from...../../stm32f407/inc\menu_mgr.h(47): warning: padding struct 'struct menu_item::(anonymous at ../../stm32f407/inc\menu_mgr.h:44:9)' with 3 bytes to align 'on_change' [-Wpadded]
+            void   (*on_change)(uint8_t);   /* 状态变化回调 (可选) */
+                     ^
+../../stm32f407/inc\menu_mgr.h(55): warning: padding struct 'struct menu_item::(anonymous at ../../stm32f407/inc\menu_mgr.h:51:9)' with 1 byte to align 'on_change' [-Wpadded]
+            void   (*on_change)(uint8_t);   /* 值变化回调 (可选) */
+                     ^
+../../stm32f407/inc\menu_mgr.h(36): warning: padding struct 'struct menu_item' with 3 bytes to align anonymous bit-field [-Wpadded]
+    union {
+    ^
+7 warnings generated.
+compiling menu_items.c...
+../../stm32f407/src/user_app.c(21): warning: In file included from...../../stm32f407/inc\menu_mgr.h(38): warning: padding size of 'struct menu_item::(anonymous at ../../stm32f407/inc\menu_mgr.h:38:9)' with 3 bytes to alignment boundary [-Wpadded]
+        struct {
+        ^
+../../stm32f407/src/user_app.c(20): warning: In file included from...../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
+                                                 ^
+../../stm32f407/src/user_app.c(6): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(363): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_i2c.h(215): warning: padding struct 'I2C_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t              ErrorCode;      /*!< I2C Error code                           */
+                             ^
+../../stm32f407/src/user_app.c(6): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(287): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_dma.h(148): warning: padding struct 'struct __DMA_HandleTypeDef' with 2 bytes to align 'Parent' [-Wpadded]
+  void                       *Parent;                                                          /*!< Parent object state                    */ 
+                              ^
+../../stm32f407/src/user_app.c(6): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal.h(29): warning: In file included from...../Inc\stm32f4xx_hal_conf.h(411): warning: In file included from...../Drivers/STM32F4xx_HAL_Driver/Inc\stm32f4xx_hal_uart.h(195): warning: padding struct 'struct __UART_HandleTypeDef' with 1 byte to align 'ErrorCode' [-Wpadded]
+  __IO uint32_t                 ErrorCode;        /*!< UART Error code                    */
+                                ^
+../../stm32f407/src/user_app.c(20): warning: In file included from...../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
+                                                   ^
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
+                                                 ^
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
+                                                   ^
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
+                                                 ^
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
+                                                   ^
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/inc\debug_console.h(28): warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+../../stm32f407/src/user_app.c(352): warning: cast from function call of type 'led_state_t' to non-matching type 'uintptr_t' (aka 'unsigned int') [-Wbad-function-cast]
+    uint8_t data = (uint8_t)(uintptr_t)led_mgr_get_state();
+                                       ^~~~~~~~~~~~~~~~~~~
+19 warnings generated.
+compiling user_app.c...
+../../stm32f407/src/menu_mgr.c(9): warning: In file included from...../../stm32f407/inc\menu_mgr.h(38): warning: padding size of 'struct menu_item::(anonymous at ../../stm32f407/inc\menu_mgr.h:38:9)' with 3 bytes to alignment boundary [-Wpadded]
+        struct {
+        ^
+../../stm32f407/src/menu_mgr.c(582): warning: default label in switch which covers all enumeration values [-Wcovered-switch-default]
+        default:
+        ^
+../../stm32f407/src/menu_mgr.c(596): warning: enumeration values 'KEY_EVENT_NONE' and 'KEY_EVENT_RELEASE' not explicitly handled in switch [-Wswitch-enum]
+    switch (event) {
+            ^
+../../stm32f407/src/menu_mgr.c(9): warning: In file included from...../../stm32f407/inc\menu_mgr.h(47): warning: padding struct 'struct menu_item::(anonymous at ../../stm32f407/inc\menu_mgr.h:44:9)' with 3 bytes to align 'on_change' [-Wpadded]
+            void   (*on_change)(uint8_t);   /* 状态变化回调 (可选) */
+                     ^
+../../stm32f407/inc\menu_mgr.h(55): warning: padding struct 'struct menu_item::(anonymous at ../../stm32f407/inc\menu_mgr.h:51:9)' with 1 byte to align 'on_change' [-Wpadded]
+            void   (*on_change)(uint8_t);   /* 值变化回调 (可选) */
+                     ^
+../../stm32f407/inc\menu_mgr.h(36): warning: padding struct 'struct menu_item' with 3 bytes to align anonymous bit-field [-Wpadded]
+    union {
+    ^
+6 warnings generated.
+compiling menu_mgr.c...
+linking...
+Program Size: Code=28724 RO-data=20024 RW-data=296 ZI-data=8128  
+FromELF: creating hex file...
+"oled_cubemx\oled_cubemx.axf" - 0 Error(s), 88 Warning(s).
+Build Time Elapsed:  00:00:03

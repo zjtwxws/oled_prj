@@ -29,7 +29,7 @@ int i2c_drv_write_reg(uint8_t dev_addr, uint8_t reg, const uint8_t *data, uint16
         (uint16_t)(dev_addr << 1),
         (uint16_t)reg,
         I2C_MEMADD_SIZE_8BIT,
-        (uint8_t *)data,
+        (uint8_t *)(uintptr_t)data,
         len,
         I2C_TIMEOUT_DEFAULT
     );

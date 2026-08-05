@@ -37,4 +37,6 @@ void iwdg_drv_feed(void)
     HAL_IWDG_Refresh(&hiwdg);
 }
 
+#else
+typedef int iwdg_dummy_t;  /* 空编译单元占位 */
 #endif /* IWDG_ENABLE */

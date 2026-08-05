@@ -37,7 +37,7 @@ void debug_console_write(const char *str)
     if (p_debug_uart && str) {
         uint16_t len = (uint16_t)strlen(str);
         if (len > 0) {
-            HAL_UART_Transmit(p_debug_uart, (uint8_t *)str, len, HAL_MAX_DELAY);
+            HAL_UART_Transmit(p_debug_uart, (uint8_t *)(uintptr_t)str, len, HAL_MAX_DELAY);
         }
     }
 }
@@ -51,7 +51,14 @@ void debug_printf(const char *fmt, ...)
     char buf[256];
     va_list args;
     va_start(args, fmt);
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
     int len = vsnprintf(buf, sizeof(buf), fmt, args);
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
     va_end(args);
 
     if (len > 0 && (uint16_t)len < sizeof(buf)) {

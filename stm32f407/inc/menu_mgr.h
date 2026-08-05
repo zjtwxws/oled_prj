@@ -82,6 +82,10 @@ void menu_mgr_deactivate(void);
 /* 检查菜单是否发生变化 (优化: 仅变化时刷新 OLED) */
 bool menu_mgr_is_dirty(void);
 
+/* 菜单项定义查询接口 (menu_items.c) */
+const struct menu_item* menu_items_get_root(void);
+void menu_items_init_state(void);
+
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION < 6000000)
 #pragma pop

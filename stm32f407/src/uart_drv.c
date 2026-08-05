@@ -26,14 +26,14 @@ void uart_drv_init(void *huart)
 int uart_drv_send(const uint8_t *data, uint16_t len)
 {
     if (p_uart == NULL) return -1;
-    HAL_StatusTypeDef status = HAL_UART_Transmit(p_uart, (uint8_t *)data, len, HAL_MAX_DELAY);
+    HAL_StatusTypeDef status = HAL_UART_Transmit(p_uart, (uint8_t *)(uintptr_t)data, len, HAL_MAX_DELAY);
     return (status == HAL_OK) ? 0 : -1;
 }
 
 int uart_drv_send_dma(const uint8_t *data, uint16_t len)
 {
     if (p_uart == NULL) return -1;
-    HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(p_uart, (uint8_t *)data, len);
+    HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(p_uart, (uint8_t *)(uintptr_t)data, len);
     return (status == HAL_OK) ? 0 : -1;
 }
 

@@ -205,25 +205,6 @@ static void draw_suffix(uint8_t page, const menu_item_t *item, bool inverted)
 }
 
 /* 绘制滚动指示器: "…… (共N项)" */
-static void draw_scroll_indicator(uint8_t page, uint8_t total)
-{
-    char buf[32];
-    /* 构建 "……" + " (共" + N + "项)" 文本 */
-    /* "……" = UTF-8 \xe2\x80\xa6\xe2\x80\xa6 */
-    uint8_t len = 0;
-    buf[len++] = (char)0xE2; buf[len++] = (char)0x80; buf[len++] = (char)0xA6;  /* … */
-    buf[len++] = (char)0xE2; buf[len++] = (char)0x80; buf[len++] = (char)0xA6;  /* … */
-    buf[len++] = ' ';
-    buf[len++] = '(';
-    buf[len++] = '\xe5'; buf[len++] = '\x85'; buf[len++] = '\xb1';  /* 共 */
-    if (total >= 10) buf[len++] = '0' + (total / 10);
-    buf[len++] = '0' + (total % 10);
-    buf[len++] = '\xe9'; buf[len++] = '\xa1'; buf[len++] = '\xb9';  /* 项 */
-    buf[len++] = ')';
-    buf[len] = '\0';
-
-    draw_text(page, 0, buf, false);
-}
 
 
 /* ================================================================
@@ -589,12 +570,14 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
     /* VALUE 编辑中 */
     if (g_menu.value_editing) {
         switch (event) {
+        case KEY_EVENT_NONE:
+            break;
+        case KEY_EVENT_LONG_PRESS:
+        case KEY_EVENT_RELEASE:
         case KEY_EVENT_SHORT_PRESS:
         case KEY_EVENT_LONG_PRESS_REPEAT:
             if (key_id == 1) value_edit_down();
             if (key_id == 2) value_edit_up();
-            break;
-        default:
             break;
         }
         /* KEY3 确认 / KEY4 取消 → 退出编辑 */
@@ -638,7 +621,8 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
         }
         break;
 
-    default:
+    case KEY_EVENT_NONE:
+    case KEY_EVENT_RELEASE:
         break;
     }
 }
