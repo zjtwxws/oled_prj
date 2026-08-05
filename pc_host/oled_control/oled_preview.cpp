@@ -21,9 +21,9 @@ static const COLORREF BG_COLOR = RGB(32, 32, 32);
 static const COLORREF PX_COLOR = RGB(180, 255, 80);
 
 static const char* weather_names[] = {
-    "\xe6\x99\xb4", "\xe5\xa4\x9a\xe4\xba\x91", "\xe9\x98\xb4",
-    "\xe5\xb0\x8f\xe9\x9b\xa8", "\xe5\xa4\xa7\xe9\x9b\xa8",
-    "\xe9\x9b\xb7\xe9\x9b\xa8", "\xe9\x9b\xaa"
+    "晴", "多云", "阴",
+    "小雨", "大雨",
+    "雷雨", "雪"
 };
 
 /* 天气图标: 8×8 点阵 (Sun,Cloud,Overcast,Rain,Heavy Rain,Thunder,Snow) */
@@ -39,8 +39,8 @@ static const uint8_t weather_icons_8x8[7][8] = {
 
 /* 星期中文名 */
 static const char* week_names[] = {
-    "\xe6\x97\xa5", "\xe4\xb8\x80", "\xe4\xba\x8c", "\xe4\xb8\x89",
-    "\xe5\x9b\x9b", "\xe4\xba\x94", "\xe5\x85\xad"
+    "日", "一", "二", "三",
+    "四", "五", "六"
 };
 
 static HINSTANCE g_previewInst = nullptr;
@@ -70,7 +70,7 @@ OledPreview::OledPreview()
     , m_fadeStep(0), m_fadeDir(1)
     , m_scrollTick(0), m_flipTick(0), m_fadeTick(0)
 {
-    m_text = "\xe6\xac\xa2\xe8\xbf\x8e\xe8\xbf\x9b\xe5\x85\xa5\xe7\xb3\xbb\xe7\xbb\x9f";
+    m_text = "欢迎进入系统";
     memset(m_frameBuf, 0, sizeof(m_frameBuf));
 }
 
@@ -315,14 +315,14 @@ void OledPreview::RenderTimeMode() {
     /* 日期+星期 自动换行 (紧凑格式, 避免溢出) */
     char dateStr[64];
     int n1 = sprintf_s(dateStr, sizeof(dateStr), "%02d", m_year % 100);
-    strcat_s(dateStr, sizeof(dateStr), "\xe5\xb9\xb4");
+    strcat_s(dateStr, sizeof(dateStr), "年");
     n1 = (int)strlen(dateStr);
     n1 += sprintf_s(dateStr + n1, sizeof(dateStr) - n1, "%02d", m_month);
-    strcat_s(dateStr, sizeof(dateStr), "\xe6\x9c\x88");
+    strcat_s(dateStr, sizeof(dateStr), "月");
     n1 = (int)strlen(dateStr);
     n1 += sprintf_s(dateStr + n1, sizeof(dateStr) - n1, "%02d", m_day);
     strcat_s(dateStr, sizeof(dateStr), "\xe6\x97\xa5 ");
-    strcat_s(dateStr, sizeof(dateStr), "\xe6\x98\x9f\xe6\x9c\x9f");
+    strcat_s(dateStr, sizeof(dateStr), "星期");
     strcat_s(dateStr, sizeof(dateStr), week_names[m_wday]);
     DrawStrWrap(m_hMemDC, 0, 32, dateStr, PX_COLOR, OLED_W);
 
@@ -347,8 +347,8 @@ void OledPreview::RenderWeatherMode() {
 
     /* 温度+湿度+风向 (自动换行) */
     char buf[96];
-    const char* wind_names[] = {"\xe5\x8c\x97","\xe4\xb8\x9c\xe5\x8c\x97","\xe4\xb8\x9c","\xe4\xb8\x9c\xe5\x8d\x97",
-                                "\xe5\x8d\x97","\xe8\xa5\xbf\xe5\x8d\x97","\xe8\xa5\xbf","\xe8\xa5\xbf\xe5\x8c\x97"};
+    const char* wind_names[] = {"北","东北","东","东南",
+                                "南","西南","西","西北"};
     buf[0] = '\0';
     strcat_s(buf, sizeof(buf), "\xe6\xb8\xa9\xe5\xba\xa6:");
     _itoa_s(m_temp, buf + strlen(buf), sizeof(buf) - strlen(buf), 10);
@@ -377,14 +377,14 @@ void OledPreview::RenderDateMode() {
     /* 日期+星期 (自动换行) */
     char dateStr[64];
     int n2 = sprintf_s(dateStr, sizeof(dateStr), "%02d", m_year % 100);
-    strcat_s(dateStr, sizeof(dateStr), "\xe5\xb9\xb4");
+    strcat_s(dateStr, sizeof(dateStr), "年");
     n2 = (int)strlen(dateStr);
     n2 += sprintf_s(dateStr + n2, sizeof(dateStr) - n2, "%02d", m_month);
-    strcat_s(dateStr, sizeof(dateStr), "\xe6\x9c\x88");
+    strcat_s(dateStr, sizeof(dateStr), "月");
     n2 = (int)strlen(dateStr);
     n2 += sprintf_s(dateStr + n2, sizeof(dateStr) - n2, "%02d", m_day);
     strcat_s(dateStr, sizeof(dateStr), "\xe6\x97\xa5 ");
-    strcat_s(dateStr, sizeof(dateStr), "\xe6\x98\x9f\xe6\x9c\x9f");
+    strcat_s(dateStr, sizeof(dateStr), "星期");
     strcat_s(dateStr, sizeof(dateStr), week_names[m_wday]);
     int dw = GetStrPixelWidth(dateStr);
     DrawStrWrap(m_hMemDC, (OLED_W - dw) / 2, 16, dateStr, PX_COLOR, OLED_W);

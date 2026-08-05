@@ -15,8 +15,10 @@
 
 #define MENU_MAX_DEPTH  8
 
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION < 6000000)
 #pragma push
 #pragma anon_unions
+#endif
 
 /* 菜单项类型 */
 typedef enum {
@@ -81,7 +83,9 @@ void menu_mgr_deactivate(void);
 bool menu_mgr_is_dirty(void);
 
 
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION < 6000000)
 #pragma pop
+#endif
 
 #endif
  /* __MENU_MGR_H */

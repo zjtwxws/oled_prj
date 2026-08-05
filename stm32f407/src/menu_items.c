@@ -104,17 +104,17 @@ static void cb_demo_c(void) { DEBUG_PRINTF("menu: demo level3 - option C"); }
 
 /* ---- 三级示例 (Level 2) ---- */
 static const menu_item_t item_demo_a = {
-    .text = "\xe9\x80\x89\xe9\xa1\xb9" "A",  /* "选项A" */
+    .text = "选项" "A",  /* "选项A" */
     .type = MENU_TYPE_ACTION,
     .action = cb_demo_a,
 };
 static const menu_item_t item_demo_b = {
-    .text = "\xe9\x80\x89\xe9\xa1\xb9" "B",  /* "选项B" */
+    .text = "选项" "B",  /* "选项B" */
     .type = MENU_TYPE_ACTION,
     .action = cb_demo_b,
 };
 static const menu_item_t item_demo_c = {
-    .text = "\xe9\x80\x89\xe9\xa1\xb9" "C",  /* "选项C" */
+    .text = "选项" "C",  /* "选项C" */
     .type = MENU_TYPE_ACTION,
     .action = cb_demo_c,
 };
@@ -124,114 +124,114 @@ static const menu_item_t *menu_demo_items[] = {
 
 /* ---- 预留 子菜单 (Level 1) ---- */
 static const menu_item_t item_demo = {
-    .text = "\xe4\xb8\x89\xe7\xba\xa7\xe7\xa4\xba\xe4\xbe\x8b",  /* "三级示例" */
+    .text = "三级示例",  /* "三级示例" */
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_demo_items, .count = 3 },
 };
 
 /* ---- 系统信息 (Level 1) ---- */
 static const menu_item_t item_fw_ver = {
-    .text = "\xe5\x9b\xba\xe4\xbb\xb6\xe7\x89\x88\xe6\x9c\xac",  /* "固件版本" */
+    .text = "固件版本",  /* "固件版本" */
     .type = MENU_TYPE_INFO,
     .info = { .detail_text = "v1.0.0" },
 };
 static const menu_item_t item_runtime = {
-    .text = "\xe8\xbf\x90\xe8\xa1\x8c\xe6\x97\xb6\xe9\x97\xb4",  /* "运行时间" */
+    .text = "运行时间",  /* "运行时间" */
     .type = MENU_TYPE_INFO,
     .info = { .detail_text = "--:--:--" },
 };
 
 /* ---- LED 控制 (Level 1) ---- */
 static const menu_item_t item_led_off = {
-    .text = "\xe5\x85\xb3\xe9\x97\xad",    /* "关闭" */
+    .text = "关闭",    /* "关闭" */
     .type = MENU_TYPE_ACTION,
     .action = cb_led_off,
 };
 static const menu_item_t item_led_on = {
-    .text = "\xe5\xb8\xb8\xe4\xba\xae",    /* "常亮" */
+    .text = "常亮",    /* "常亮" */
     .type = MENU_TYPE_ACTION,
     .action = cb_led_on,
 };
 static const menu_item_t item_led_blink = {
-    .text = "\xe9\x97\xaa\xe7\x83\x81",    /* "闪烁" */
+    .text = "闪烁",    /* "闪烁" */
     .type = MENU_TYPE_ACTION,
     .action = cb_led_blink,
 };
 
 /* ---- 显示特效 (Level 1) ---- */
 static const menu_item_t item_effect_static = {
-    .text = "\xe9\x9d\x99\xe6\x80\x81",    /* "静态" */
+    .text = "静态",    /* "静态" */
     .type = MENU_TYPE_ACTION,
     .action = cb_effect_static,
 };
 static const menu_item_t item_effect_scroll_l = {
-    .text = "\xe5\xb7\xa6\xe6\xbb\x9a",    /* "左滚" */
+    .text = "左滚",    /* "左滚" */
     .type = MENU_TYPE_ACTION,
     .action = cb_effect_scroll_l,
 };
 static const menu_item_t item_effect_scroll_r = {
-    .text = "\xe5\x8f\xb3\xe6\xbb\x9a",    /* "右滚" */
+    .text = "右滚",    /* "右滚" */
     .type = MENU_TYPE_ACTION,
     .action = cb_effect_scroll_r,
 };
 static const menu_item_t item_effect_scroll_u = {
-    .text = "\xe4\xb8\x8a\xe6\xbb\x9a",    /* "上滚" */
+    .text = "上滚",    /* "上滚" */
     .type = MENU_TYPE_ACTION,
     .action = cb_effect_scroll_u,
 };
 static const menu_item_t item_effect_scroll_d = {
-    .text = "\xe4\xb8\x8b\xe6\xbb\x9a",    /* "下滚" */
+    .text = "下滚",    /* "下滚" */
     .type = MENU_TYPE_ACTION,
     .action = cb_effect_scroll_d,
 };
 static const menu_item_t item_effect_flip = {
-    .text = "\xe7\xbf\xbb\xe9\xa1\xb5",    /* "翻页" */
+    .text = "翻页",    /* "翻页" */
     .type = MENU_TYPE_ACTION,
     .action = cb_effect_flip,
 };
 static const menu_item_t item_effect_fade = {
-    .text = "\xe6\xb7\xa1\xe5\x85\xa5\xe6\xb7\xa1\xe5\x87\xba",  /* "淡入淡出" */
+    .text = "淡入淡出",  /* "淡入淡出" */
     .type = MENU_TYPE_ACTION,
     .action = cb_effect_fade,
 };
 
 /* ---- 显示内容 (Level 1) ---- */
 static const menu_item_t item_content_time = {
-    .text = "\xe6\x97\xb6\xe9\x97\xb4",    /* "时间" */
+    .text = "时间",    /* "时间" */
     .type = MENU_TYPE_ACTION,
     .action = cb_disp_time,
 };
 static const menu_item_t item_content_weather = {
-    .text = "\xe5\xa4\xa9\xe6\xb0\x94",    /* "天气" */
+    .text = "天气",    /* "天气" */
     .type = MENU_TYPE_ACTION,
     .action = cb_disp_weather,
 };
 static const menu_item_t item_content_date = {
-    .text = "\xe6\x97\xa5\xe6\x9c\x9f",    /* "日期" */
+    .text = "日期",    /* "日期" */
     .type = MENU_TYPE_ACTION,
     .action = cb_disp_date,
 };
 static const menu_item_t item_content_custom = {
-    .text = "\xe8\x87\xaa\xe5\xae\x9a\xe4\xb9\x89\xe6\x96\x87\xe5\xad\x97",  /* "自定义文字" */
+    .text = "自定义文字",  /* "自定义文字" */
     .type = MENU_TYPE_ACTION,
     .action = cb_disp_custom,
 };
 
 /* ---- 工作模式 TOGGLE (Level 1) ---- */
 static const menu_item_t item_mode_local = {
-    .text = "\xe6\x9c\xac\xe5\x9c\xb0",    /* "本地" */
+    .text = "本地",    /* "本地" */
     .type = MENU_TYPE_TOGGLE,
     .toggle = { .value_ptr = &g_remote_mode, .checked_value = 0, .on_change = cb_mode_changed },
 };
 static const menu_item_t item_mode_remote = {
-    .text = "\xe8\xbf\x9c\xe7\xa8\x8b",    /* "远程" */
+    .text = "远程",    /* "远程" */
     .type = MENU_TYPE_TOGGLE,
     .toggle = { .value_ptr = &g_remote_mode, .checked_value = 1, .on_change = cb_mode_changed },
 };
 
 /* ---- OLED 对比度 (Level 0, 直接是 VALUE) ---- */
 static const menu_item_t item_contrast = {
-    .text = "OLED\xe5\xaf\xb9\xe6\xaf\x94\xe5\xba\xa6",  /* "OLED对比度" */
+    .text = "4.OLED\xe5\xaf\xb9\xe6\xaf\x94\xe5\xba\xa6",  /* "OLED对比度" */
     .type = MENU_TYPE_VALUE,
     .value = { .value_ptr = &g_contrast, .min = 0, .max = 255, .step = 5,
                .on_change = cb_contrast_changed },
@@ -239,9 +239,9 @@ static const menu_item_t item_contrast = {
 
 /* ---- 上电文字 (预留 INFO) ---- */
 static const menu_item_t item_boot_text = {
-    .text = "\xe4\xb8\x8a\xe7\x94\xb5\xe6\x96\x87\xe5\xad\x97",  /* "上电文字" */
+    .text = "6.\xe4\xb8\x8a\xe7\x94\xb5\xe6\x96\x87\xe5\xad\x97",  /* "上电文字" */
     .type = MENU_TYPE_INFO,
-    .info = { .detail_text = "\xe9\xa2\x84\xe7\x95\x99\xe5\x8a\x9f\xe8\x83\xbd" },  /* "预留功能" */
+    .info = { .detail_text = "预留功能" },  /* "预留功能" */
 };
 
 /* ================================================================

@@ -310,7 +310,9 @@ static void render_menu(void)
             draw_suffix(page, item, false);
         }
     }
-
+	
+//暂时删除角标显示	
+#if 0
     /* 角标滚动指示器: 底部有更多项时在右下角显示 "↓", 已滚动时显示 "▲" */
     if (g_menu.current_menu_count > MENU_ROWS_VISIBLE) {
         uint8_t indic_page = (MENU_ROWS_VISIBLE - 1) * MENU_ROW_PAGES;
@@ -325,6 +327,7 @@ static void render_menu(void)
             draw_ascii_normal(indic_page, indic_x, 0x76)  /* 'v' */;
         }
     }
+#endif
 }
 
 /* ================================================================

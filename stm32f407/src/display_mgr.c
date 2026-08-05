@@ -438,7 +438,7 @@ void display_mgr_show_disconnect(void)
     disconnect_msg_shown = true;
     clear_full_screen();
     /* 在 OLED 中央显示 "串口已断开" */
-    const char *msg = "\xe4\xb8\xb2\xe5\x8f\xa3\xe5\xb7\xb2\xe6\x96\xad\xe5\xbc\x80"; /* UTF-8: 串口已断开 */
+    const char *msg = "串口已断开"; /* UTF-8: 串口已断开 */
     uint8_t *buf = ssd1306_get_buffer();
     memset(buf, 0, FRAME_BUF_SIZE);
 
