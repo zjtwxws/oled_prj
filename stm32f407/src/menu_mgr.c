@@ -278,16 +278,9 @@ static void render_menu(void)
         const menu_item_t *item = g_menu.current_menu[item_idx];
         uint8_t page = row * MENU_ROW_PAGES;
 
-        /* 最后一行: 如果下方还有未显示项, 显示滚动指示器 */
-        if (row == MENU_ROWS_VISIBLE - 1 &&
-            g_menu.current_menu_count - g_menu.scroll_offset > MENU_ROWS_VISIBLE) {
-            draw_scroll_indicator(page, g_menu.current_menu_count);
-            break;
-        }
-
         if (item_idx == g_menu.cursor) {
             /* 光标选中行: 反白显示 */
-            fill_row_white(page);
+            fill_row_white(row);
             /* "> " 箭头始终在固定位置 */
             draw_text(page, 0, MENU_ARROW_STR, true);
             uint8_t x = draw_ascii_inverted(page, 8, ' ');  /* 间距 */
@@ -296,18 +289,40 @@ static void render_menu(void)
             uint8_t suffix_w = get_suffix_width(item);
             uint8_t space_for_text = SSD1306_WIDTH - x - suffix_w;
             if (text_w > space_for_text) {
-                x = SSD1306_WIDTH - suffix_w - text_w;
-                if (x < 16) x = 16;  /* 不覆盖箭头 */
+                int16_t new_x = (int16_t)SSD1306_WIDTH - (int16_t)suffix_w - (int16_t)text_w;
+                x = (new_x < 16) ? 16 : (uint8_t)new_x;
             }
             /* 菜单项文字 */
             x = draw_text(page, x, item->text, true);
             /* 右侧后缀 */
             draw_suffix(page, item, true);
         } else {
-            /* 普通行 */
-            uint8_t x = MENU_INDENT_PX;  /* 2 空格缩进 */
+            /* 普通行: 长文本也右对齐 */
+            uint8_t text_w = measure_text_width(item->text);
+            uint8_t suffix_w = get_suffix_width(item);
+            uint8_t space_for_text = SSD1306_WIDTH - MENU_INDENT_PX - suffix_w;
+            uint8_t x = MENU_INDENT_PX;
+            if (text_w > space_for_text) {
+                int16_t new_x = (int16_t)SSD1306_WIDTH - (int16_t)suffix_w - (int16_t)text_w;
+                x = (new_x < (int16_t)MENU_INDENT_PX) ? MENU_INDENT_PX : (uint8_t)new_x;
+            }
             x = draw_text(page, x, item->text, false);
             draw_suffix(page, item, false);
+        }
+    }
+
+    /* 角标滚动指示器: 底部有更多项时在右下角显示 "↓", 已滚动时显示 "▲" */
+    if (g_menu.current_menu_count > MENU_ROWS_VISIBLE) {
+        uint8_t indic_page = (MENU_ROWS_VISIBLE - 1) * MENU_ROW_PAGES;
+        uint8_t indic_x    = SSD1306_WIDTH - FONT_ASCII_W;
+        if (g_menu.scroll_offset > 0) {
+            /* 上方还有内容: ▲ */
+            draw_ascii_normal(indic_page, indic_x, 0x5E)  /* '^' */;
+        }
+        if (g_menu.current_menu_count - g_menu.scroll_offset > MENU_ROWS_VISIBLE) {
+            /* 下方还有内容: ↓ */
+            if (g_menu.scroll_offset > 0) indic_x -= FONT_ASCII_W;
+            draw_ascii_normal(indic_page, indic_x, 0x76)  /* 'v' */;
         }
     }
 }
@@ -360,20 +375,10 @@ static void adjust_scroll(void)
         return;
     }
 
-    /*
-     * 当底部还有未显示项时, render_menu() 会用最后一
-     * 行显示滚动指示器 "??(共N项)"。此时实际可见
-     * 菜单项只有 MENU_ROWS_VISIBLE-1 行, 需据此调整窗口。
-     */
-    uint8_t visible_items = MENU_ROWS_VISIBLE;
-    if (g_menu.current_menu_count - g_menu.scroll_offset > MENU_ROWS_VISIBLE) {
-        visible_items = MENU_ROWS_VISIBLE - 1;
-    }
-
     if (g_menu.cursor < g_menu.scroll_offset) {
         g_menu.scroll_offset = g_menu.cursor;
-    } else if (g_menu.cursor >= g_menu.scroll_offset + visible_items) {
-        g_menu.scroll_offset = g_menu.cursor - visible_items + 1;
+    } else if (g_menu.cursor >= g_menu.scroll_offset + MENU_ROWS_VISIBLE) {
+        g_menu.scroll_offset = g_menu.cursor - MENU_ROWS_VISIBLE + 1;
     }
 
     /* 确保不会滚过头 */
@@ -457,16 +462,13 @@ static void goto_root(void)
 /* ================================================================
  * 光标移动
  * ================================================================ */
-
 static void cursor_up(void)
 {
     if (g_menu.current_menu_count == 0) return;
     if (g_menu.cursor > 0) {
         g_menu.cursor--;
-    } else {
-        /* 循环到末尾 */
-        g_menu.cursor = g_menu.current_menu_count - 1;
     }
+    /* 已在顶部, 不再回绕 */
     adjust_scroll();
     g_menu.dirty = true;
 }
@@ -476,10 +478,8 @@ static void cursor_down(void)
     if (g_menu.current_menu_count == 0) return;
     if (g_menu.cursor + 1 < g_menu.current_menu_count) {
         g_menu.cursor++;
-    } else {
-        /* 循环到开头 */
-        g_menu.cursor = 0;
     }
+    /* 已在底部, 不再回绕 */
     adjust_scroll();
     g_menu.dirty = true;
 }

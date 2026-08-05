@@ -107,8 +107,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
-	user_app_handle();
+		//HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
+		user_app_handle();
   }
   /* USER CODE END 3 */
 }

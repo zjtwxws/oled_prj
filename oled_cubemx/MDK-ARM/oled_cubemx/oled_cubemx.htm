@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Tue Aug 04 19:48:17 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Wed Aug 05 14:13:20 2026
 <BR><P>
 <H3>Maximum Stack Usage =        656 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -437,12 +437,12 @@ Global Symbols
 <P><STRONG><a name="[e2]"></a>__aeabi_memcpy</STRONG> (Thumb, 64 bytes, Stack size 8 bytes, memmovea.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<BR>[Called By]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
 <LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_rx_frame_seg
 <LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_redraw
 <LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_up
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_down
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[124]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text))
@@ -451,7 +451,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
 </UL>
 
-<P><STRONG><a name="[f4]"></a>__aeabi_memmove</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text))
+<P><STRONG><a name="[f3]"></a>__aeabi_memmove</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __aeabi_memmove
 </UL>
 <BR>[Called By]<UL><LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_right
@@ -479,9 +479,9 @@ Global Symbols
 <LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_up
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_down
 <LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clear_full_screen
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
-<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
+<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
 <P><STRONG><a name="[a2]"></a>__aeabi_memclr4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text))
@@ -490,12 +490,12 @@ Global Symbols
 <LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
 <LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
-<LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
-<LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_init_entry
+<LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
+<LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_init_entry
 <LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_remote
 <LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_rx_frame_seg
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
 </UL>
 
 <P><STRONG><a name="[140]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
@@ -507,7 +507,7 @@ Global Symbols
 <P><STRONG><a name="[dd]"></a>strncpy</STRONG> (Thumb, 24 bytes, Stack size 8 bytes, strncpy.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = strncpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<BR>[Called By]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_text
 <LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_boot_text
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
@@ -524,7 +524,7 @@ Global Symbols
 <P><STRONG><a name="[129]"></a>strncmp</STRONG> (Thumb, 30 bytes, Stack size 12 bytes, strncmp.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = strncmp
 </UL>
-<BR>[Called By]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<BR>[Called By]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 </UL>
 
 <P><STRONG><a name="[141]"></a>__aeabi_uidiv</STRONG> (Thumb, 0 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
@@ -720,19 +720,15 @@ Global Symbols
 <LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
 </UL>
 
-<P><STRONG><a name="[fe]"></a>HAL_GPIO_ReadPin</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_ReadPin))
-<BR><BR>[Called By]<UL><LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
-</UL>
-
-<P><STRONG><a name="[103]"></a>HAL_GPIO_TogglePin</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_TogglePin))
-<BR><BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+<P><STRONG><a name="[fd]"></a>HAL_GPIO_ReadPin</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_ReadPin))
+<BR><BR>[Called By]<UL><LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
 </UL>
 
 <P><STRONG><a name="[c1]"></a>HAL_GPIO_WritePin</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_WritePin))
 <BR><BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
-<LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_tick
+<LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_tick
 <LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_set_state
-<LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_init
+<LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_init
 </UL>
 
 <P><STRONG><a name="[8d]"></a>HAL_GetTick</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_hal.o(i.HAL_GetTick))
@@ -749,8 +745,8 @@ Global Symbols
 <LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_WaitForLastOperation
 <LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_I2C_Mem_Write
 <LI><a href="#[12a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_ms
-<LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_feed_byte
-<LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
+<LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_feed_byte
+<LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
 </UL>
 
 <P><STRONG><a name="[9a]"></a>HAL_I2C_Init</STRONG> (Thumb, 376 bytes, Stack size 16 bytes, stm32f4xx_hal_i2c.o(i.HAL_I2C_Init))
@@ -771,7 +767,7 @@ Global Symbols
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;I2C_RequestMemoryWrite
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_write_reg
+<BR>[Called By]<UL><LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_write_reg
 </UL>
 
 <P><STRONG><a name="[9b]"></a>HAL_I2C_MspInit</STRONG> (Thumb, 94 bytes, Stack size 32 bytes, i2c.o(i.HAL_I2C_MspInit))
@@ -813,7 +809,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Init
 </UL>
 
-<P><STRONG><a name="[101]"></a>HAL_NVIC_EnableIRQ</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, stm32f4xx_hal_cortex.o(i.HAL_NVIC_EnableIRQ))
+<P><STRONG><a name="[100]"></a>HAL_NVIC_EnableIRQ</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, stm32f4xx_hal_cortex.o(i.HAL_NVIC_EnableIRQ))
 <BR><BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -1073,7 +1069,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_console_write
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[d9]"></a>debug_console_write</STRONG> (Thumb, 46 bytes, Stack size 16 bytes, debug_console.o(i.debug_console_write))
@@ -1091,25 +1087,25 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
 <LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_c
 <LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_b
 <LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_a
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
-<P><STRONG><a name="[113]"></a>display_mgr_get_status</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_get_status))
-<BR><BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<P><STRONG><a name="[111]"></a>display_mgr_get_status</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_get_status))
+<BR><BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[11e]"></a>display_mgr_get_sub_mode</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_get_sub_mode))
-<BR><BR>[Called By]<UL><LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
+<BR><BR>[Called By]<UL><LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
 </UL>
 
 <P><STRONG><a name="[131]"></a>display_mgr_hide_disconnect</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_hide_disconnect))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[dc]"></a>display_mgr_init</STRONG> (Thumb, 128 bytes, Stack size 16 bytes, display_mgr.o(i.display_mgr_init))
@@ -1120,14 +1116,14 @@ Global Symbols
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncpy
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
-<P><STRONG><a name="[106]"></a>display_mgr_is_remote</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_is_remote))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
-<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<P><STRONG><a name="[104]"></a>display_mgr_is_remote</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_is_remote))
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[e0]"></a>display_mgr_next_mode</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_next_mode))
@@ -1135,7 +1131,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_mode
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[e1]"></a>display_mgr_redraw</STRONG> (Thumb, 56 bytes, Stack size 16 bytes, display_mgr.o(i.display_mgr_redraw))
@@ -1147,7 +1143,7 @@ Global Symbols
 <LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_deactivate
+<BR>[Called By]<UL><LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_deactivate
 </UL>
 
 <P><STRONG><a name="[e3]"></a>display_mgr_rx_frame_seg</STRONG> (Thumb, 124 bytes, Stack size 40 bytes, display_mgr.o(i.display_mgr_rx_frame_seg))
@@ -1158,7 +1154,7 @@ Global Symbols
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[e4]"></a>display_mgr_set_boot_text</STRONG> (Thumb, 26 bytes, Stack size 8 bytes, display_mgr.o(i.display_mgr_set_boot_text))
@@ -1166,12 +1162,12 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
-<P><STRONG><a name="[108]"></a>display_mgr_set_menu_suppress</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_set_menu_suppress))
-<BR><BR>[Called By]<UL><LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<P><STRONG><a name="[106]"></a>display_mgr_set_menu_suppress</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_set_menu_suppress))
+<BR><BR>[Called By]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
 <P><STRONG><a name="[d4]"></a>display_mgr_set_mode</STRONG> (Thumb, 60 bytes, Stack size 16 bytes, display_mgr.o(i.display_mgr_set_mode))
@@ -1190,7 +1186,7 @@ Global Symbols
 <LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_effect_scroll_d
 <LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_effect_flip
 <LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_effect_fade
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[d3]"></a>display_mgr_set_remote</STRONG> (Thumb, 68 bytes, Stack size 16 bytes, display_mgr.o(i.display_mgr_set_remote))
@@ -1206,7 +1202,7 @@ Global Symbols
 <LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_disp_weather
 <LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_disp_time
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_disp_date
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[d2]"></a>display_mgr_set_sub_mode</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_set_sub_mode))
@@ -1214,7 +1210,7 @@ Global Symbols
 <LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_disp_time
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_disp_date
 <LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_disp_custom
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[e7]"></a>display_mgr_set_text</STRONG> (Thumb, 50 bytes, Stack size 8 bytes, display_mgr.o(i.display_mgr_set_text))
@@ -1224,7 +1220,7 @@ Global Symbols
 <LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[e8]"></a>display_mgr_show_disconnect</STRONG> (Thumb, 80 bytes, Stack size 16 bytes, display_mgr.o(i.display_mgr_show_disconnect))
@@ -1237,7 +1233,7 @@ Global Symbols
 <LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clear_full_screen
 <LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[eb]"></a>display_mgr_tick</STRONG> (Thumb, 160 bytes, Stack size 8 bytes, display_mgr.o(i.display_mgr_tick))
@@ -1247,11 +1243,11 @@ Global Symbols
 <LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_set_contrast
 <LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[114]"></a>display_mgr_update_status</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_update_status))
-<BR><BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<P><STRONG><a name="[112]"></a>display_mgr_update_status</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, display_mgr.o(i.display_mgr_update_status))
+<BR><BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[ed]"></a>font_get_ascii</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, font.o(i.font_get_ascii))
@@ -1270,10 +1266,10 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[133]"></a>i2c_drv_init</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, i2c_drv.o(i.i2c_drv_init))
-<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR><BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
-<P><STRONG><a name="[fa]"></a>i2c_drv_write_reg</STRONG> (Thumb, 50 bytes, Stack size 32 bytes, i2c_drv.o(i.i2c_drv_write_reg))
+<P><STRONG><a name="[f9]"></a>i2c_drv_write_reg</STRONG> (Thumb, 50 bytes, Stack size 32 bytes, i2c_drv.o(i.i2c_drv_write_reg))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_I2C_Mem_Write
@@ -1282,186 +1278,185 @@ Global Symbols
 <LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
 </UL>
 
-<P><STRONG><a name="[fb]"></a>key_drv_init</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, key_drv.o(i.key_drv_init))
+<P><STRONG><a name="[fa]"></a>key_drv_init</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, key_drv.o(i.key_drv_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = key_drv_init &rArr; key_init_entry
 </UL>
-<BR>[Calls]<UL><LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_init_entry
+<BR>[Calls]<UL><LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_init_entry
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
-<P><STRONG><a name="[fd]"></a>key_drv_scan</STRONG> (Thumb, 276 bytes, Stack size 32 bytes, key_drv.o(i.key_drv_scan))
+<P><STRONG><a name="[fc]"></a>key_drv_scan</STRONG> (Thumb, 276 bytes, Stack size 32 bytes, key_drv.o(i.key_drv_scan))
 <BR><BR>[Stack]<UL><LI>Max Depth = 384<LI>Call Chain = key_drv_scan &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
+<BR>[Calls]<UL><LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[11d]"></a>led_mgr_get_state</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, led_mgr.o(i.led_mgr_get_state))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
 </UL>
 
-<P><STRONG><a name="[ff]"></a>led_mgr_init</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, led_mgr.o(i.led_mgr_init))
+<P><STRONG><a name="[fe]"></a>led_mgr_init</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, led_mgr.o(i.led_mgr_init))
 <BR><BR>[Calls]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[d5]"></a>led_mgr_set_state</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, led_mgr.o(i.led_mgr_set_state))
 <BR><BR>[Calls]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 <LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_led_on
 <LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_led_off
 <LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_led_blink
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
-<P><STRONG><a name="[100]"></a>led_mgr_tick</STRONG> (Thumb, 56 bytes, Stack size 0 bytes, led_mgr.o(i.led_mgr_tick))
+<P><STRONG><a name="[ff]"></a>led_mgr_tick</STRONG> (Thumb, 56 bytes, Stack size 0 bytes, led_mgr.o(i.led_mgr_tick))
 <BR><BR>[Calls]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[5b]"></a>main</STRONG> (Thumb, 64 bytes, Stack size 0 bytes, main.o(i.main))
+<P><STRONG><a name="[5b]"></a>main</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 656<LI>Call Chain = main &rArr; user_app_handle &rArr; process_frame &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Calls]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART2_UART_Init
 <LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USART1_UART_Init
 <LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_I2C2_Init
 <LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
-<LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_EnableIRQ
+<LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_EnableIRQ
 <LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Init
-<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[f6]"></a>menu_items_get_root</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, menu_items.o(i.menu_items_get_root))
-<BR><BR>[Called By]<UL><LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit_submenu
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<P><STRONG><a name="[f5]"></a>menu_items_get_root</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, menu_items.o(i.menu_items_get_root))
+<BR><BR>[Called By]<UL><LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit_submenu
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
-<P><STRONG><a name="[105]"></a>menu_items_init_state</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, menu_items.o(i.menu_items_init_state))
+<P><STRONG><a name="[103]"></a>menu_items_init_state</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, menu_items.o(i.menu_items_init_state))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = menu_items_init_state
 </UL>
-<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
+<BR>[Calls]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<BR>[Called By]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
-<P><STRONG><a name="[107]"></a>menu_mgr_activate</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, menu_mgr.o(i.menu_mgr_activate))
+<P><STRONG><a name="[105]"></a>menu_mgr_activate</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, menu_mgr.o(i.menu_mgr_activate))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = menu_mgr_activate &rArr; menu_items_init_state
 </UL>
-<BR>[Calls]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_menu_suppress
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_menu_suppress
 <LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
-<LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
+<LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[109]"></a>menu_mgr_deactivate</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, menu_mgr.o(i.menu_mgr_deactivate))
+<P><STRONG><a name="[107]"></a>menu_mgr_deactivate</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, menu_mgr.o(i.menu_mgr_deactivate))
 <BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = menu_mgr_deactivate &rArr; display_mgr_redraw &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_redraw
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<BR>[Called By]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
-<P><STRONG><a name="[10a]"></a>menu_mgr_handle_key</STRONG> (Thumb, 326 bytes, Stack size 32 bytes, menu_mgr.o(i.menu_mgr_handle_key))
+<P><STRONG><a name="[108]"></a>menu_mgr_handle_key</STRONG> (Thumb, 316 bytes, Stack size 32 bytes, menu_mgr.o(i.menu_mgr_handle_key))
 <BR><BR>[Stack]<UL><LI>Max Depth = 232<LI>Call Chain = menu_mgr_handle_key &rArr; menu_mgr_deactivate &rArr; display_mgr_redraw &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_deactivate
-<LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_confirm
-<LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit_submenu
-<LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_scroll
-<LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
+<BR>[Calls]<UL><LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_deactivate
+<LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_confirm
+<LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit_submenu
+<LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_scroll
+<LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[10b]"></a>menu_mgr_init</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, menu_mgr.o(i.menu_mgr_init))
+<P><STRONG><a name="[109]"></a>menu_mgr_init</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, menu_mgr.o(i.menu_mgr_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = menu_mgr_init &rArr; menu_items_init_state
 </UL>
-<BR>[Calls]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_menu_suppress
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_menu_suppress
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
-<LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
+<LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[132]"></a>menu_mgr_is_active</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, menu_mgr.o(i.menu_mgr_is_active))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[10c]"></a>menu_mgr_tick</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, menu_mgr.o(i.menu_mgr_tick))
+<P><STRONG><a name="[10a]"></a>menu_mgr_tick</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, menu_mgr.o(i.menu_mgr_tick))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = menu_mgr_tick &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
-<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[117]"></a>proto_build_frame</STRONG> (Thumb, 66 bytes, Stack size 16 bytes, protocol.o(i.proto_build_frame))
+<P><STRONG><a name="[115]"></a>proto_build_frame</STRONG> (Thumb, 66 bytes, Stack size 16 bytes, protocol.o(i.proto_build_frame))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = proto_build_frame &rArr; proto_crc8
 </UL>
-<BR>[Calls]<UL><LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_crc8
+<BR>[Calls]<UL><LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_crc8
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_nak
-<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_ack
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_nak
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
+<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_ack
 </UL>
 
-<P><STRONG><a name="[118]"></a>proto_crc8</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, protocol.o(i.proto_crc8))
+<P><STRONG><a name="[116]"></a>proto_crc8</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, protocol.o(i.proto_crc8))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = proto_crc8
 </UL>
-<BR>[Called By]<UL><LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<BR>[Called By]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
 </UL>
 
-<P><STRONG><a name="[119]"></a>proto_feed_byte</STRONG> (Thumb, 168 bytes, Stack size 24 bytes, protocol.o(i.proto_feed_byte))
+<P><STRONG><a name="[117]"></a>proto_feed_byte</STRONG> (Thumb, 168 bytes, Stack size 24 bytes, protocol.o(i.proto_feed_byte))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = proto_feed_byte
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[12f]"></a>proto_get_frame</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, protocol.o(i.proto_get_frame))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[12c]"></a>proto_get_last_byte_tick</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, protocol.o(i.proto_get_last_byte_tick))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[11c]"></a>proto_get_tx_buf</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, protocol.o(i.proto_get_tx_buf))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_nak
-<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_ack
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_nak
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
+<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_ack
 </UL>
 
 <P><STRONG><a name="[12d]"></a>proto_reset_rx</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, protocol.o(i.proto_reset_rx))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[11f]"></a>ssd1306_fill</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, ssd1306.o(i.ssd1306_fill))
@@ -1481,8 +1476,8 @@ Global Symbols
 <LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_chinese_char
 <LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clear_full_screen
-<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
-<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
+<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_chinese_normal
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_chinese_inverted
 <LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_ascii_normal
@@ -1497,7 +1492,7 @@ Global Symbols
 <LI><a href="#[121]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_write_cmd
 <LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[e5]"></a>ssd1306_scroll_stop</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, ssd1306.o(i.ssd1306_scroll_stop))
@@ -1523,7 +1518,7 @@ Global Symbols
 <P><STRONG><a name="[df]"></a>ssd1306_update_screen</STRONG> (Thumb, 64 bytes, Stack size 24 bytes, ssd1306.o(i.ssd1306_update_screen))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_write_reg
+<BR>[Calls]<UL><LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_write_reg
 </UL>
 <BR>[Called By]<UL><LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_tick
@@ -1532,11 +1527,11 @@ Global Symbols
 <LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_redraw
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
 <LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_screen_if_allowed
-<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
 <P><STRONG><a name="[134]"></a>sys_config_get_boot_text</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, sys_config.o(i.sys_config_get_boot_text))
-<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR><BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[122]"></a>sys_config_init</STRONG> (Thumb, 82 bytes, Stack size 16 bytes, sys_config.o(i.sys_config_init))
@@ -1548,7 +1543,7 @@ Global Symbols
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 <LI><a href="#[124]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[126]"></a>sys_config_save</STRONG> (Thumb, 86 bytes, Stack size 48 bytes, sys_config.o(i.sys_config_save))
@@ -1559,11 +1554,11 @@ Global Symbols
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Program
 <LI><a href="#[128]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Lock
 </UL>
-<BR>[Called By]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<BR>[Called By]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
 </UL>
 
-<P><STRONG><a name="[115]"></a>sys_config_set_boot_text</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, sys_config.o(i.sys_config_set_boot_text))
+<P><STRONG><a name="[113]"></a>sys_config_set_boot_text</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, sys_config.o(i.sys_config_set_boot_text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = sys_config_set_boot_text &rArr; sys_config_save &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
@@ -1571,27 +1566,27 @@ Global Symbols
 <LI><a href="#[129]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncmp
 <LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[12a]"></a>sys_tick_ms</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, sys_tick.o(i.sys_tick_ms))
 <BR><BR>[Calls]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[130]"></a>uart_drv_available</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, uart_drv.o(i.uart_drv_available))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[12b]"></a>uart_drv_init</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, uart_drv.o(i.uart_drv_init))
 <BR><BR>[Calls]<UL><LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[12e]"></a>uart_drv_read_byte</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, uart_drv.o(i.uart_drv_read_byte))
-<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[bb]"></a>uart_drv_rx_callback</STRONG> (Thumb, 76 bytes, Stack size 8 bytes, uart_drv.o(i.uart_drv_rx_callback))
@@ -1610,7 +1605,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;safe_send
 </UL>
 
-<P><STRONG><a name="[104]"></a>user_app_handle</STRONG> (Thumb, 394 bytes, Stack size 32 bytes, user_app.o(i.user_app_handle))
+<P><STRONG><a name="[102]"></a>user_app_handle</STRONG> (Thumb, 394 bytes, Stack size 32 bytes, user_app.o(i.user_app_handle))
 <BR><BR>[Stack]<UL><LI>Max Depth = 656<LI>Call Chain = user_app_handle &rArr; process_frame &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[12a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_ms
@@ -1618,45 +1613,45 @@ Global Symbols
 <LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_tx_buf
 <LI><a href="#[12c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_last_byte_tick
 <LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_frame
-<LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_feed_byte
-<LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
-<LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_tick
+<LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_feed_byte
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_tick
 <LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_set_state
 <LI><a href="#[11d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_get_state
-<LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
+<LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_tick
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_show_disconnect
 <LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_next_mode
-<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
 <LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_hide_disconnect
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
-<LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 <LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_is_active
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
-<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
+<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
+<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;safe_send
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 <LI><a href="#[12e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_read_byte
 <LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_available
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[102]"></a>user_app_init</STRONG> (Thumb, 58 bytes, Stack size 8 bytes, user_app.o(i.user_app_init))
+<P><STRONG><a name="[101]"></a>user_app_init</STRONG> (Thumb, 58 bytes, Stack size 8 bytes, user_app.o(i.user_app_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 360<LI>Call Chain = user_app_init &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
 <LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_boot_text
 <LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
-<LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_init
-<LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
+<LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_init
+<LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
 <LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_init
 <LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_console_init
-<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
 <LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -1847,7 +1842,7 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = effect_scroll_left &rArr; __aeabi_memmove
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
-<LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memmove
+<LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memmove
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> display_mgr.o(i.display_mgr_init)
 </UL>
@@ -1855,7 +1850,7 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = effect_scroll_right &rArr; __aeabi_memmove
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
-<LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memmove
+<LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memmove
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> display_mgr.o(i.display_mgr_init)
 </UL>
@@ -1885,18 +1880,18 @@ Local Symbols
 <LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_mode
 </UL>
 
-<P><STRONG><a name="[fc]"></a>key_init_entry</STRONG> (Thumb, 24 bytes, Stack size 16 bytes, key_drv.o(i.key_init_entry))
+<P><STRONG><a name="[fb]"></a>key_init_entry</STRONG> (Thumb, 24 bytes, Stack size 16 bytes, key_drv.o(i.key_init_entry))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = key_init_entry
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
+<BR>[Called By]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
 </UL>
 
 <P><STRONG><a name="[121]"></a>ssd1306_write_cmd</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, ssd1306.o(i.ssd1306_write_cmd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = ssd1306_write_cmd &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite &rArr; I2C_WaitOnMasterAddressFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_write_reg
+<BR>[Calls]<UL><LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_write_reg
 </UL>
 <BR>[Called By]<UL><LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
 <LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_set_contrast
@@ -1906,32 +1901,32 @@ Local Symbols
 <P><STRONG><a name="[123]"></a>crc32_simple</STRONG> (Thumb, 48 bytes, Stack size 16 bytes, sys_config.o(i.crc32_simple))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = crc32_simple
 </UL>
-<BR>[Called By]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<BR>[Called By]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
 </UL>
 
-<P><STRONG><a name="[10f]"></a>process_frame</STRONG> (Thumb, 546 bytes, Stack size 272 bytes, user_app.o(i.process_frame))
+<P><STRONG><a name="[10d]"></a>process_frame</STRONG> (Thumb, 546 bytes, Stack size 272 bytes, user_app.o(i.process_frame))
 <BR><BR>[Stack]<UL><LI>Max Depth = 624<LI>Call Chain = process_frame &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<BR>[Calls]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_set_state
-<LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_update_status
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_update_status
 <LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_text
 <LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_sub_mode
 <LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_remote
 <LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_mode
 <LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_boot_text
 <LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_rx_frame_seg
-<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
-<LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_get_status
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
+<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_get_status
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
-<LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_nak
-<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_ack
+<LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_nak
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
+<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_ack
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[11a]"></a>safe_send</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, user_app.o(i.safe_send))
@@ -1939,56 +1934,56 @@ Local Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[11b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_send
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_nak
-<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
-<LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
-<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_ack
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_nak
+<LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_mode_status
+<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_led_status
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_ack
 </UL>
 
-<P><STRONG><a name="[110]"></a>send_ack</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, user_app.o(i.send_ack))
+<P><STRONG><a name="[10e]"></a>send_ack</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, user_app.o(i.send_ack))
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = send_ack &rArr; safe_send &rArr; uart_drv_send &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_tx_buf
-<LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;safe_send
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
-<P><STRONG><a name="[111]"></a>send_led_status</STRONG> (Thumb, 42 bytes, Stack size 16 bytes, user_app.o(i.send_led_status))
+<P><STRONG><a name="[10f]"></a>send_led_status</STRONG> (Thumb, 42 bytes, Stack size 16 bytes, user_app.o(i.send_led_status))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = send_led_status &rArr; safe_send &rArr; uart_drv_send &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_tx_buf
-<LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
 <LI><a href="#[11d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_get_state
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;safe_send
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
-<P><STRONG><a name="[112]"></a>send_mode_status</STRONG> (Thumb, 50 bytes, Stack size 16 bytes, user_app.o(i.send_mode_status))
+<P><STRONG><a name="[110]"></a>send_mode_status</STRONG> (Thumb, 50 bytes, Stack size 16 bytes, user_app.o(i.send_mode_status))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = send_mode_status &rArr; safe_send &rArr; uart_drv_send &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_tx_buf
-<LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
-<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
 <LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_get_sub_mode
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;safe_send
 </UL>
-<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
+<LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
-<P><STRONG><a name="[116]"></a>send_nak</STRONG> (Thumb, 28 bytes, Stack size 16 bytes, user_app.o(i.send_nak))
+<P><STRONG><a name="[114]"></a>send_nak</STRONG> (Thumb, 28 bytes, Stack size 16 bytes, user_app.o(i.send_nak))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = send_nak &rArr; safe_send &rArr; uart_drv_send &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_tx_buf
-<LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;safe_send
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
+<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_frame
 </UL>
 
 <P><STRONG><a name="[79]"></a>cb_contrast_changed</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, menu_items.o(i.cb_contrast_changed))
@@ -2120,11 +2115,9 @@ Local Symbols
 <BR>[Address Reference Count : 2]<UL><LI> menu_items.o(.constdata)
 <LI> menu_items.o(.constdata)
 </UL>
-<P><STRONG><a name="[f7]"></a>adjust_scroll</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, menu_mgr.o(i.adjust_scroll))
-<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = adjust_scroll
-</UL>
-<BR>[Called By]<UL><LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit_submenu
-<LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<P><STRONG><a name="[f6]"></a>adjust_scroll</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, menu_mgr.o(i.adjust_scroll))
+<BR><BR>[Called By]<UL><LI><a href="#[f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit_submenu
+<LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
 <P><STRONG><a name="[ec]"></a>draw_ascii_inverted</STRONG> (Thumb, 98 bytes, Stack size 24 bytes, menu_mgr.o(i.draw_ascii_inverted))
@@ -2133,7 +2126,7 @@ Local Symbols
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
 <LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;font_get_ascii
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
 </UL>
 
@@ -2143,7 +2136,8 @@ Local Symbols
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
 <LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;font_get_ascii
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
+<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+<LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
 </UL>
 
@@ -2162,24 +2156,16 @@ Local Symbols
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;font_get_chinese_utf8
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
+<BR>[Called By]<UL><LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_info
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
 </UL>
 
-<P><STRONG><a name="[f1]"></a>draw_scroll_indicator</STRONG> (Thumb, 144 bytes, Stack size 48 bytes, menu_mgr.o(i.draw_scroll_indicator))
-<BR><BR>[Stack]<UL><LI>Max Depth = 116<LI>Call Chain = draw_scroll_indicator &rArr; draw_text &rArr; draw_chinese_normal &rArr; font_get_chinese_utf8
-</UL>
-<BR>[Calls]<UL><LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
-</UL>
-<BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
-</UL>
-
-<P><STRONG><a name="[f3]"></a>draw_suffix</STRONG> (Thumb, 170 bytes, Stack size 40 bytes, menu_mgr.o(i.draw_suffix))
+<P><STRONG><a name="[f1]"></a>draw_suffix</STRONG> (Thumb, 170 bytes, Stack size 40 bytes, menu_mgr.o(i.draw_suffix))
 <BR><BR>[Stack]<UL><LI>Max Depth = 108<LI>Call Chain = draw_suffix &rArr; draw_text &rArr; draw_chinese_normal &rArr; font_get_chinese_utf8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
 </UL>
 
 <P><STRONG><a name="[f2]"></a>draw_text</STRONG> (Thumb, 102 bytes, Stack size 16 bytes, menu_mgr.o(i.draw_text))
@@ -2190,33 +2176,42 @@ Local Symbols
 <LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_ascii_normal
 <LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_ascii_inverted
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
-<LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_suffix
-<LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_scroll_indicator
+<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+<LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_suffix
 </UL>
 
-<P><STRONG><a name="[f9]"></a>enter_submenu</STRONG> (Thumb, 58 bytes, Stack size 0 bytes, menu_mgr.o(i.enter_submenu))
-<BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_confirm
+<P><STRONG><a name="[f8]"></a>enter_submenu</STRONG> (Thumb, 58 bytes, Stack size 0 bytes, menu_mgr.o(i.enter_submenu))
+<BR><BR>[Called By]<UL><LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;handle_confirm
 </UL>
 
-<P><STRONG><a name="[f5]"></a>exit_submenu</STRONG> (Thumb, 112 bytes, Stack size 8 bytes, menu_mgr.o(i.exit_submenu))
-<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = exit_submenu &rArr; adjust_scroll
+<P><STRONG><a name="[f4]"></a>exit_submenu</STRONG> (Thumb, 112 bytes, Stack size 8 bytes, menu_mgr.o(i.exit_submenu))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = exit_submenu
 </UL>
-<BR>[Calls]<UL><LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_scroll
-<LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
+<BR>[Calls]<UL><LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;adjust_scroll
+<LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<BR>[Called By]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
-<P><STRONG><a name="[f8]"></a>handle_confirm</STRONG> (Thumb, 94 bytes, Stack size 16 bytes, menu_mgr.o(i.handle_confirm))
+<P><STRONG><a name="[119]"></a>get_suffix_width</STRONG> (Thumb, 38 bytes, Stack size 0 bytes, menu_mgr.o(i.get_suffix_width))
+<BR><BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+</UL>
+
+<P><STRONG><a name="[f7]"></a>handle_confirm</STRONG> (Thumb, 94 bytes, Stack size 16 bytes, menu_mgr.o(i.handle_confirm))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = handle_confirm
 </UL>
-<BR>[Calls]<UL><LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enter_submenu
+<BR>[Calls]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enter_submenu
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<BR>[Called By]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
-<P><STRONG><a name="[10d]"></a>render_info</STRONG> (Thumb, 130 bytes, Stack size 16 bytes, menu_mgr.o(i.render_info))
+<P><STRONG><a name="[118]"></a>measure_text_width</STRONG> (Thumb, 54 bytes, Stack size 12 bytes, menu_mgr.o(i.measure_text_width))
+<BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = measure_text_width
+</UL>
+<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;render_menu
+</UL>
+
+<P><STRONG><a name="[10b]"></a>render_info</STRONG> (Thumb, 130 bytes, Stack size 16 bytes, menu_mgr.o(i.render_info))
 <BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = render_info &rArr; draw_chinese_normal &rArr; font_get_chinese_utf8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
@@ -2224,20 +2219,22 @@ Local Symbols
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_chinese_normal
 <LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_ascii_normal
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<BR>[Called By]<UL><LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
-<P><STRONG><a name="[10e]"></a>render_menu</STRONG> (Thumb, 320 bytes, Stack size 32 bytes, menu_mgr.o(i.render_menu))
-<BR><BR>[Stack]<UL><LI>Max Depth = 148<LI>Call Chain = render_menu &rArr; draw_scroll_indicator &rArr; draw_text &rArr; draw_chinese_normal &rArr; font_get_chinese_utf8
+<P><STRONG><a name="[10c]"></a>render_menu</STRONG> (Thumb, 302 bytes, Stack size 32 bytes, menu_mgr.o(i.render_menu))
+<BR><BR>[Stack]<UL><LI>Max Depth = 140<LI>Call Chain = render_menu &rArr; draw_suffix &rArr; draw_text &rArr; draw_chinese_normal &rArr; font_get_chinese_utf8
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
 <LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
+<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;measure_text_width
+<LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_suffix_width
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
-<LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_suffix
-<LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_scroll_indicator
+<LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_suffix
+<LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_ascii_normal
 <LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_ascii_inverted
 </UL>
-<BR>[Called By]<UL><LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<BR>[Called By]<UL><LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
 <P><STRONG><a name="[cb]"></a>_fp_digits</STRONG> (Thumb, 366 bytes, Stack size 64 bytes, printfa.o(i._fp_digits), UNUSED)

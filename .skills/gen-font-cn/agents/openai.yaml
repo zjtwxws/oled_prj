@@ -1,0 +1,7 @@
+interface:
+  display_name: "生成中文字库"
+  short_description: "为OLED项目生成16x16点阵中文字模并插入font.c"
+  default_prompt: "使用 -font-cn 为以下汉字生成字模数据："
+
+policy:
+  allow_implicit_invocation: true
