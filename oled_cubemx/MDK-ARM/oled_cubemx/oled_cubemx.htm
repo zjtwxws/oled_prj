@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Thu Aug  6 10:34:43 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Thu Aug  6 12:24:05 2026
 <BR><P>
 <H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1061,11 +1061,10 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[c9]"></a>display_mgr_redraw</STRONG> (Thumb, 120 bytes, Stack size 8 bytes, display_mgr.o(.text.display_mgr_redraw))
+<P><STRONG><a name="[c9]"></a>display_mgr_redraw</STRONG> (Thumb, 114 bytes, Stack size 8 bytes, display_mgr.o(.text.display_mgr_redraw))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = display_mgr_redraw &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
-<LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_set_contrast
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
 <LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
@@ -1116,11 +1115,10 @@ Global Symbols
 <LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_effect_fade
 </UL>
 
-<P><STRONG><a name="[be]"></a>display_mgr_set_remote</STRONG> (Thumb, 174 bytes, Stack size 8 bytes, display_mgr.o(.text.display_mgr_set_remote))
+<P><STRONG><a name="[be]"></a>display_mgr_set_remote</STRONG> (Thumb, 168 bytes, Stack size 8 bytes, display_mgr.o(.text.display_mgr_set_remote))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = display_mgr_set_remote &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
-<LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_set_contrast
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
 <LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
@@ -1267,7 +1265,7 @@ Global Symbols
 <LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
-<P><STRONG><a name="[df]"></a>menu_items_init_state</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, menu_items.o(.text.menu_items_init_state))
+<P><STRONG><a name="[df]"></a>menu_items_init_state</STRONG> (Thumb, 18 bytes, Stack size 8 bytes, menu_items.o(.text.menu_items_init_state))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = menu_items_init_state
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
@@ -1286,7 +1284,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[e4]"></a>menu_mgr_handle_key</STRONG> (Thumb, 866 bytes, Stack size 24 bytes, menu_mgr.o(.text.menu_mgr_handle_key))
+<P><STRONG><a name="[e4]"></a>menu_mgr_handle_key</STRONG> (Thumb, 946 bytes, Stack size 24 bytes, menu_mgr.o(.text.menu_mgr_handle_key))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = menu_mgr_handle_key &rArr; display_mgr_redraw &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_redraw
@@ -1395,9 +1393,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_write_reg
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_tick
-<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_remote
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_mode
-<LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_redraw
 <LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_contrast_changed
 </UL>
 
@@ -1520,7 +1516,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[dd]"></a>user_app_init</STRONG> (Thumb, 120 bytes, Stack size 8 bytes, user_app.o(.text.user_app_init))
+<P><STRONG><a name="[dd]"></a>user_app_init</STRONG> (Thumb, 156 bytes, Stack size 8 bytes, user_app.o(.text.user_app_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 344<LI>Call Chain = user_app_init &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init

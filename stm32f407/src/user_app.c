@@ -59,6 +59,7 @@ int user_app_init(void)
     display_mgr_init(sys_config_get_boot_text());
     menu_mgr_init();
 	
+    DEBUG_PRINTF("Firmware Version: " FW_VERSION);
     DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
 
     return 0;

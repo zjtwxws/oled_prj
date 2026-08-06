@@ -5,7 +5,8 @@
 
 #ifndef __USER_APP_H
 #define __USER_APP_H
-
+/** 固件版本号 */
+#define FW_VERSION  "V1.0.1"
 
 int user_app_init(void);
 int user_app_handle(void);

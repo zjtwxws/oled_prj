@@ -20,6 +20,7 @@
 #include "led_mgr.h"
 #include "sys_config.h"
 #include "debug_console.h"
+#include "user_app.h"
 
 /* ================================================================
  * 菜单共享状态变量 (RAM, 被 TOGGLE/VALUE 的 value_ptr 指向)
@@ -133,7 +134,7 @@ static const menu_item_t item_demo = {
 static const menu_item_t item_fw_ver = {
     .text = "固件版本",  /* "固件版本" */
     .type = MENU_TYPE_INFO,
-    .info = { .detail_text = "v1.0.0" },
+    .info = { .detail_text = FW_VERSION },
 };
 static const menu_item_t item_runtime = {
     .text = "运行时间",  /* "运行时间" */
@@ -369,5 +370,5 @@ const menu_item_t* menu_items_get_root(void)
 void menu_items_init_state(void)
 {
     g_remote_mode = display_mgr_is_remote() ? 1 : 0;
-    g_contrast    = 255;  /* SSD1306 默认对比度 */
+    /* g_contrast 保持当前值不变，不硬编码重置 */
 }

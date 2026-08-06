@@ -277,7 +277,6 @@ void display_mgr_set_remote(bool remote)
         frame_seg_total = 0;
     } else {
         /* 切换到本地模式: 恢复本地渲染 */
-        ssd1306_set_contrast(255);
         scroll_offset_x = 0;
         flip_phase = 0;
         fade_step = 0;
@@ -522,7 +521,6 @@ void display_mgr_redraw(void)
         ssd1306_update_screen();
     } else {
         /* 本地模式: 重绘当前文字 + 特效 */
-        ssd1306_set_contrast(255);
         scroll_offset_x = 0;
         flip_phase = 0;
         fade_step = 0;

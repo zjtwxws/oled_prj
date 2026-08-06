@@ -469,6 +469,47 @@ static void cursor_down(void)
     g_menu.dirty = true;
 }
 
+/* VALUE 编辑: 长按快速增减 (5 倍步长) */
+static void value_edit_up_fast(void)
+{
+    if (!g_menu.value_editing) return;
+    const menu_item_t *item = g_menu.current_menu[g_menu.cursor];
+    if (item->type != MENU_TYPE_VALUE) return;
+
+    uint8_t *vp = item->value.value_ptr;
+    uint8_t fast_step = item->value.step * 5;
+    if (fast_step == 0) fast_step = 5;
+    if (*vp + fast_step <= item->value.max) {
+        *vp += fast_step;
+    } else {
+        *vp = item->value.max;
+    }
+    if (item->value.on_change) {
+        item->value.on_change(*vp);
+    }
+    g_menu.dirty = true;
+}
+
+static void value_edit_down_fast(void)
+{
+    if (!g_menu.value_editing) return;
+    const menu_item_t *item = g_menu.current_menu[g_menu.cursor];
+    if (item->type != MENU_TYPE_VALUE) return;
+
+    uint8_t *vp = item->value.value_ptr;
+    uint8_t fast_step = item->value.step * 5;
+    if (fast_step == 0) fast_step = 5;
+    if (*vp >= fast_step + item->value.min) {
+        *vp -= fast_step;
+    } else {
+        *vp = item->value.min;
+    }
+    if (item->value.on_change) {
+        item->value.on_change(*vp);
+    }
+    g_menu.dirty = true;
+}
+
 /* ================================================================
  * 确认操作 (KEY3)
  * ================================================================ */
@@ -574,12 +615,17 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
         switch (event) {
         case KEY_EVENT_NONE:
             break;
-        case KEY_EVENT_LONG_PRESS:
-        case KEY_EVENT_RELEASE:
         case KEY_EVENT_SHORT_PRESS:
-        case KEY_EVENT_LONG_PRESS_REPEAT:
             if (key_id == 1) value_edit_down();
             if (key_id == 2) value_edit_up();
+            break;
+        case KEY_EVENT_LONG_PRESS:
+        case KEY_EVENT_LONG_PRESS_REPEAT:
+            /* 长按重复: 5 倍步长 */
+            if (key_id == 1) value_edit_down_fast();
+            if (key_id == 2) value_edit_up_fast();
+            break;
+        case KEY_EVENT_RELEASE:
             break;
         }
         /* KEY3 确认 / KEY4 取消 → 退出编辑 */
