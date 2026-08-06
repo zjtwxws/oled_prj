@@ -22,9 +22,10 @@
 #define CONFIG_FLASH_SECTOR FLASH_SECTOR_11
 #define CONFIG_MAGIC        0x4F4C4544UL
 
+/* RAM 中的配置缓存，上电后从 Flash 加载，运行时所有读写操作此副本。 */
 static sys_config_t config;
 
-/* 简单 CRC32 */
+/* 简单 CRC-32 校验（IEEE 802.3 反射多项式 0xEDB88320），用于验证 Flash 中配置数据的完整性。 */
 static uint32_t crc32_simple(const uint8_t *data, uint32_t len)
 {
     uint32_t crc = 0xFFFFFFFF;
@@ -70,6 +71,8 @@ int sys_config_save(void)
     HAL_FLASH_Unlock();
 
     /* 擦除扇区 */
+    
+    /* 擦除 Sector 11 (0x080E0000, 128KB)，擦除后该扇区全为 0xFF */
     FLASH_EraseInitTypeDef erase_init;
     uint32_t sector_error;
 

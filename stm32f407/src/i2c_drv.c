@@ -13,6 +13,7 @@
 #define I2C_TIMEOUT_DEFAULT  100
 #endif
 
+/* I2C 句柄指针，由 i2c_drv_init() 从 CubeMX 生成的 hi2c2 赋值 */
 static I2C_HandleTypeDef *p_i2c = NULL;
 
 void i2c_drv_init(void *hi2c)

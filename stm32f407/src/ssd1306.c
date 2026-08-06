@@ -42,6 +42,9 @@ static const uint8_t ssd1306_init_cmds[] = {
 };
 
 /* 显存缓冲区: 1024 bytes (128×64 / 8) */
+
+/* 显存缓冲区: 1024 字节 (128 列 × 8 页)，格式为 page-major，每字节 8 个垂直像素 (bit0=顶部)。
+ * ssd1306_update_screen() 按页通过 I2C 发送至 OLED GDDRAM。 */
 static uint8_t buffer[SSD1306_WIDTH * SSD1306_PAGES];
 
 /* --- 内部函数 --- */

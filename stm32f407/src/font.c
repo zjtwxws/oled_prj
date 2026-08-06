@@ -231,11 +231,13 @@ static const uint8_t font_chinese_demo[][32] = {
 
 /* === AUTO-GENERATED CHINESE FONT TABLE START === */
 /* 中文字模表 (UTF-8 编码, 16x16 点阵, 每字 32 字节) */
+/* 中文字符条目：UTF-8 编码 → 16×16 点阵字模 (每字 32 字节) */
 typedef struct {
     const char *utf8;      /* UTF-8 编码的单个汉字 */
     const uint8_t glyph[32]; /* 16x16 点阵, 按列扫描 */
 } chinese_char_t;
 
+/* 项目完整字库表 (编译时链接，存于 Flash)，通过线性搜索匹配 UTF-8 汉字 */
 static const chinese_char_t chinese_font_table[] = {
     {"欢", {0x04, 0x10, 0x24, 0x08, 0x44, 0x06, 0x84, 0x01, 0x64, 0x82, 0x9c, 0x4c, 0x40, 0x20, 0x30, 0x18, 0x0f, 0x06, 0xc8, 0x01, 0x08, 0x06, 0x08, 0x18, 0x28, 0x20, 0x18, 0x40, 0x00, 0x80, 0x00, 0x00}}, /* 欢 */
     {"迎", {0x40, 0x00, 0x40, 0x40, 0x42, 0x20, 0xcc, 0x1f, 0x00, 0x20, 0x00, 0x40, 0xfc, 0x4f, 0x04, 0x44, 0x02, 0x42, 0x00, 0x40, 0xfc, 0x7f, 0x04, 0x42, 0x04, 0x44, 0xfc, 0x43, 0x00, 0x40, 0x00, 0x00}}, /* 迎 */
@@ -707,6 +709,7 @@ int font_is_chinese_lead(uint8_t byte)
 }
 
 /* 计算 UTF-8 字符字节长度 (仅处理 ASCII/常见多字节, 不校验畸形编码) */
+/* 根据 UTF-8 首字节判断字符占用字节数 (不校验畸形编码) */
 static size_t utf8_char_len(uint8_t first_byte)
 {
     if ((first_byte & 0x80) == 0)       return 1;  /* 0xxxxxxx */
@@ -723,6 +726,7 @@ static size_t utf8_char_len(uint8_t first_byte)
  */
 #define FONT_LRU_SIZE  5
 
+/* 中文字符条目：UTF-8 编码 → 16×16 点阵字模 (每字 32 字节) */
 typedef struct {
     char     key[4];       /* UTF-8 字节序列 (最多 4 字节) */
     uint8_t  key_len;      /* 实际字节长度 */
@@ -730,7 +734,7 @@ typedef struct {
 } font_lru_entry_t;
 
 static font_lru_entry_t font_lru_cache[FONT_LRU_SIZE];
-static uint8_t font_lru_next = 0;  /* 下次替换位置 (round-robin) */
+static uint8_t font_lru_next = 0;  /* round-robin 替换指针 (0~4 循环) */  /* 下次替换位置 (round-robin) */
 
 const uint8_t* font_get_chinese_utf8(const char *utf8_str)
 {
