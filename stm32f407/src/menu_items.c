@@ -141,6 +141,11 @@ static const menu_item_t item_runtime = {
     .type = MENU_TYPE_INFO,
     .info = { .detail_text = "--:--:--" },
 };
+static const menu_item_t item_author = {
+    .text = "作者",  /* "作者" */
+    .type = MENU_TYPE_INFO,
+    .info = { .detail_text = "赵建涛" },
+};
 
 /* ---- LED 控制 (Level 1) ---- */
 static const menu_item_t item_led_off = {
@@ -279,7 +284,7 @@ static const menu_item_t *menu_led_items[] = {
 };
 
 static const menu_item_t *menu_sysinfo_items[] = {
-    &item_fw_ver, &item_runtime,
+    &item_fw_ver, &item_runtime, &item_author,
 };
 
 static const menu_item_t *menu_reserved_items[] = {
@@ -327,7 +332,7 @@ static const menu_item_t item_main_6 = {
 static const menu_item_t item_main_7 = {
     .text = "7.系统信息",  /* "7.系统信息" */
     .type = MENU_TYPE_SUBMENU,
-    .submenu = { .items = menu_sysinfo_items, .count = 2 },
+    .submenu = { .items = menu_sysinfo_items, .count = 3 },
 };
 static const menu_item_t item_main_8 = {
     .text = "8.预留",  /* "8.预留" */
