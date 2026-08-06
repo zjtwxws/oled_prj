@@ -254,19 +254,6 @@ static const menu_item_t *menu_setting_items[] = {
     &item_contrast_menu,
 };
 
-static const menu_item_t item_setting_menu = {
-    .text = "4.设置",
-    .type = MENU_TYPE_SUBMENU,
-    .submenu = { .items = menu_setting_items, .count = 1 },
-};
-
-/* ---- 上电文字 (预留 INFO) ---- */
-static const menu_item_t item_boot_text = {
-    .text = "6.上电文字",  /* "上电文字" */
-    .type = MENU_TYPE_INFO,
-    .info = { .detail_text = "预留功能" },  /* "预留功能" */
-};
-
 /* ================================================================
  * 子菜单数组 (Level 1 各组)
  * ================================================================ */
@@ -317,14 +304,25 @@ static const menu_item_t item_main_3 = {
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_effect_items, .count = 7 },
 };
-/* item_main_4: "4.设置" SUBMENU → 对比度设置 */
+
+static const menu_item_t item_main_4 = {
+    .text = "4.设置",/* "4.设置" */
+    .type = MENU_TYPE_SUBMENU,
+    .submenu = { .items = menu_setting_items, .count = 1 },
+};
+
 static const menu_item_t item_main_5 = {
     .text = "5.LED控制",  /* "5.LED控制" */
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_led_items, .count = 3 },
 };
-/* item_main_6: 上电文字 → 直接使用 item_boot_text */
-#define item_main_6  item_boot_text
+
+static const menu_item_t item_main_6 = {
+    .text = "6.上电文字",  /* "6.上电文字" */
+    .type = MENU_TYPE_INFO,
+    .info = { .detail_text = "预留功能" },  /* "预留功能" */
+};
+
 static const menu_item_t item_main_7 = {
     .text = "7.系统信息",  /* "7.系统信息" */
     .type = MENU_TYPE_SUBMENU,
@@ -338,7 +336,7 @@ static const menu_item_t item_main_8 = {
 
 static const menu_item_t *menu_main_items[] = {
     &item_main_1, &item_main_2, &item_main_3,
-    &item_setting_menu, /* 4.设置 */ &item_main_5, &item_main_6,
+    &item_main_4, &item_main_5, &item_main_6,
     &item_main_7, &item_main_8,
 };
 
