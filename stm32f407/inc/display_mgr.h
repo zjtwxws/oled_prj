@@ -22,7 +22,7 @@ typedef enum {
 
 /* 显示特效枚举 (本地模式+远程文字子模式) */
 typedef enum {
-    DISP_MODE_STATIC   = 0,
+    DISP_MODE_STATIC   = 0,    /* 静态显示 */
     DISP_MODE_SCROLL_L = 1,   /* 左滚 */
     DISP_MODE_SCROLL_R = 2,   /* 右滚 */
     DISP_MODE_SCROLL_U = 3,   /* 上滚 */
@@ -34,14 +34,14 @@ typedef enum {
 
 /* 时间/天气信息 (仅存储, 本地+远程均不绘制状态栏) */
 typedef struct {
-    uint8_t  weather_type;
-    int8_t   temperature;
-    uint8_t  humidity;
-    uint8_t  wind_dir;
-    uint8_t  year, month, day;
-    uint8_t  hour, minute, second;
-    uint8_t  week_day;
-    uint8_t  led_state;
+    uint8_t  weather_type;   /* 天气类型 (0=晴,1=多云,2=雨,3=雪,4=风...由PC端定义) */
+    int8_t   temperature;    /* 温度 (-128~127, 摄氏度) */
+    uint8_t  humidity;      /* 湿度 (0~100%) */
+    uint8_t  wind_dir;       /* 风向 (0~7, 0=北,1=东北,...由PC端定义) */
+    uint8_t  year, month, day;  /* 日期: 年(0~99, 2000+year), 月(1~12), 日(1~31) */
+    uint8_t  hour, minute, second;  /* 时间: 时(0~23), 分(0~59), 秒(0~59) */
+    uint8_t  week_day;      /* 星期 (0=日,1~6=一~六) */
+    uint8_t  led_state;      /* LED 状态 (0=关,1=开,2=闪烁) */
 } display_status_t;
 
 /* ---- 初始化 ---- */
@@ -79,6 +79,7 @@ void display_mgr_tick(void);
 
 /* ---- 菜单退出后恢复显示 ---- */
 void display_mgr_redraw(void);
+/** @brief 菜单激活期间抑制 display_mgr 自行刷屏，防止与 menu_mgr 冲突 */
 void display_mgr_set_menu_suppress(bool suppress);
 
 #endif

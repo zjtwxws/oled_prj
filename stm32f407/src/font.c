@@ -658,7 +658,7 @@ static const chinese_char_t chinese_font_table[] = {
     {"项", {0x10, 0x20, 0x10, 0x60, 0x10, 0x20, 0xf0, 0x1f, 0x10, 0x10, 0x10, 0x10, 0x00, 0x00, 0xe4, 0x9f, 0x24, 0x40, 0x34, 0x30, 0xac, 0x0f, 0x24, 0x20, 0x24, 0x40, 0xe4, 0x9f, 0x04, 0x00, 0x00, 0x00}}, /* 项 */
 };
 
-#define CHINESE_FONT_TABLE_SIZE  (sizeof(chinese_font_table) / sizeof(chinese_font_table[0]))
+#define CHINESE_FONT_TABLE_SIZE  /* 字库条目总数 (编译时计算) */  (sizeof(chinese_font_table) / sizeof(chinese_font_table[0]))
 /* === AUTO-GENERATED CHINESE FONT TABLE END === */
 /* --- 公开接口 --- */
 
@@ -708,7 +708,6 @@ int font_is_chinese_lead(uint8_t byte)
     return (byte >= 0xA1 && byte <= 0xF7) ? 1 : 0;
 }
 
-/* 计算 UTF-8 字符字节长度 (仅处理 ASCII/常见多字节, 不校验畸形编码) */
 /* 根据 UTF-8 首字节判断字符占用字节数 (不校验畸形编码) */
 static size_t utf8_char_len(uint8_t first_byte)
 {
@@ -724,7 +723,7 @@ static size_t utf8_char_len(uint8_t first_byte)
  * 状态栏高频汉字 (时/分/秒/温/湿 等) 命中率 > 90%,
  * 大幅减少平均查表时间。
  */
-#define FONT_LRU_SIZE  5
+#define FONT_LRU_SIZE  5  /* LRU 缓存条目数 (5 条覆盖状态栏高频汉字) */
 
 /* 中文字符条目：UTF-8 编码 → 16×16 点阵字模 (每字 32 字节) */
 typedef struct {

@@ -11,12 +11,12 @@
 #include "stm32f4xx_hal.h"
 
 /* ---- 用户配置: LED 端口 & 引脚 ---- */
-#define LED_PORT    GPIOF
-#define LED_PIN     GPIO_PIN_9
+#define LED_PORT    GPIOF           /* LED 控制端口 (板载 LED 接 PF9) */
+#define LED_PIN     GPIO_PIN_9        /* LED 控制引脚: PF9 */
 
-static led_state_t led_state = LED_STATE_OFF;
-static uint32_t blink_timer = 0;
-static uint8_t  blink_on = 0;
+static led_state_t led_state = LED_STATE_OFF;  /* 当前 LED 状态 (OFF/ON/BLINK) */
+static uint32_t blink_timer = 0;  /* 闪烁计时器 (ms累计) */
+static uint8_t  blink_on = 0;       /* 闪烁周期内当前亮灭状态 */
 
 void led_mgr_init(void)
 {

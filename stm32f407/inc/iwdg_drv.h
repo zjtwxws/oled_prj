@@ -20,8 +20,8 @@ void iwdg_drv_feed(void);   /* 喂狗 */
 #else
 
 /* 空实现 (调试模式) */
-#define iwdg_drv_init()   ((void)0)
-#define iwdg_drv_feed()   ((void)0)
+#define iwdg_drv_init()   ((void)0)   /* 看门狗关闭时的空实现 */
+#define iwdg_drv_feed()   ((void)0)   /* 看门狗关闭时的空实现 */
 
 #endif /* IWDG_ENABLE */
 

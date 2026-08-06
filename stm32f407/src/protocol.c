@@ -27,23 +27,23 @@ static const uint8_t crc8_table[256] = {
 };
 
 typedef enum {
-    RX_WAIT_SOF = 0,
-    RX_WAIT_LEN,
-    RX_WAIT_CMD,
-    RX_WAIT_SEQ,
-    RX_WAIT_DATA,
-    RX_WAIT_CRC,
-    RX_WAIT_EOF
+    RX_WAIT_SOF = 0,    /* 初始态：等待帧头 0xA5 */
+    RX_WAIT_LEN,       /* 等待数据长度字段 */
+    RX_WAIT_CMD,       /* 等待命令字 */
+    RX_WAIT_SEQ,       /* 等待序列号 */
+    RX_WAIT_DATA,      /* 接收负载数据 */
+    RX_WAIT_CRC,       /* 等待 CRC-8 校验字节 */
+    RX_WAIT_EOF         /* 等待帧尾 0x5A，收到则完整帧解析完成 */
 } rx_state_t;
 
-static rx_state_t    rx_state = RX_WAIT_SOF;
-static proto_frame_t rx_frame;
-static uint8_t       rx_data_idx;
-static uint8_t       rx_expected_len;
-static uint8_t       rx_crc_accum;
-static volatile uint32_t last_byte_tick = 0;  /* 最后收到字节的时刻 */
+static rx_state_t    rx_state = RX_WAIT_SOF;  /* 当前接收状态机状态 */
+static proto_frame_t rx_frame;  /* 正在接收的帧结构 (状态机逐字节填充) */
+static uint8_t       rx_data_idx;       /* 当前已接收的负载数据字节数 */
+static uint8_t       rx_expected_len;  /* 期望接收的负载数据总长度 (来自帧头 LEN 字段) */
+static uint8_t       rx_crc_accum;    /* CRC-8 累加器 (从 SOF 开始逐字节累积计算) */
+static volatile uint32_t last_byte_tick = 0;  /* 最后接收字节的时刻 (HAL_GetTick)，用于帧间超时检测 (volatile: ISR 和主循环共享) */
 
-static uint8_t tx_buf[PROTO_FRAME_MAX];
+static uint8_t tx_buf[PROTO_FRAME_MAX];  /* 发送缓冲区 (全局复用，每次 proto_build_frame 覆盖) */
 
 uint8_t proto_crc8(const uint8_t *data, uint16_t len)
 {
@@ -118,13 +118,13 @@ int proto_feed_byte(uint8_t byte)
 
     case RX_WAIT_CRC:
         if (byte == rx_crc_accum) {
-            rx_state = RX_WAIT_EOF;
+            rx_state = RX_WAIT_EOF         /* 等待帧尾 0x5A，收到则完整帧解析完成 */;
         } else {
             rx_state = RX_WAIT_SOF;
         }
         break;
 
-    case RX_WAIT_EOF:
+    case RX_WAIT_EOF         /* 等待帧尾 0x5A，收到则完整帧解析完成 */:
         if (byte == PROTO_EOF) {
             rx_state = RX_WAIT_SOF;
             return 1;

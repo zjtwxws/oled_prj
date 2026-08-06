@@ -25,16 +25,16 @@ void debug_console_write(const char *str);
 void debug_printf(const char *fmt, ...);
 void debug_hexdump(const uint8_t *data, uint16_t len);
 
-#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)
-#define DEBUG_HEXDUMP(d, l)      debug_hexdump(d, l)
-#define DEBUG_WRITE(str)         debug_console_write(str)
+#define DEBUG_PRINTF(fmt, ...)   debug_printf(fmt, ##__VA_ARGS__)  /* 格式化调试输出 (自动追加 \\r\\n) */
+#define DEBUG_HEXDUMP(d, l)      debug_hexdump(d, l)  /* 十六进制 dump 输出 */
+#define DEBUG_WRITE(str)         debug_console_write(str)  /* 原始字符串输出 */
 
 #else  /* !DEBUG_UART_ENABLE */
 
-#define debug_console_init(h)    ((void)0)
-#define DEBUG_PRINTF(fmt, ...)   ((void)0)
-#define DEBUG_HEXDUMP(d, l)      ((void)0)
-#define DEBUG_WRITE(str)         ((void)0)
+#define debug_console_init(h)    ((void)0)     /* 调试关闭时的空实现 */
+#define DEBUG_PRINTF(fmt, ...)   ((void)0)   /* 调试关闭时的空实现 */
+#define DEBUG_HEXDUMP(d, l)      ((void)0)      /* 调试关闭时的空实现 */
+#define DEBUG_WRITE(str)         ((void)0)         /* 调试关闭时的空实现 */
 
 #endif /* DEBUG_UART_ENABLE */
 

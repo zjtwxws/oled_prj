@@ -9,8 +9,8 @@
 #include <stdint.h>
 
 /* OLED 分辨率 */
-#define SSD1306_WIDTH   128
-#define SSD1306_HEIGHT  64
+#define SSD1306_WIDTH   128   /* OLED 宽度 (像素) */
+#define SSD1306_HEIGHT  64   /* OLED 高度 (像素) */
 #define SSD1306_PAGES   (SSD1306_HEIGHT / 8)  /* 8 pages */
 
 /*
@@ -25,13 +25,13 @@
 #define SSD1306_I2C_TIMEOUT_MS  100
 
 /* 基本颜色 */
-#define SSD1306_COLOR_BLACK  0
-#define SSD1306_COLOR_WHITE  1
+#define SSD1306_COLOR_BLACK  0  /* 黑色 (像素灭) */
+#define SSD1306_COLOR_WHITE  1  /* 白色 (像素亮) */
 
 /* 显示状态 */
 typedef enum {
-    SSD1306_STATE_OFF = 0,
-    SSD1306_STATE_ON  = 1
+    SSD1306_STATE_OFF = 0,  /* 显示关闭 */
+    SSD1306_STATE_ON  = 1   /* 显示开启 */
 } ssd1306_state_t;
 
 /* --- 公开接口 --- */

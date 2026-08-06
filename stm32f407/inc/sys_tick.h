@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 
+/** @brief 获取系统运行毫秒数 (封装 HAL_GetTick) */
 uint32_t sys_tick_ms(void);
 
 #endif

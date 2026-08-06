@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include "key_drv.h"
 
-#define MENU_MAX_DEPTH  8
+#define MENU_MAX_DEPTH  8      /* 菜单最大嵌套深度 (含根菜单) */
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION < 6000000)
 #pragma push

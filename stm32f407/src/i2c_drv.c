@@ -10,7 +10,7 @@
 #include "stm32f4xx_hal.h"
 
 #ifndef I2C_TIMEOUT_DEFAULT
-#define I2C_TIMEOUT_DEFAULT  100
+#define I2C_TIMEOUT_DEFAULT  100  /* I2C 操作超时 (ms)，避免总线异常时永久阻塞 */
 #endif
 
 /* I2C 句柄指针，由 i2c_drv_init() 从 CubeMX 生成的 hi2c2 赋值 */

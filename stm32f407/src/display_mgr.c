@@ -14,49 +14,49 @@
 #include <assert.h>
 
 /* --- 内部常量 --- */
-#define CONTENT_MAX_LEN     256
-#define BOOT_TEXT_MAX_LEN   128
-#define SCROLL_STEP_PX      2
-#define SCROLL_INTERVAL_MS  40
-#define FLIP_INTERVAL_MS    3000
-#define FADE_INTERVAL_MS    30
-#define FADE_STEPS          32
+#define CONTENT_MAX_LEN     256         /* 本地模式显示文字的最大字节数 */
+#define BOOT_TEXT_MAX_LEN   128       /* 上电默认文字最大长度 */
+#define SCROLL_STEP_PX      2          /* 滚动特效每步移动像素数 */
+#define SCROLL_INTERVAL_MS  40     /* 滚动特效刷新间隔 (ms)，间隔越小滚动越快 */
+#define FLIP_INTERVAL_MS    3000      /* 翻页特效切换间隔 (ms) */
+#define FADE_INTERVAL_MS    30       /* 淡入淡出特效每步间隔 (ms) */
+#define FADE_STEPS          32              /* 淡入淡出总步数 (32 步完成一次渐变) */
 
-#define FRAME_BUF_SIZE      (SSD1306_WIDTH * SSD1306_PAGES)  /* 1024 */
+#define FRAME_BUF_SIZE      (SSD1306_WIDTH * SSD1306_PAGES)  /* 远程模式帧缓冲大小 = OLED 全屏字节数 (1024) */  /* 1024 */
 
 /* --- 静态变量 --- */
 
 /* 模式管理 */
-static bool            is_remote = false;
-static uint8_t         remote_sub_mode = REMOTE_SUB_TEXT;
+static bool            is_remote = false;  /* true=远程模式(PC帧缓冲), false=本地模式(STM32自行渲染) */
+static uint8_t         remote_sub_mode = REMOTE_SUB_TEXT;  /* 远程子模式: TEXT/TIME/WEATHER/DATE */
 
 /* 本地模式 */
-static display_mode_t  current_mode = DISP_MODE_STATIC;
-static char            content_text[CONTENT_MAX_LEN] = {0};
-static char            boot_text[BOOT_TEXT_MAX_LEN] = "欢迎进入系统";
-static int16_t         scroll_offset_x = 0;
-static uint8_t         flip_phase = 0;
-static uint32_t        flip_timer = 0;
-static uint8_t         fade_step = 0;
-static uint8_t         fade_dir = 0;
-static uint32_t        fade_timer = 0;
+static display_mode_t  current_mode = DISP_MODE_STATIC;  /* 当前特效模式 (静态/左滚/右滚/上滚/下滚/翻页/淡入淡出) */
+static char            content_text[CONTENT_MAX_LEN] = {0};  /* 本地模式下当前显示的文字内容 */
+static char            boot_text[BOOT_TEXT_MAX_LEN] = "欢迎进入系统";  /* 上电默认文字 (可从 Flash 配置加载) */
+static int16_t         scroll_offset_x = 0;  /* 左右滚动特效的水平偏移量 (像素) */
+static uint8_t         flip_phase = 0;   /* 翻页特效相位 (0=显示文字, 1=显示空白) */
+static uint32_t        flip_timer = 0;   /* 翻页计时器 (ms)，达 FLIP_INTERVAL_MS 后翻转 */
+static uint8_t         fade_step = 0;   /* 淡入淡出特效的当前步数 (0~FADE_STEPS) */
+static uint8_t         fade_dir = 0;   /* 淡入淡出方向 (0=淡出, 1=淡入) */
+static uint32_t        fade_timer = 0;   /* 淡入淡出计时器 (ms) */
 
 /* 时间/天气数据 (仅存储) */
-static display_status_t status = {0};
+static display_status_t status = {0};  /* 时间/天气数据副本 (仅存储，本地模式不绘制状态栏) */
 
 /* 远程模式帧缓冲 */
-static uint8_t  frame_buf[FRAME_BUF_SIZE] = {0};
-static uint8_t  frame_seg_received = 0;
-static uint8_t  frame_seg_total = 0;
+static uint8_t  frame_buf[FRAME_BUF_SIZE] = {0};  /* 远程模式帧缓冲拼装区: 接收 PC 分段帧数据，拼装完整后复制到 OLED buffer */
+static uint8_t  frame_seg_received = 0;  /* 已接收的分段数 */
+static uint8_t  frame_seg_total = 0;    /* 本次帧的总分段数 */
 
 /* 远程模式串口断开提示状态 */
-static bool     disconnect_msg_shown = false;
+static bool     disconnect_msg_shown = false;  /* 串口断开提示是否已显示 (防重复触发) */
 
 /* 菜单激活时抑制 display_mgr 内部刷屏 */
-static bool     menu_suppress = false;
+static bool     menu_suppress = false;           /* 菜单激活期间抑制 display_mgr 自行刷屏，防止与 menu_mgr 冲突 */
 
-/* 特效函数指针表 */
 typedef void (*effect_func_t)(void);
+/* 特效函数指针表: 按 display_mode_t 枚举值索引，在 display_mgr_init() 中注册 */
 static effect_func_t effects[DISP_MODE_COUNT];
 
 static void effect_static(void);
@@ -529,4 +529,3 @@ void display_mgr_redraw(void)
         ssd1306_update_screen();
     }
 }
-

@@ -14,19 +14,20 @@
 #define DEBOUNCE_SAMPLES    3   /* 连续 3 次相同 → 消抖完成 (3×20ms=60ms) */
 
 typedef struct {
-    GPIO_TypeDef *port;
-    uint16_t      pin;
-    uint8_t       last_raw;
-    uint8_t       stable_state;
-    uint8_t       debounce_cnt;
-    uint32_t      press_start_tick;  /* 按下起始 tick, 用于真实时间长按检测 */
-    uint8_t       event_pending;
-    key_event_t   pending_event;
-    uint8_t       long_press_fired;
-    uint32_t      last_repeat_tick;   /* 上次重复触发时刻 */
-    uint8_t       release_pending;    /* 是否有释放事件待处理 */
+    GPIO_TypeDef *port;     /* GPIO 端口基地址 */
+    uint16_t      pin;          /* GPIO 引脚号 */
+    uint8_t       last_raw;       /* 上一次读取的原始电平 (用于边沿检测) */
+    uint8_t       stable_state;  /* 消抖后的稳定状态 (0=按下, 1=释放) */
+    uint8_t       debounce_cnt;  /* 消抖计数器 (连续相同次数) */
+    uint32_t      press_start_tick;  /* 按下时刻的 HAL_GetTick() 值，用于真实时间长按检测 */
+    uint8_t       event_pending;  /* 有待处理事件标志 */
+    key_event_t   pending_event;  /* 待处理的事件类型 */
+    uint8_t       long_press_fired;  /* 长按已触发标志 (防止重复触发) */
+    uint32_t      last_repeat_tick;   /* 上次长按重复触发时刻 */   /* 上次重复触发时刻 */
+    uint8_t       release_pending;    /* 长按释放后待处理的 RELEASE 事件标志 */    /* 是否有释放事件待处理 */
 } key_dev_t;
 
+/* 按键设备数组: 索引 0~3 对应物理按键 KEY1~KEY4 */
 static key_dev_t keys[KEY_COUNT];
 
 /* 辅助: 初始化一个按键结构 */

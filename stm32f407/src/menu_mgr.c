@@ -17,35 +17,38 @@ extern const menu_item_t* menu_items_get_root(void);
 extern void menu_items_init_state(void);
 
 /* --- 内部常量 --- */
-#define MENU_ROWS_VISIBLE   4
-#define MENU_ROW_HEIGHT_PX 16
-#define MENU_ROW_PAGES      2
-#define MENU_INDENT_PX     16   /* 非光标行缩进 2 个 ASCII 空格 / 1 个中文空格 */
-#define MENU_ARROW_STR      ">"
+#define MENU_ROWS_VISIBLE   4      /* 屏幕可见菜单行数 (128x64 OLED 可显示 4 行 x 16px) */
+#define MENU_ROW_HEIGHT_PX 16    /* 每行高度 (像素) */
+#define MENU_ROW_PAGES      2         /* 每行占用 page 数 (16px/8 = 2 pages) */
+#define MENU_INDENT_PX     16       /* 非光标行左缩进 (像素) */   /* 非光标行缩进 2 个 ASCII 空格 / 1 个中文空格 */
+#define MENU_ARROW_STR      ">"        /* 光标指示符字符串 */
 
 /* --- 每层菜单上下文 (存于栈中) --- */
+/* 每层菜单的导航上下文 (存入栈中，回退时恢复) */
 typedef struct {
-    uint8_t cursor;
-    uint8_t scroll_offset;
+    uint8_t cursor;          /* 当前层光标位置 */
+    uint8_t scroll_offset;  /* 当前层滚动偏移 */
 } menu_context_t;
 
 /* --- 菜单管理器内部状态 --- */
+/* 每层菜单的导航上下文 (存入栈中，回退时恢复) */
 typedef struct {
-    const menu_item_t **current_menu;
-    uint8_t            current_menu_count;
+    const menu_item_t **current_menu;  /* 当前显示的菜单项数组指针 */
+    uint8_t            current_menu_count;       /* 当前菜单项数量 */
     uint8_t            cursor;
     uint8_t            scroll_offset;
-    menu_context_t     stack[MENU_MAX_DEPTH];
-    uint8_t            depth;
-    bool               active;
-    bool               dirty;
-    bool               value_editing;
-    uint8_t            value_backup;   /* VALUE编辑原始值备份, KEY4恢复用 */
+    menu_context_t     stack[MENU_MAX_DEPTH];  /* 多级菜单导航栈 (每进入一层子菜单压栈) */
+    uint8_t            depth;               /* 当前菜单深度 (0=根菜单) */
+    bool               active;              /* 菜单是否激活 (激活时接管全屏和按键) */
+    bool               dirty;               /* 脏标记: 内容变化需重绘时置 true */
+    bool               value_editing;       /* VALUE 项编辑模式标志 */
+    uint8_t            value_backup;     /* VALUE 编辑前的原始值备份 (KEY4 取消时恢复) */
     /* INFO 模式: 显示详情页 */
-    bool               info_showing;
-    const char        *info_detail;
+    bool               info_showing;       /* INFO 详情页显示中 */
+    const char        *info_detail;  /* INFO 详情页文本 */
 } menu_state_t;
 
+/* 菜单管理器全局单例: 所有菜单状态集中管理 */
 static menu_state_t g_menu;
 
 

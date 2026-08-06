@@ -12,11 +12,11 @@
 #include <stdint.h>
 
 /* 字体尺寸 */
-#define FONT_ASCII_W    8
-#define FONT_ASCII_H    16
+#define FONT_ASCII_W    8    /* ASCII 字符宽度 (像素) */
+#define FONT_ASCII_H    16    /* ASCII 字符高度 (像素) */
 
-#define FONT_CHINESE_W  16
-#define FONT_CHINESE_H  16
+#define FONT_CHINESE_W  16  /* 中文字符宽度 (像素) */
+#define FONT_CHINESE_H  16  /* 中文字符高度 (像素) */
 
 /**
  * @brief  获取 ASCII 字符字模 (8×16)

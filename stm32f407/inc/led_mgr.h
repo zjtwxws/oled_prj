@@ -13,16 +13,20 @@
 #include <stdint.h>
 
 typedef enum {
-    LED_STATE_OFF = 0,
-    LED_STATE_ON  = 1,
-    LED_STATE_BLINK = 2
+    LED_STATE_OFF = 0,   /* LED 关闭 */
+    LED_STATE_ON  = 1,    /* LED 常亮 */
+    LED_STATE_BLINK = 2 /* LED 闪烁 (周期 = LED_BLINK_PERIOD_MS) */
 } led_state_t;
 
-#define LED_BLINK_PERIOD_MS  500
+#define LED_BLINK_PERIOD_MS  500  /* LED 闪烁周期 (ms)，亮灭各占一半 */
 
+/** @brief 初始化 LED (GPIO 已在 CubeMX MX_GPIO_Init 中配置) */
 void led_mgr_init(void);
+/** @brief 设置 LED 状态 (OFF/ON/BLINK) */
 void led_mgr_set_state(led_state_t s);
+/** @brief 获取当前 LED 状态 */
 led_state_t led_mgr_get_state(void);
+/** @brief LED 闪烁 tick (需周期性调用，elapsed_ms 为距离上次调用的毫秒数) */
 void led_mgr_tick(uint32_t elapsed_ms);
 
 #endif

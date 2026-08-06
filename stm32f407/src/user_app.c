@@ -32,12 +32,13 @@ static void send_key_event(uint8_t key_id, uint8_t action);
 static void send_led_status(void);
 static void send_mode_status(void);
 
-static volatile uint8_t tx_seq = 0;
+static volatile uint8_t tx_seq = 0;  /* 发送帧序列号 (每次发送递增，用于协议层去重和确认) */
 
 /*
  * 发送辅助函数: 所有 send_* 调用均在主循环上下文中,
  * UART RX ISR 只写环形缓冲区, 不碰 tx_buf, 无需关中断。
  */
+/* 安全发送封装: 所有 send_* 调用在主循环上下文中，ISR 只写环形缓冲区不碰 tx_buf，无需关中断 */
 static void safe_send(const uint8_t *data, uint16_t len)
 {
     uart_drv_send(data, len);
@@ -45,8 +46,8 @@ static void safe_send(const uint8_t *data, uint16_t len)
 
 int user_app_init(void)
 {
-    i2c_drv_init(&hi2c2);
-    uart_drv_init(&huart1);
+    i2c_drv_init(&hi2c2);   /* I2C2: SSD1306 OLED 通信 */
+    uart_drv_init(&huart1);  /* USART1: 与 PC 上位机通信 (115200, 中断接收) */
     debug_console_init(&huart2);
 
     ssd1306_init();

@@ -7,12 +7,12 @@
 #include "stm32f4xx_hal.h"
 #include <string.h>
 
-static UART_HandleTypeDef *p_uart = NULL;
+static UART_HandleTypeDef *p_uart = NULL;  /* UART 句柄，由 uart_drv_init() 从 CubeMX 生成的 huart1 赋值 */
 
-static uint8_t  rx_buf[UART_RX_BUF_SIZE];
-static volatile uint16_t rx_head = 0;
-static volatile uint16_t rx_tail = 0;
-static uint8_t  rx_byte;
+static uint8_t  rx_buf[UART_RX_BUF_SIZE];  /* 环形接收缓冲区 (512 字节，大小必须是 2 的幂) */
+static volatile uint16_t rx_head = 0;  /* 环形缓冲区写指针 (ISR 中递增，主循环只读) */
+static volatile uint16_t rx_tail = 0;  /* 环形缓冲区读指针 (主循环递增，ISR 只读) */
+static uint8_t  rx_byte;        /* ISR 接收字节临时存放，由 HAL_UART_Receive_IT 写入 */
 
 void uart_drv_init(void *huart)
 {
@@ -43,6 +43,7 @@ int uart_drv_tx_busy(void)
     return (p_uart->gState != HAL_UART_STATE_READY) ? 1 : 0;
 }
 
+/* 环形缓冲区可读字节数 = (head - tail) & (SIZE - 1) */
 uint16_t uart_drv_available(void)
 {
     return (rx_head - rx_tail) & (UART_RX_BUF_SIZE - 1);

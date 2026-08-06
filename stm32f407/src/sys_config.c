@@ -19,8 +19,8 @@
 #include <string.h>
 
 #define CONFIG_FLASH_ADDR   0x080E0000UL   /* Sector 11 起始地址 */
-#define CONFIG_FLASH_SECTOR FLASH_SECTOR_11
-#define CONFIG_MAGIC        0x4F4C4544UL
+#define CONFIG_FLASH_SECTOR FLASH_SECTOR_11  /* 配置存储扇区: Sector 11 (128KB) */
+#define CONFIG_MAGIC        0x4F4C4544UL          /* 魔数 "OLED" (ASCII)，用于验证配置有效性 */
 
 /* RAM 中的配置缓存，上电后从 Flash 加载，运行时所有读写操作此副本。 */
 static sys_config_t config;
