@@ -40,6 +40,7 @@ typedef struct {
     bool               active;
     bool               dirty;
     bool               value_editing;
+    uint8_t            value_backup;   /* VALUE编辑原始值备份, KEY4恢复用 */
     /* INFO 模式: 显示详情页 */
     bool               info_showing;
     const char        *info_detail;
@@ -493,6 +494,7 @@ static void handle_confirm(void)
 
     case MENU_TYPE_VALUE:
         /* 进入数值编辑模式 */
+        g_menu.value_backup = *(item->value.value_ptr);  /* 备份原始值 */
         g_menu.value_editing = true;
         g_menu.dirty = true;
         break;
@@ -582,7 +584,19 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
         }
         /* KEY3 确认 / KEY4 取消 → 退出编辑 */
         if (event == KEY_EVENT_SHORT_PRESS) {
-            if (key_id == 3 || key_id == 4) {
+            if (key_id == 3) {
+                /* 确认: 保持当前值, 退出编辑 */
+                g_menu.value_editing = false;
+                g_menu.dirty = true;
+            } else if (key_id == 4) {
+                /* 返回: 恢复原始值 */
+                const menu_item_t *item = g_menu.current_menu[g_menu.cursor];
+                if (item->type == MENU_TYPE_VALUE) {
+                    *(item->value.value_ptr) = g_menu.value_backup;
+                    if (item->value.on_change) {
+                        item->value.on_change(*(item->value.value_ptr));
+                    }
+                }
                 g_menu.value_editing = false;
                 g_menu.dirty = true;
             }

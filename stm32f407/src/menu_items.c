@@ -7,7 +7,7 @@
  *   ├── 工作模式 → 本地 / 远程 (TOGGLE 互斥)
  *   ├── 显示内容 → 时间 / 天气 / 日期 / 自定义文字 (ACTION)
  *   ├── 显示特效 → 静态 / 左滚 / 右滚 / 上滚 / 下滚 / 翻页 / 淡入淡出 (ACTION)
- *   ├── OLED对比度 (VALUE 0~255)
+ *   ├── 设置 → 对比度设置 → 对比度 (VALUE 0~255)
  *   ├── LED控制 → 关闭 / 常亮 / 闪烁 (ACTION)
  *   ├── 上电文字 (INFO, 预留)
  *   ├── 系统信息 → 固件版本 / 运行时间 (INFO)
@@ -71,7 +71,7 @@ static void cb_effect_scroll_d(void) { display_mgr_set_mode(DISP_MODE_SCROLL_D);
 static void cb_effect_flip(void)     { display_mgr_set_mode(DISP_MODE_FLIP); }
 static void cb_effect_fade(void)     { display_mgr_set_mode(DISP_MODE_FADE); }
 
-/* --- OLED 对比度 VALUE 回调 --- */
+/* --- 对比度 VALUE 回调 --- */
 static void cb_contrast_changed(uint8_t val)
 {
     ssd1306_set_contrast(val);
@@ -229,17 +229,40 @@ static const menu_item_t item_mode_remote = {
     .toggle = { .value_ptr = &g_remote_mode, .checked_value = 1, .on_change = cb_mode_changed },
 };
 
-/* ---- OLED 对比度 (Level 0, 直接是 VALUE) ---- */
+/* ---- 对比度 VALUE 项 (Level 2, 位于"对比度设置"子菜单下) ---- */
 static const menu_item_t item_contrast = {
-    .text = "4.OLED\xe5\xaf\xb9\xe6\xaf\x94\xe5\xba\xa6",  /* "OLED对比度" */
+    .text = "对比度",
     .type = MENU_TYPE_VALUE,
     .value = { .value_ptr = &g_contrast, .min = 0, .max = 255, .step = 5,
                .on_change = cb_contrast_changed },
 };
 
+/* ---- 对比度设置 三级菜单 (Level 2) ---- */
+static const menu_item_t *menu_contrast_items[] = {
+    &item_contrast,
+};
+
+/* ---- 对比度设置 二级菜单 (Level 1, 位于"设置"下) ---- */
+static const menu_item_t item_contrast_menu = {
+    .text = "对比度设置",
+    .type = MENU_TYPE_SUBMENU,
+    .submenu = { .items = menu_contrast_items, .count = 1 },
+};
+
+/* ---- 设置 二级菜单 (Level 1) ---- */
+static const menu_item_t *menu_setting_items[] = {
+    &item_contrast_menu,
+};
+
+static const menu_item_t item_setting_menu = {
+    .text = "4.设置",
+    .type = MENU_TYPE_SUBMENU,
+    .submenu = { .items = menu_setting_items, .count = 1 },
+};
+
 /* ---- 上电文字 (预留 INFO) ---- */
 static const menu_item_t item_boot_text = {
-    .text = "6.\xe4\xb8\x8a\xe7\x94\xb5\xe6\x96\x87\xe5\xad\x97",  /* "上电文字" */
+    .text = "6.上电文字",  /* "上电文字" */
     .type = MENU_TYPE_INFO,
     .info = { .detail_text = "预留功能" },  /* "预留功能" */
 };
@@ -280,43 +303,42 @@ static const menu_item_t *menu_reserved_items[] = {
  * ================================================================ */
 
 static const menu_item_t item_main_1 = {
-    .text = "1.\xe5\xb7\xa5\xe4\xbd\x9c\xe6\xa8\xa1\xe5\xbc\x8f",  /* "1.工作模式" */
+    .text = "1.工作模式",  /* "1.工作模式" */
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_mode_items, .count = 2 },
 };
 static const menu_item_t item_main_2 = {
-    .text = "2.\xe6\x98\xbe\xe7\xa4\xba\xe5\x86\x85\xe5\xae\xb9",  /* "2.显示内容" */
+    .text = "2.显示内容",  /* "2.显示内容" */
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_content_items, .count = 4 },
 };
 static const menu_item_t item_main_3 = {
-    .text = "3.\xe6\x98\xbe\xe7\xa4\xba\xe7\x89\xb9\xe6\x95\x88",  /* "3.显示特效" */
+    .text = "3.显示特效",  /* "3.显示特效" */
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_effect_items, .count = 7 },
 };
-/* item_main_4: OLED对比度 → 直接使用 item_contrast */
-#define item_main_4  item_contrast
+/* item_main_4: "4.设置" SUBMENU → 对比度设置 */
 static const menu_item_t item_main_5 = {
-    .text = "5.LED\xe6\x8e\xa7\xe5\x88\xb6",  /* "5.LED控制" */
+    .text = "5.LED控制",  /* "5.LED控制" */
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_led_items, .count = 3 },
 };
 /* item_main_6: 上电文字 → 直接使用 item_boot_text */
 #define item_main_6  item_boot_text
 static const menu_item_t item_main_7 = {
-    .text = "7.\xe7\xb3\xbb\xe7\xbb\x9f\xe4\xbf\xa1\xe6\x81\xaf",  /* "7.系统信息" */
+    .text = "7.系统信息",  /* "7.系统信息" */
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_sysinfo_items, .count = 2 },
 };
 static const menu_item_t item_main_8 = {
-    .text = "8.\xe9\xa2\x84\xe7\x95\x99",  /* "8.预留" */
+    .text = "8.预留",  /* "8.预留" */
     .type = MENU_TYPE_SUBMENU,
     .submenu = { .items = menu_reserved_items, .count = 1 },
 };
 
 static const menu_item_t *menu_main_items[] = {
     &item_main_1, &item_main_2, &item_main_3,
-    &item_main_4, &item_main_5, &item_main_6,
+    &item_setting_menu, /* 4.设置 */ &item_main_5, &item_main_6,
     &item_main_7, &item_main_8,
 };
 

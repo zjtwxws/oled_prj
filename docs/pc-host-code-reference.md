@@ -1,6 +1,6 @@
 # Windows 上位机代码参考文档 (v3.1)
 
-> 本文档梳理 `pc_host/` 目录下全部源文件的架构、类职责、接口定义与数据流向。  
+> 本文档梳理 `pc_host/` 目录下全部源文件的架构、类职责、接口定义与数据流向 (v3.2)。  
 > 配合阅读需求文档、协议文档与 STM32 端代码分层文档，可形成完整的项目知识体系。  
 > **更新代码后请同步更新本文档。**
 
@@ -338,6 +338,7 @@ static deque<TxTask>    g_pendingAcks;    // 待确认队列 (FIFO)
 static uint8_t          g_seq;            // 发送帧序号 (递增)
 static bool             g_connected;      // 串口连接标志
 static bool             g_userIsRemote;   // 用户 UI 意图 (防竞态)
+static bool             g_userIsRemote;   // 用户 UI 意图 (防竞态)
 static OledPreview      g_preview;        // OLED 预览实例
 ```
 
@@ -521,6 +522,9 @@ ProcessFrame(ACK)
 | 设备状态组/日志组 | 1063 / 1071 | Group Box |
 | 按键日志列表 | `IDC_LST_KEY_LOG` (1070) | ListBox |
 | OLED 预览 | `IDC_OLED_PREVIEW` (1080) | Custom ("OledPreviewWnd") |
+| 远程子模式标签 | IDC_STC_REMOTE_MODE (1085) | Static |
+| 天气分组框 | IDC_GRP_WEATHER (1090) | Group Box |
+| 底部状态栏 | IDC_STATUS_BAR (1099) | StatusBar (v3.2) |
 | 远程子模式标签 | `IDC_STC_REMOTE_MODE` (1085) | Static |
 
 ---

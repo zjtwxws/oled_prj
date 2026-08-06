@@ -79,7 +79,7 @@ Categories → **IWDG → 勾选 Activated**
 
 对应代码 `iwdg_drv.c`，通过 `IWDG_ENABLE` 编译宏控制是否启用。
 
-### 4.3 串口1 — USART1 (与 RK3506 通信)
+### 4.3 串口1 — USART1 (与 PC上位机通信)
 
 Categories → **USART1 → Mode: Asynchronous**
 
@@ -144,10 +144,10 @@ Pinout 自动分配: PB10 → I2C2_SCL, PB11 → I2C2_SDA。OLED 地址 `0x3C` (
 
 | 外设 | 引脚 | 功能 |
 |------|------|------|
-| USART1_TX | PA9 | UART 发送 → RK3506 |
-| USART1_RX | PA10 | UART 接收 ← RK3506 |
-| USART2_TX | PA2 | 调试 TX (可选) |
-| USART2_RX | PA3 | 调试 RX (可选) |
+| USART1_TX | PA9 | UART 发送 → PC上位机 |
+| USART1_RX | PA10 | UART 接收 ← PC上位机 |
+| USART2_TX | PA2 | 调试 TX (全双工) |
+| USART2_RX | PA3 | 调试 RX (全双工) |
 | I2C2_SCL | PB10 | OLED SCL |
 | I2C2_SDA | PB11 | OLED SDA |
 | KEY1 | PE1 | GPIO Input, Pull-up |
@@ -315,7 +315,10 @@ led_mgr_init();                // LED 管理器
 key_drv_init();                // 按键驱动 (轮询扫描)
 iwdg_drv_init();               // 看门狗 (IWDG_ENABLE 宏控制)
 
-display_mgr_init(
+
+    menu_mgr_init();              /* 菜单系统初始化 */
+
+    display_mgr_init(
     sys_config_get_boot_text()  // 显示上电欢迎画面
 );
 
@@ -337,6 +340,7 @@ DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
 #include "iwdg_drv.h"
 #include "sys_config.h"
 #include "debug_console.h"
+#include "menu_mgr.h"
 
 extern I2C_HandleTypeDef  hi2c2;
 extern UART_HandleTypeDef huart1;
@@ -468,7 +472,7 @@ arm-none-eabi-gdb build/oled_f407.elf
 | `MX_IWDG_Init()` | `HAL_IWDG_Init` / `HAL_IWDG_Refresh` | `iwdg_drv.c` |
 | `SystemClock_Config()` | `HAL_RCC_OscConfig` / `HAL_RCC_ClockConfig` | `main.c` |
 
-**架构要点**:
+**架构要点** (更新于 v1.1):
 
 应用层在 HAL 之上采用 **依赖注入模式**: 每个驱动模块暴露 `xxx_init(void *handle)` 接口接收 HAL 句柄，不直接引用 CubeMX 生成的全局变量（除 `main.c` 中的 `extern` 声明）。优点:
 
@@ -492,4 +496,4 @@ arm-none-eabi-gdb build/oled_f407.elf
 - [STM32F407VGTx 数据手册](https://www.st.com/en/microcontrollers-microprocessors/stm32f407vg.html)
 - [Arm GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
 
-**文档版本**: v1.0 | **创建日期**: 2026-07-30 | **适用工程**: OLED 三级联动嵌入式系统
+**文档版本**: v1.1 | **创建日期**: 2026-07-30 | **最后更新**: 2026-08-05 | **适用工程**: OLED 串口直连控制系统

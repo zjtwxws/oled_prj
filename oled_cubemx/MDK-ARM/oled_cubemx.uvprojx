@@ -312,7 +312,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>3</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -335,7 +335,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls>-Wno-padded -Wno-covered-switch-default -Wno-gnu-zero-variadic-macro-arguments -Wno-format-nonliteral</MiscControls>
+              <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
               <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../../stm32f407/inc</IncludePath>
@@ -526,7 +526,7 @@
                 <FileArmAds>
                   <Cads>
                     <interw>2</interw>
-                    <Optim>0</Optim>
+                    <Optim>2</Optim>
                     <oTime>2</oTime>
                     <SplitLS>2</SplitLS>
                     <OneElfS>2</OneElfS>
@@ -549,7 +549,7 @@
                     <v6WtE>2</v6WtE>
                     <v6Rtti>2</v6Rtti>
                     <VariousControls>
-                      <MiscControls>-Wno-padded -Wno-covered-switch-default -Wno-gnu-zero-variadic-macro-arguments -Wno-format-nonliteral</MiscControls>
+                      <MiscControls></MiscControls>
                       <Define></Define>
                       <Undefine></Undefine>
                       <IncludePath></IncludePath>
