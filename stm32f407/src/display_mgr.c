@@ -16,7 +16,7 @@
 
 /* extern: Logo 位图和大号文字渲染 (定义于 menu_items.c) */
 extern const uint8_t logo_boot_bmp[1024];
-extern void draw_bigtext_zhaojiantao(void);
+extern void draw_bigtext_zhaosi(void);
 
 /* --- 内部常量 --- */
 #define CONTENT_MAX_LEN     256         /* 本地模式显示文字的最大字节数 */
@@ -268,7 +268,7 @@ void display_mgr_init(const char *boot_text_str)
         memcpy(ssd1306_get_buffer(), logo_boot_bmp, 1024);
         break;
     case SYS_CONFIG_POWERON_BIGTEXT:
-        draw_bigtext_zhaojiantao();
+        draw_bigtext_zhaosi();
         break;
     default: /* SYS_CONFIG_POWERON_WELCOME */
         draw_text_fullscreen(content_text);

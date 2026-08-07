@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Fri Aug  7 14:31:14 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Fri Aug  7 14:38:36 2026
 <BR><P>
 <H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -484,7 +484,7 @@ Global Symbols
 <P><STRONG><a name="[86]"></a>__aeabi_memclr</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, memseta.o(.text))
 <BR><BR>[Calls]<UL><LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
 </UL>
-<BR>[Called By]<UL><LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bigtext_zhaojiantao
+<BR>[Called By]<UL><LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bigtext_zhaosi
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_show_disconnect
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_remote
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_up
@@ -1058,7 +1058,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_poweron_type
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bigtext_zhaojiantao
+<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bigtext_zhaosi
 <LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncpy
 <LI><a href="#[cd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
@@ -1195,8 +1195,8 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[d2]"></a>draw_bigtext_zhaojiantao</STRONG> (Thumb, 248 bytes, Stack size 24 bytes, menu_items.o(.text.draw_bigtext_zhaojiantao))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = draw_bigtext_zhaojiantao
+<P><STRONG><a name="[d2]"></a>draw_bigtext_zhaosi</STRONG> (Thumb, 244 bytes, Stack size 24 bytes, menu_items.o(.text.draw_bigtext_zhaosi))
+<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = draw_bigtext_zhaosi
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_get_buffer
 <LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
@@ -1388,7 +1388,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[cf]"></a>ssd1306_get_buffer</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, ssd1306.o(.text.ssd1306_get_buffer))
-<BR><BR>[Called By]<UL><LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bigtext_zhaojiantao
+<BR><BR>[Called By]<UL><LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bigtext_zhaosi
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_show_disconnect
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_remote
 <LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_rx_frame_seg
@@ -1921,7 +1921,7 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = preview_render_bigtext &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
-<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bigtext_zhaojiantao
+<LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bigtext_zhaosi
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> menu_items.o(.rodata.item_poweron_display_2)
 </UL>
