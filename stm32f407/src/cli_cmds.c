@@ -108,6 +108,59 @@ static int cmd_led(uint8_t argc, char **argv)
     return 0;
 }
 
+/* ---- 地址合法性校验 ---- */
+
+/**
+ * @brief  检查地址是否属于 STM32F407 有效内存/外设区域
+ * @param  addr  待检查的地址
+ * @return 1=合法, 0=非法 (访问会导致 HardFault)
+ * @note   F407VG: Flash 1MB, SRAM 128KB+64KB CCM, 外设区
+ */
+static int is_valid_address(unsigned long addr)
+{
+    /* Flash (主存储区) */
+    if (addr >= 0x08000000UL && addr <= 0x080FFFFFUL)
+    {
+        return 1;
+    }
+    /* SRAM1 (128KB) */
+    if (addr >= 0x20000000UL && addr <= 0x2001FFFFUL)
+    {
+        return 1;
+    }
+    /* CCM RAM (64KB, 只能 CPU 访问) */
+    if (addr >= 0x10000000UL && addr <= 0x1000FFFFUL)
+    {
+        return 1;
+    }
+    /* AHB1 外设 (GPIO/RCC/DMA 等) */
+    if (addr >= 0x40020000UL && addr <= 0x4007FFFFUL)
+    {
+        return 1;
+    }
+    /* APB1 外设 (TIM/I2C/USART/SPI 等) */
+    if (addr >= 0x40000000UL && addr <= 0x4000FFFFUL)
+    {
+        return 1;
+    }
+    /* APB2 外设 (TIM1/USART1/SPI1/SYSCFG 等) */
+    if (addr >= 0x40010000UL && addr <= 0x4001FFFFUL)
+    {
+        return 1;
+    }
+    /* AHB2 外设 (OTG/RNG) */
+    if (addr >= 0x50000000UL && addr <= 0x500FFFFFUL)
+    {
+        return 1;
+    }
+    /* Cortex-M4 系统控制 (NVIC/SCB/SysTick/MPU) */
+    if (addr >= 0xE000E000UL && addr <= 0xE00FFFFFUL)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 /* ---- 内存读取命令 ---- */
 
 /**
@@ -131,6 +184,14 @@ static int cmd_rd(uint8_t argc, char **argv)
     if (sscanf(argv[1], "%lx", &addr) != 1)
     {
         shell_printf("Invalid address format\r\n");
+        return -1;
+    }
+
+    if (!is_valid_address(addr))
+    {
+        shell_printf("Error: address 0x%08lx is not a valid memory region\r\n", addr);
+        shell_printf("Valid ranges: Flash(0x08xxxxxx) SRAM(0x2000xxxx) CCM(0x1000xxxx)\r\n");
+        shell_printf("              Peripheral(0x400xxxxx) AHB2(0x500xxxxx)\r\n");
         return -1;
     }
 
@@ -274,4 +335,6 @@ void cli_cmds_init(void)
 {
     /* 命令表已静态定义，暂无运行时注册需求 */
 }
+
+
 

@@ -1075,11 +1075,22 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
         return;
     }
 
-    /* INFO 显示中: KEY1/KEY2 滚动, KEY3/KEY4 退出 */
+    /* INFO 显示中: KEY1/KEY2 滚动(支持长按), KEY3/KEY4 退出 */
     if (g_menu.info_showing)
     {
-        if (event == KEY_EVENT_SHORT_PRESS)
+        switch (event)
         {
+        case KEY_EVENT_SHORT_PRESS:
+            if (key_id == 3 || key_id == 4)
+            {
+                g_menu.info_showing = false;
+                g_menu.info_scroll_row = 0;
+                g_menu.dirty = true;
+                break;
+            }
+            /* fall through to scroll */
+        case KEY_EVENT_LONG_PRESS:
+        case KEY_EVENT_LONG_PRESS_REPEAT:
             if (key_id == 1 && g_menu.info_scroll_row + 4 < g_menu.info_total_rows)
             {
                 g_menu.info_scroll_row++;
@@ -1090,12 +1101,9 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
                 g_menu.info_scroll_row--;
                 g_menu.dirty = true;
             }
-            else if (key_id == 3 || key_id == 4)
-            {
-                g_menu.info_showing = false;
-                g_menu.info_scroll_row = 0;
-                g_menu.dirty = true;
-            }
+            break;
+        default:
+            break;
         }
         return;
     }

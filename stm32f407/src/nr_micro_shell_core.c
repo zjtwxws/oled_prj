@@ -216,9 +216,7 @@ static int run_cmdline(struct nr_micro_shell *sh)
 	}
 
 #ifdef NR_SHELL_HISTORY_CMD_SUPPORT
-	if (!ret) {
-		add_history_cmd(sh);
-	}
+	add_history_cmd(sh);
 #endif
 
 	return ret;
@@ -660,4 +658,5 @@ void shell(char c)
 }
 
 /******************* (C) COPYRIGHT 2025 Ji Youzhou ****************************/
+
 

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Fri Aug  7 17:35:52 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Fri Aug  7 17:52:45 2026
 <BR><P>
 <H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1485,7 +1485,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[11a]"></a>menu_mgr_handle_key</STRONG> (Thumb, 1146 bytes, Stack size 24 bytes, menu_mgr.o(.text.menu_mgr_handle_key))
+<P><STRONG><a name="[11a]"></a>menu_mgr_handle_key</STRONG> (Thumb, 1164 bytes, Stack size 24 bytes, menu_mgr.o(.text.menu_mgr_handle_key))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = menu_mgr_handle_key &rArr; display_mgr_redraw &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
@@ -2246,7 +2246,7 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> cli_cmds.o(.data.cmd_table)
 </UL>
-<P><STRONG><a name="[4]"></a>cmd_rd</STRONG> (Thumb, 448 bytes, Stack size 48 bytes, cli_cmds.o(.text.cmd_rd))
+<P><STRONG><a name="[4]"></a>cmd_rd</STRONG> (Thumb, 600 bytes, Stack size 48 bytes, cli_cmds.o(.text.cmd_rd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 264<LI>Call Chain = cmd_rd &rArr; __0sscanf &rArr; __vfscanf_char &rArr; __vfscanf &rArr; _scanf_int
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_printf
@@ -2285,7 +2285,7 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> nr_micro_shell_core.o(.rodata.key_funcs)
 </UL>
-<P><STRONG><a name="[8d]"></a>enter_key_func</STRONG> (Thumb, 508 bytes, Stack size 144 bytes, nr_micro_shell_core.o(.text.enter_key_func))
+<P><STRONG><a name="[8d]"></a>enter_key_func</STRONG> (Thumb, 504 bytes, Stack size 144 bytes, nr_micro_shell_core.o(.text.enter_key_func))
 <BR><BR>[Stack]<UL><LI>Max Depth = 328<LI>Call Chain = enter_key_func &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcpy

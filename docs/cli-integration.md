@@ -10,6 +10,7 @@
 - Tab 自动补全
 - 光标编辑 (左右/退格/Delete)
 - ANSI 转义序列 (清屏/颜色)
+- 地址合法性校验 (防止非法内存访问死机)
 
 ---
 
@@ -66,7 +67,7 @@ UART2: PA2(TX) + PA3(RX), 115200-8-N-1, 无硬件流控
 |------|------|------|
 | `inc/nr_micro_shell.h` | ~80 | 引擎 API 头文件 (原始复制) |
 | `inc/nr_micro_shell_port.h` | ~40 | 移植配置: 缓冲区大小/历史条数/提示符 |
-| `src/nr_micro_shell_core.c` | ~560 | 引擎实现 (原始复制) |
+| `src/nr_micro_shell_core.c` | ~560 | 引擎实现 (原始复制, 有少量修改) |
 | `inc/cli_cmds.h` | ~15 | 命令注册接口声明 |
 | `src/cli_cmds.c` | ~260 | 命令表 + 7 条调试命令实现 |
 
@@ -245,6 +246,7 @@ int user_app_handle(void)
 ### Step 7: 创建命令表 (`cli_cmds.c`)
 
 ```c
+// 命令表 (struct cmd 定义于 nr_micro_shell.h)
 struct cmd cmd_table[] =
 {
     { .name = "help",   .func = cmd_help,   .desc = "显示所有命令" },
@@ -256,6 +258,23 @@ struct cmd cmd_table[] =
     { .name = "mode",   .func = cmd_mode,   .desc = "显示模式 (mode [local|remote])" },
 };
 const uint16_t cmd_table_size = sizeof(cmd_table) / sizeof(cmd_table[0]);
+
+// 自动补全候选词 (用于 Tab 参数提示)
+char *auto_complete_words[] = { "0", "1", "2", "local", "remote", "-h" };
+const uint16_t auto_complete_words_size =
+    sizeof(auto_complete_words) / sizeof(auto_complete_words[0]);
+```
+
+**`rd` 命令必须包含地址合法性校验**，防止用户输入非法地址导致 HardFault。
+利用 STM32F407 的内存映射表，白名单校验 Flash/SRAM/CCM/外设区域：
+
+```c
+static int is_valid_address(unsigned long addr)
+{
+    // F407: Flash 0x08000000-0x080FFFFF, SRAM 0x20000000-0x2001FFFF,
+    //       CCM 0x10000000-0x1000FFFF, 外设 0x40000000-0x4007FFFF 等
+    // 不在白名单内一律拒绝，返回错误提示而非死机
+}
 ```
 
 ---
@@ -291,7 +310,8 @@ static int cmd_uptime(uint8_t argc, char **argv)
 static int cmd_xxx(uint8_t argc, char **argv);
 //   argc: 参数个数 (含命令名本身)
 //   argv: 参数字符串数组, argv[0] 即命令名
-//   return: 0=成功, 非0=失败 (非0时该命令不会加入历史记录)
+//   return: 0=成功, 非0=失败
+//   (无论返回何值，该命令都会被记录到历史，可通过 ↑ 调出)
 ```
 
 **可用输出 API:**
@@ -311,6 +331,29 @@ static int cmd_xxx(uint8_t argc, char **argv);
 | `sys_tick.h` | sys_tick_ms |
 | `menu_mgr.h` | is_active |
 | `user_app.h` | FW_VERSION / FW_AUTHOR / FW_BUILD_TIME |
+
+---
+
+## 历史记录
+
+引擎默认保存最近 **8 条** 命令（由 `NR_SHELL_HISTORY_CMD_NUM` 定义），每条最大 64 字节。
+
+| 操作 | 按键 |
+|------|------|
+| 上一条命令 | ↑ |
+| 下一条命令 | ↓ |
+
+**注意:** 无论命令执行成功还是失败，都会被记录到历史中（包括输错的未知命令和参数校验失败的命令），方便用 ↑ 调出修改后重新执行。
+
+此项修改位于 `nr_micro_shell_core.c` 的 `run_cmdline()` 函数末尾：
+
+```c
+#ifdef NR_SHELL_HISTORY_CMD_SUPPORT
+    add_history_cmd(sh);    // 原始代码有 if (!ret) 条件，已去掉
+#endif
+```
+
+在原始代码基础上移除了 `if (!ret)` 条件，使所有非空输入都进入历史。
 
 ---
 
@@ -342,10 +385,26 @@ static int cmd_xxx(uint8_t argc, char **argv);
 
 ## 踩坑记录
 
-| 现象 | 根因 | 修复 |
-|------|------|------|
-| 终端无响应 (TX 有显示, RX 无反应) | 中断回调中 `HAL_UART_Receive_IT` 只调一次, 未重启 | 每次回调末尾重新 `HAL_UART_Receive_IT` |
-| 同上 | UART2 分支传了 UART1 的 `rx_byte` | 改为无参回调, 内部读 `cli_rx_byte` |
-| 输入命令后死循环 | 环形缓冲区用 `head != tail` 判断空; tail 溢出后永不为空 | 改用 `(head - tail) & mask` |
-| help 输出阶梯状偏移 | `show_all_cmds` 用 `\n` 缺 `\r` | 改为 `\r\n` |
-| 敲回车显示两行提示符 | 终端开启了 New Line Mode | 关闭终端自动 CR 插入 |
+| # | 现象 | 根因 | 修复 |
+|---|------|------|------|
+| 1 | 终端无响应 (TX 有显示, RX 无反应) | 中断回调中 `HAL_UART_Receive_IT` 只调一次, 未重启 | 每次回调末尾重新 `HAL_UART_Receive_IT` |
+| 2 | 同上 | UART2 分支传了 UART1 的 `rx_byte` | 改为无参回调, 内部读 `cli_rx_byte` |
+| 3 | 输入命令后死循环 | 环形缓冲区用 `head != tail` 判断空; tail 溢出后永不为空 | 改用 `(head - tail) & mask` |
+| 4 | help 输出阶梯状偏移 | `show_all_cmds` 用 `\n` 缺 `\r` | 改为 `\r\n` |
+| 5 | 敲回车显示两行提示符 | 终端开启了 New Line Mode | SecureCRT 取消 New line mode |
+| 6 | `rd 100000 1` 死机 | 访问了非法地址 0x100000, 不在 CCM 范围 | 新增 `is_valid_address()` 白名单校验 |
+| 7 | 输错命令后上键调不出来 | `run_cmdline` 只在 ret==0 时记录历史 | 去掉 `if (!ret)` 条件, 所有输入都记录 |
+| 8 | 终端回车无响应 | TX 引脚 PA2 模式配置错误 / 中断未使能 | 检查 CubeMX 串口配置 NVIC Settings 勾选 USART2 global interrupt |
+
+---
+
+## 代码修改汇总 (相对原始 nr_micro_shell)
+
+对 nr_micro_shell v2.0.0 原始代码所做的本地修改：
+
+| 文件 | 修改内容 | 原因 |
+|------|---------|------|
+| `nr_micro_shell_core.c` | `run_cmdline()` 中移除 `if (!ret)` 条件, 始终调用 `add_history_cmd(sh)` | 失败的/输错的命令也要能通过 ↑ 调出 |
+| `nr_micro_shell_core.c` | `show_all_cmds()` 中 `\n` 改为 `\r\n` | 终端换行兼容, 避免阶梯状输出 |
+| `cli_cmds.c` | `cmd_rd()` 新增 `is_valid_address()` 地址白名单校验 | 防止非法地址导致 HardFault |
+| `nr_micro_shell_port.h` | 自定义提示符/缓冲区/历史条数 | 项目适配 |
