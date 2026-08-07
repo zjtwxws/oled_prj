@@ -32,10 +32,10 @@ void led_mgr_set_state(led_state_t s)
 
     switch (s) {
     case LED_STATE_OFF:
-        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
         break;
     case LED_STATE_ON:
-        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
         break;
     case LED_STATE_BLINK:
         blink_on = 1;
