@@ -48,6 +48,9 @@ typedef struct {
     const char        *info_detail;  /* INFO 详情页文本 */
     /* PREVIEW 模式: 全屏预览 + 确认/取消 */
     bool               preview_showing;    /* 预览模式激活 */
+    /* CONFIRM 模式: 确认对话框 */
+    bool               confirm_showing;    /* 确认对话框显示中 */
+    void             (*confirm_callback)(void);  /* 确认回调函数 */
 } menu_state_t;
 
 /* 菜单管理器全局单例: 所有菜单状态集中管理 */
@@ -321,6 +324,29 @@ static void render_menu(void)
  * INFO 详情页渲染 (全屏显示 detail_text)
  * ================================================================ */
 
+/* ================================================================
+ * CONFIRM 对话框渲染 (居中显示提示文字 + 按键提示)
+ * ================================================================ */
+
+static void render_confirm(void)
+{
+    uint8_t *buf = ssd1306_get_buffer();
+    memset(buf, 0x00, SSD1306_WIDTH * SSD1306_PAGES);
+
+    const menu_item_t *item = g_menu.current_menu[g_menu.cursor];
+    const char *prompt = item->confirm.prompt_text;
+    uint8_t prompt_w = measure_text_width(prompt);
+    uint8_t prompt_x = (SSD1306_WIDTH - prompt_w) / 2;
+    uint8_t prompt_page = 2;
+    draw_text(prompt_page, prompt_x, prompt, false);
+
+    const char *hint_ok  = "[确定]";
+    const char *hint_back = "[返回]";
+    uint8_t hint_page = 6;
+    draw_text(hint_page, 8, hint_ok, false);
+    draw_text(hint_page, SSD1306_WIDTH - 8 - measure_text_width(hint_back), hint_back, false);
+}
+
 static void render_info(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
@@ -447,6 +473,7 @@ static void goto_root(void)
     g_menu.value_editing      = false;
     g_menu.info_showing       = false;
     g_menu.preview_showing    = false;
+    g_menu.confirm_showing    = false;
     g_menu.dirty              = true;
 }
 
@@ -568,6 +595,13 @@ static void handle_confirm(void)
         g_menu.preview_showing = true;
         g_menu.dirty = true;
         break;
+
+    case MENU_TYPE_CONFIRM:
+        /* 进入确认对话框 */
+        g_menu.confirm_callback = item->confirm.on_confirm;
+        g_menu.confirm_showing = true;
+        g_menu.dirty = true;
+        break;
     }
 }
 
@@ -631,6 +665,24 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
             } else if (key_id == 4) {
                 /* 取消: 直接退出预览 → 回到当前子菜单 */
                 g_menu.preview_showing = false;
+                g_menu.dirty = true;
+            }
+        }
+        return;
+    }
+
+    /* CONFIRM 对话框显示中: KEY3=确认执行, KEY4=取消退出 */
+    if (g_menu.confirm_showing) {
+        if (event == KEY_EVENT_SHORT_PRESS) {
+            if (key_id == 3) {
+                /* 确认: 执行回调 */
+                if (g_menu.confirm_callback) {
+                    g_menu.confirm_callback();
+                }
+                g_menu.confirm_showing = false;
+            } else if (key_id == 4) {
+                /* 取消: 退出对话框 */
+                g_menu.confirm_showing = false;
                 g_menu.dirty = true;
             }
         }
@@ -734,6 +786,9 @@ void menu_mgr_tick(void)
     if (g_menu.dirty) {
         if (g_menu.preview_showing) {
             /* 预览模式不重新渲染 (内容由 MENU_TYPE_PREVIEW 回调直接绘制) */
+        } else if (g_menu.confirm_showing) {
+            render_confirm();
+            ssd1306_update_screen();
         } else if (g_menu.info_showing) {
             render_info();
         } else {
@@ -767,6 +822,7 @@ void menu_mgr_init(void)
     g_menu.value_editing      = false;
     g_menu.info_showing       = false;
     g_menu.preview_showing    = false;
+    g_menu.confirm_showing    = false;
 
     /* 通知 display_mgr 抑制远程帧刷屏 */
     display_mgr_set_menu_suppress(true);
@@ -796,6 +852,7 @@ void menu_mgr_activate(void)
     g_menu.value_editing      = false;
     g_menu.info_showing       = false;
     g_menu.preview_showing    = false;
+    g_menu.confirm_showing    = false;
 
     memset(g_menu.stack, 0, sizeof(g_menu.stack));
 
@@ -808,6 +865,7 @@ void menu_mgr_deactivate(void)
     g_menu.dirty  = false;
     g_menu.info_showing = false;
     g_menu.preview_showing = false;
+    g_menu.confirm_showing = false;
     g_menu.value_editing = false;
 
     display_mgr_redraw();

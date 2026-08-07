@@ -287,6 +287,12 @@ static void preview_confirm_bigtext(void)
     sys_config_set_poweron_type(SYS_CONFIG_POWERON_BIGTEXT);
 }
 
+/* --- 系统重启确认回调 --- */
+static void cb_reboot_confirm(void)
+{
+    sys_config_reset();
+}
+
 /* ================================================================
  * 菜单项定义 (自底向上, const 存储于 Flash)
  * ================================================================ */
@@ -460,9 +466,18 @@ static const menu_item_t item_contrast_menu = {
     .submenu = { .items = menu_contrast_items, .count = 1 },
 };
 
+/* --- 重启 CONFIRM 项 (Level 2, 位于"设置"子菜单下) --- */
+static const menu_item_t item_reboot = {
+    .text = "重启",
+    .type = MENU_TYPE_CONFIRM,
+    .confirm = { .prompt_text = "真的要重启吗？",
+                 .on_confirm = cb_reboot_confirm },
+};
+
 /* ---- 设置 二级菜单 (Level 1) ---- */
 static const menu_item_t *menu_setting_items[] = {
     &item_contrast_menu,
+    &item_reboot,
 };
 
 /* ================================================================
@@ -523,7 +538,7 @@ static const menu_item_t item_main_3 = {
 static const menu_item_t item_main_4 = {
     .text = "4.设置",/* "4.设置" */
     .type = MENU_TYPE_SUBMENU,
-    .submenu = { .items = menu_setting_items, .count = 1 },
+    .submenu = { .items = menu_setting_items, .count = 2 },
 };
 
 static const menu_item_t item_main_5 = {

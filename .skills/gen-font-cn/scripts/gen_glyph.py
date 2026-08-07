@@ -66,22 +66,31 @@ def glyph_to_c(glyph):
 
 
 def utf8_to_c_escape(ch):
-    return '"' + ''.join('\\x{:02x}'.format(b) for b in ch.encode('utf-8')) + '"'
+    return '"' + ch + '"'
 
 
 def read_existing(font_c_path):
     with open(font_c_path, 'r', encoding='utf-8') as f:
         content = f.read()
-    entries = re.findall(
+    # Match both \xHH\xHH\xHH escapes and real UTF-8 Chinese in {"X", ...} entries
+    entries1 = re.findall(
         r'\\x([0-9a-f]{2})\\x([0-9a-f]{2})\\x([0-9a-f]{2})',
         content
     )
+    # Also match real UTF-8: {"中", ...}
+    cjk_range = r'\u4e00-\u9fff\u3000-\u303f\uff00-\uffef'
+    entries2 = re.findall(
+        r'\{' + re.escape('"') + r'([' + cjk_range + r'])' + re.escape('"'),
+        content
+    )
     existing = set()
-    for h1, h2, h3 in entries:
+    for h1, h2, h3 in entries1:
         try:
             existing.add(bytes([int(h1, 16), int(h2, 16), int(h3, 16)]).decode('utf-8'))
         except:
             pass
+    for ch in entries2:
+        existing.add(ch)
     return content, existing
 
 

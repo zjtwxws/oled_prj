@@ -35,4 +35,7 @@ const char* sys_config_get_boot_text(void);
 void sys_config_set_poweron_type(uint8_t type);
 uint8_t sys_config_get_poweron_type(void);
 
+/** @brief ç³»ç»å¤ä½ (è°ç¨ NVIC_SystemResetï¼ä¸è¿å) */
+void sys_config_reset(void);
+
 #endif /* __SYS_CONFIG_H */

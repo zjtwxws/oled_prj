@@ -128,6 +128,11 @@ void sys_config_set_poweron_type(uint8_t type)
     sys_config_save();
 }
 
+void sys_config_reset(void)
+{
+    NVIC_SystemReset();
+}
+
 uint8_t sys_config_get_poweron_type(void)
 {
     return config.poweron_type;

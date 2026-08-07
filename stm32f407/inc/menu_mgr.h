@@ -28,6 +28,7 @@ typedef enum {
     MENU_TYPE_ACTION,       /* 执行回调函数 */
     MENU_TYPE_INFO,         /* 纯信息显示 (如版本号), 按确认/返回退出 */
     MENU_TYPE_PREVIEW,      /* 全屏预览: KEY3进入预览→KEY3确认选定退出/KEY4取消退出 */
+    MENU_TYPE_CONFIRM,      /* 确认对话框: 显示提示文字, KEY3执行确认回调, KEY4取消 */
 } menu_item_type_t;
 
 /* 菜单项定义 (存储于 Flash, const) */
@@ -69,6 +70,12 @@ typedef struct menu_item {
             void (*render)(void);           /* 全屏渲染回调 (由 menu_items.c 实现) */
             void (*on_confirm)(void);       /* KEY3 确认时调用 (保存选择,可选) */
         } preview;
+
+        /* CONFIRM: 确认对话框, KEY3 执行 on_confirm, KEY4 取消 */
+        struct {
+            const char *prompt_text;        /* 提示文字, 如 "真的要重启吗？" */
+            void      (*on_confirm)(void); /* KEY3 确认时执行的回调 (如系统复位) */
+        } confirm;
     };
 } menu_item_t;
 

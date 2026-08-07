@@ -3658,9 +3658,9 @@
       </Doc>
       <Doc>
         <Name>..\..\stm32f407\src\menu_items.c</Name>
-        <ColumnNumber>2</ColumnNumber>
+        <ColumnNumber>41</ColumnNumber>
         <TopLine>192</TopLine>
-        <CurrentLine>213</CurrentLine>
+        <CurrentLine>216</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

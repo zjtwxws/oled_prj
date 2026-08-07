@@ -33,6 +33,45 @@
 - 显示: SSD1306 OLED 128x64 (I2C)
 - 编译器: ARMCC (Keil MDK)
 
+## 驱动层隔离
+
+### 应用层禁止直接调用 HAL/CMSIS 接口
+
+所有应用层代码（`menu_items.c`、`user_app.c`、`display_mgr.c` 等）不得直接调用
+STM32 HAL 库函数或 CMSIS 内核函数（如 `NVIC_SystemReset`、`HAL_GPIO_WritePin` 等）。
+所有硬件操作必须通过驱动层模块封装：
+
+- 复位操作 → `sys_config_reset()` (sys_config.h)
+- GPIO 操作 → key_drv / led_mgr / i2c_drv
+- 看门狗 → iwdg_drv
+- Flash 操作 → sys_config
+
+**禁止示例：**
+```c
+#include "stm32f4xx_hal.h"   // 应用层禁止 include HAL 头文件
+NVIC_SystemReset();             // 应用层禁止直接调用 CMSIS
+```
+
+**正确示例：**
+```c
+#include "sys_config.h"       // 应用层只 include 驱动层头文件
+sys_config_reset();            // 通过驱动层接口调用
+```
+
+
+## 字库维护
+
+### 新增菜单文本时的字库检查
+
+每次新增菜单项、对话框提示文字、或任何需要在 OLED 上显示的中文文本时，必须自动检查所用汉字是否已存在于 `stm32f407/src/font.c` 的 `chinese_font_table` 中。若存在缺失字，调用 `.skills/gen-font-cn/` skill 生成字模并插入字库表。
+
+使用方法：
+```bash
+python .skills/gen-font-cn/scripts/gen_glyph.py stm32f407/src/font.c <缺失汉字>
+```
+
+脚本会自动跳过已存在的字符，仅生成缺失字的 16×16 点阵字模，并追加到 `chinese_font_table` 末尾。
+
 ## 菜单系统
 
 菜单定义文件: `stm32f407/src/menu_items.c`
