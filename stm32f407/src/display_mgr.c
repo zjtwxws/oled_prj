@@ -9,9 +9,14 @@
 #include "display_mgr.h"
 #include "ssd1306.h"
 #include "font.h"
+#include "sys_config.h"
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+
+/* extern: Logo 位图和大号文字渲染 (定义于 menu_items.c) */
+extern const uint8_t logo_boot_bmp[1024];
+extern void draw_bigtext_zhaojiantao(void);
 
 /* --- 内部常量 --- */
 #define CONTENT_MAX_LEN     256         /* 本地模式显示文字的最大字节数 */
@@ -256,7 +261,19 @@ void display_mgr_init(const char *boot_text_str)
     frame_seg_received = 0;
     frame_seg_total = 0;
 
-    draw_text_fullscreen(content_text);
+    /* 根据 Flash 中记录的上电显示类型渲染启动画面 */
+    uint8_t ptype = sys_config_get_poweron_type();
+    switch (ptype) {
+    case SYS_CONFIG_POWERON_LOGO:
+        memcpy(ssd1306_get_buffer(), logo_boot_bmp, 1024);
+        break;
+    case SYS_CONFIG_POWERON_BIGTEXT:
+        draw_bigtext_zhaojiantao();
+        break;
+    default: /* SYS_CONFIG_POWERON_WELCOME */
+        draw_text_fullscreen(content_text);
+        break;
+    }
     ssd1306_update_screen();
 }
 

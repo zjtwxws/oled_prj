@@ -10,3 +10,8 @@ uint32_t sys_tick_ms(void)
 {
     return HAL_GetTick();
 }
+
+void sys_tick_delay_ms(uint32_t ms)
+{
+    HAL_Delay(ms);
+}

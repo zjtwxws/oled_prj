@@ -11,4 +11,7 @@
 /** @brief 获取系统运行毫秒数 (封装 HAL_GetTick) */
 uint32_t sys_tick_ms(void);
 
+/** @brief 阻塞延时 (ms), 封装 HAL_Delay */
+void sys_tick_delay_ms(uint32_t ms);
+
 #endif

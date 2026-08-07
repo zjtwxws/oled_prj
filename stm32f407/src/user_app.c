@@ -58,6 +58,8 @@ int user_app_init(void)
     iwdg_drv_init();
 	
     display_mgr_init(sys_config_get_boot_text());
+    /* 上电画面保持 2s，让用户看清启动内容 */
+    sys_tick_delay_ms(2000);
     menu_mgr_init();
 	
     DEBUG_PRINTF("Firmware Version: " FW_VERSION);

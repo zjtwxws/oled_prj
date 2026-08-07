@@ -27,6 +27,7 @@ typedef enum {
     MENU_TYPE_VALUE,        /* 数值调节, KEY3 进入编辑, KEY1/KEY2 增减 */
     MENU_TYPE_ACTION,       /* 执行回调函数 */
     MENU_TYPE_INFO,         /* 纯信息显示 (如版本号), 按确认/返回退出 */
+    MENU_TYPE_PREVIEW,      /* 全屏预览: KEY3进入预览→KEY3确认选定退出/KEY4取消退出 */
 } menu_item_type_t;
 
 /* 菜单项定义 (存储于 Flash, const) */
@@ -62,6 +63,12 @@ typedef struct menu_item {
         struct {
             const char *detail_text;        /* 详细信息文本 */
         } info;
+
+        /* PREVIEW: 全屏预览 + 确认/取消 */
+        struct {
+            void (*render)(void);           /* 全屏渲染回调 (由 menu_items.c 实现) */
+            void (*on_confirm)(void);       /* KEY3 确认时调用 (保存选择,可选) */
+        } preview;
     };
 } menu_item_t;
 

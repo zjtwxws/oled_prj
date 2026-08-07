@@ -46,6 +46,8 @@ typedef struct {
     /* INFO 模式: 显示详情页 */
     bool               info_showing;       /* INFO 详情页显示中 */
     const char        *info_detail;  /* INFO 详情页文本 */
+    /* PREVIEW 模式: 全屏预览 + 确认/取消 */
+    bool               preview_showing;    /* 预览模式激活 */
 } menu_state_t;
 
 /* 菜单管理器全局单例: 所有菜单状态集中管理 */
@@ -444,6 +446,7 @@ static void goto_root(void)
     g_menu.scroll_offset      = 0;
     g_menu.value_editing      = false;
     g_menu.info_showing       = false;
+    g_menu.preview_showing    = false;
     g_menu.dirty              = true;
 }
 
@@ -555,6 +558,16 @@ static void handle_confirm(void)
         g_menu.info_detail  = item->info.detail_text;
         g_menu.dirty = true;
         break;
+
+    case MENU_TYPE_PREVIEW:
+        /* 进入全屏预览 */
+        if (item->preview.render) {
+            item->preview.render();
+            ssd1306_update_screen();
+        }
+        g_menu.preview_showing = true;
+        g_menu.dirty = true;
+        break;
     }
 }
 
@@ -604,6 +617,26 @@ static void value_edit_down(void)
 
 void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
 {
+    /* PREVIEW 显示中: KEY3=确认选定退出, KEY4=取消退出 */
+    if (g_menu.preview_showing) {
+        if (event == KEY_EVENT_SHORT_PRESS) {
+            if (key_id == 3) {
+                /* 确认选定: 调用 on_confirm → 退出预览 → 回到当前子菜单 */
+                const menu_item_t *item = g_menu.current_menu[g_menu.cursor];
+                if (item->type == MENU_TYPE_PREVIEW && item->preview.on_confirm) {
+                    item->preview.on_confirm();
+                }
+                g_menu.preview_showing = false;
+                g_menu.dirty = true;
+            } else if (key_id == 4) {
+                /* 取消: 直接退出预览 → 回到当前子菜单 */
+                g_menu.preview_showing = false;
+                g_menu.dirty = true;
+            }
+        }
+        return;
+    }
+
     /* INFO 显示中: 任意键退出 */
     if (g_menu.info_showing) {
         if (event == KEY_EVENT_SHORT_PRESS) {
@@ -699,12 +732,14 @@ void menu_mgr_tick(void)
     if (!g_menu.active) return;
 
     if (g_menu.dirty) {
-        if (g_menu.info_showing) {
+        if (g_menu.preview_showing) {
+            /* 预览模式不重新渲染 (内容由 MENU_TYPE_PREVIEW 回调直接绘制) */
+        } else if (g_menu.info_showing) {
             render_info();
         } else {
             render_menu();
+            ssd1306_update_screen();
         }
-        ssd1306_update_screen();
         g_menu.dirty = false;
     }
 }
@@ -731,6 +766,7 @@ void menu_mgr_init(void)
     g_menu.dirty              = true;
     g_menu.value_editing      = false;
     g_menu.info_showing       = false;
+    g_menu.preview_showing    = false;
 
     /* 通知 display_mgr 抑制远程帧刷屏 */
     display_mgr_set_menu_suppress(true);
@@ -759,6 +795,7 @@ void menu_mgr_activate(void)
     g_menu.dirty              = true;
     g_menu.value_editing      = false;
     g_menu.info_showing       = false;
+    g_menu.preview_showing    = false;
 
     memset(g_menu.stack, 0, sizeof(g_menu.stack));
 
@@ -770,6 +807,7 @@ void menu_mgr_deactivate(void)
     g_menu.active = false;
     g_menu.dirty  = false;
     g_menu.info_showing = false;
+    g_menu.preview_showing = false;
     g_menu.value_editing = false;
 
     display_mgr_redraw();

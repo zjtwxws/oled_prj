@@ -118,3 +118,17 @@ const char* sys_config_get_boot_text(void)
 {
     return config.boot_text;
 }
+
+void sys_config_set_poweron_type(uint8_t type)
+{
+    if (type > 2) return;
+    if (config.poweron_type == type) return;
+    config.poweron_type = type;
+    config.crc32 = crc32_simple((const uint8_t *)&config, sizeof(sys_config_t) - 4);
+    sys_config_save();
+}
+
+uint8_t sys_config_get_poweron_type(void)
+{
+    return config.poweron_type;
+}
