@@ -48,16 +48,33 @@ static uint8_t buffer[SSD1306_WIDTH * SSD1306_PAGES];
 
 /* --- 内部函数 --- */
 
+/**
+ * @brief  SSD1306 发送单条命令
+ * @param  cmd 参数说明
+ * @date   2026-08-07
+ */
 static void ssd1306_write_cmd(uint8_t cmd)
 {
     i2c_drv_write_reg(SSD1306_I2C_ADDR, 0x00, &cmd, 1);
 }
 
+/**
+ * @brief  SSD1306 发送多条命令
+ * @param  cmds 参数说明
+ * @param  len 参数说明
+ * @date   2026-08-07
+ */
 static void ssd1306_write_cmds(const uint8_t *cmds, uint16_t len)
 {
     i2c_drv_write_reg(SSD1306_I2C_ADDR, 0x00, cmds, len);
 }
 
+/**
+ * @brief  SSD1306 发送数据
+ * @param  data 参数说明
+ * @param  len 参数说明
+ * @date   2026-08-07
+ */
 static void ssd1306_write_data(const uint8_t *data, uint16_t len)
 {
     i2c_drv_write_reg(SSD1306_I2C_ADDR, 0x40, data, len);
@@ -65,6 +82,10 @@ static void ssd1306_write_data(const uint8_t *data, uint16_t len)
 
 /* --- 公开接口 --- */
 
+/**
+ * @brief  初始化 SSD1306 OLED 控制器
+ * @date   2026-08-07
+ */
 int ssd1306_init(void)
 {
     /*
@@ -75,7 +96,8 @@ int ssd1306_init(void)
     HAL_Delay(100);
 
     /* 发送全部初始化命令 */
-    for (uint16_t i = 0; i < sizeof(ssd1306_init_cmds); i++) {
+    for (uint16_t i = 0; i < sizeof(ssd1306_init_cmds); i++)
+    {
         ssd1306_write_cmd(ssd1306_init_cmds[i]);
     }
 
@@ -86,32 +108,58 @@ int ssd1306_init(void)
     return 0;
 }
 
+/**
+ * @brief  打开 OLED 显示
+ * @date   2026-08-07
+ */
 void ssd1306_display_on(void)
 {
     ssd1306_write_cmd(0xAF);
 }
 
+/**
+ * @brief  关闭 OLED 显示
+ * @date   2026-08-07
+ */
 void ssd1306_display_off(void)
 {
     ssd1306_write_cmd(0xAE);
 }
 
+/**
+ * @brief  设置 OLED 对比度
+ * @param  contrast 参数说明
+ * @date   2026-08-07
+ */
 void ssd1306_set_contrast(uint8_t contrast)
 {
     ssd1306_write_cmd(0x81);
     ssd1306_write_cmd(contrast);
 }
 
+/**
+ * @brief  填充全屏为指定颜色
+ * @param  color 参数说明
+ * @date   2026-08-07
+ */
 void ssd1306_fill(uint8_t color)
 {
     memset(buffer, (color == SSD1306_COLOR_WHITE) ? 0xFF : 0x00, sizeof(buffer));
 }
 
+/**
+ * @brief  清空显存缓冲区
+ * @date   2026-08-07
+ */
 void ssd1306_clear_buffer(void)
 {
     memset(buffer, 0x00, sizeof(buffer));
 }
 
+/**
+ * @brief  将显存缓冲区刷新到 OLED 屏幕
+ * @date   2026-08-07
+ */
 void ssd1306_update_screen(void)
 {
     /*
@@ -119,7 +167,8 @@ void ssd1306_update_screen(void)
      * 3 条命令合并为一次 I²C 事务 (减少 24 次 START/STOP),
      * 相比原来每条命令独立发送, 刷新速度提升约 30%。
      */
-    for (uint8_t page = 0; page < SSD1306_PAGES; page++) {
+    for (uint8_t page = 0; page < SSD1306_PAGES; page++)
+    {
         uint8_t cmds[3];
         cmds[0] = 0xB0 + page;                       /* Set Page Start Address */
         cmds[1] = 0x00;                               /* Set Lower Column Start Address */
@@ -131,23 +180,46 @@ void ssd1306_update_screen(void)
     }
 }
 
+/**
+ * @brief  在指定坐标绘制一个像素
+ * @param  x 参数说明
+ * @param  y 参数说明
+ * @param  color 参数说明
+ * @date   2026-08-07
+ */
 void ssd1306_draw_pixel(uint8_t x, uint8_t y, uint8_t color)
 {
-    if (x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT) return;
+    if (x >= SSD1306_WIDTH || y >= SSD1306_HEIGHT)
+    {
+        return;
+    }
 
     uint8_t page = y / 8;
     uint8_t bit  = y % 8;
 
-    if (color) {
+    if (color)
+    {
         buffer[page * SSD1306_WIDTH + x] |= (1 << bit);
-    } else {
+    }
+    else
+    {
         buffer[page * SSD1306_WIDTH + x] &= ~(1 << bit);
     }
 }
 
+/**
+ * @brief  向显存缓冲区指定位置写入一个字节
+ * @param  page 参数说明
+ * @param  col 参数说明
+ * @param  data 参数说明
+ * @date   2026-08-07
+ */
 void ssd1306_write_byte(uint8_t page, uint8_t col, uint8_t data)
 {
-    if (page >= SSD1306_PAGES || col >= SSD1306_WIDTH) return;
+    if (page >= SSD1306_PAGES || col >= SSD1306_WIDTH)
+    {
+        return;
+    }
     buffer[page * SSD1306_WIDTH + col] = data;
 }
 
@@ -156,6 +228,14 @@ uint8_t* ssd1306_get_buffer(void)
     return buffer;
 }
 
+/**
+ * @brief  启动 OLED 水平滚动
+ * @param  start_page 参数说明
+ * @param  end_page 参数说明
+ * @param  speed 参数说明
+ * @param  right 参数说明
+ * @date   2026-08-07
+ */
 void ssd1306_scroll_h(uint8_t start_page, uint8_t end_page, uint8_t speed, uint8_t right)
 {
     ssd1306_write_cmd(right ? 0x26 : 0x27);
@@ -181,6 +261,10 @@ void ssd1306_scroll_vh(uint8_t start_page, uint8_t end_page,
     ssd1306_write_cmd(0x2F);
 }
 
+/**
+ * @brief  停止 OLED 滚动
+ * @date   2026-08-07
+ */
 void ssd1306_scroll_stop(void)
 {
     ssd1306_write_cmd(0x2E);

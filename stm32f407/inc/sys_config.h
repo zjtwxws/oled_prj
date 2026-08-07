@@ -20,7 +20,8 @@
 #define SYS_CONFIG_POWERON_BIGTEXT   2   /* 大号文字 */
 
 /* 配置数据结构 (需保持 4 字节对齐) */
-typedef struct {
+typedef struct
+{
     uint32_t magic;                              /* 魔数 0x4F4C4544 "OLED" */
     uint8_t  poweron_type;                       /* 上电显示类型 (0=欢迎语,1=Logo,2=大号文字) */
     uint8_t  _reserved[3];                       /* 对齐填充 */

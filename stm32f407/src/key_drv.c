@@ -13,7 +13,8 @@
 
 #define DEBOUNCE_SAMPLES    3   /* 连续 3 次相同 → 消抖完成 (3×20ms=60ms) */
 
-typedef struct {
+typedef struct
+{
     GPIO_TypeDef *port;     /* GPIO 端口基地址 */
     uint16_t      pin;          /* GPIO 引脚号 */
     uint8_t       last_raw;       /* 上一次读取的原始电平 (用于边沿检测) */
@@ -31,6 +32,13 @@ typedef struct {
 static key_dev_t keys[KEY_COUNT];
 
 /* 辅助: 初始化一个按键结构 */
+/**
+ * @brief  初始化单个按键结构
+ * @param  k 参数说明
+ * @param  port 参数说明
+ * @param  pin 参数说明
+ * @date   2026-08-07
+ */
 static void key_init_entry(key_dev_t *k, GPIO_TypeDef *port, uint16_t pin)
 {
     memset(k, 0, sizeof(*k));
@@ -39,6 +47,10 @@ static void key_init_entry(key_dev_t *k, GPIO_TypeDef *port, uint16_t pin)
     k->stable_state = 1;  /* 上拉输入, 默认释放 */
 }
 
+/**
+ * @brief  初始化按键驱动
+ * @date   2026-08-07
+ */
 void key_drv_init(void)
 {
     memset(keys, 0, sizeof(keys));
@@ -61,11 +73,19 @@ void key_drv_init(void)
 #endif
 }
 
+/**
+ * @brief  按键扫描（消抖 + 长按 + 长按重复检测）
+ * @param  info 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 int key_drv_scan(key_info_t *info)
 {
     /* 待处理事件优先返回 */
-    for (int i = 0; i < KEY_COUNT; i++) {
-        if (keys[i].event_pending) {
+    for (int i = 0; i < KEY_COUNT; i++)
+    {
+        if (keys[i].event_pending)
+        {
             info->key_id = i + 1;
             info->event  = keys[i].pending_event;
             keys[i].event_pending = 0;
@@ -75,34 +95,44 @@ int key_drv_scan(key_info_t *info)
 
     uint32_t now = HAL_GetTick();
 
-    for (int i = 0; i < KEY_COUNT; i++) {
+    for (int i = 0; i < KEY_COUNT; i++)
+    {
         uint8_t raw = (HAL_GPIO_ReadPin(keys[i].port, keys[i].pin) == GPIO_PIN_RESET) ? 0 : 1;
 
-        if (raw == keys[i].last_raw) {
-            if (keys[i].debounce_cnt < DEBOUNCE_SAMPLES) {
+        if (raw == keys[i].last_raw)
+        {
+            if (keys[i].debounce_cnt < DEBOUNCE_SAMPLES)
+            {
                 keys[i].debounce_cnt++;
             }
             if (keys[i].debounce_cnt == DEBOUNCE_SAMPLES &&
-                raw != keys[i].stable_state) {
+                raw != keys[i].stable_state)
+                {
                 keys[i].stable_state = raw;
 
-                if (raw == 0) {
+                if (raw == 0)
+                {
                     /* 确认按下: 记录起始时刻 */
                     DEBUG_PRINTF("[KEY%d] Press", i + 1);
                     keys[i].press_start_tick = now;
                     keys[i].long_press_fired = 0;
                     keys[i].last_repeat_tick = 0;
                     keys[i].release_pending = 0;
-                } else {
+                }
+                else
+                {
                     /* 确认释放 */
-                    if (keys[i].long_press_fired) {
+                    if (keys[i].long_press_fired)
+                    {
                         /* 长按后释放: 产生 RELEASE 事件 */
                         DEBUG_PRINTF("[KEY%d] Release (after long press)", i + 1);
                         keys[i].release_pending = 1;
                         keys[i].pending_event = KEY_EVENT_RELEASE;
                         keys[i].event_pending = 1;
                         keys[i].long_press_fired = 0;
-                    } else {
+                    }
+                    else
+                    {
                         /* 短按: 产生 SHORT_PRESS 事件 */
                         DEBUG_PRINTF("[KEY%d] Short Press", i + 1);
                         keys[i].pending_event = KEY_EVENT_SHORT_PRESS;
@@ -110,7 +140,9 @@ int key_drv_scan(key_info_t *info)
                     }
                 }
             }
-        } else {
+        }
+        else
+        {
             keys[i].last_raw = raw;
             keys[i].debounce_cnt = 0;
         }
@@ -119,8 +151,10 @@ int key_drv_scan(key_info_t *info)
          * 长按检测: 基于真实时间 (HAL_GetTick),
          * 不受主循环负载引起的扫描间隔波动影响。
          */
-        if (keys[i].stable_state == 0 && !keys[i].long_press_fired) {
-            if (now - keys[i].press_start_tick >= KEY_LONG_PRESS_MS) {
+        if (keys[i].stable_state == 0 && !keys[i].long_press_fired)
+        {
+            if (now - keys[i].press_start_tick >= KEY_LONG_PRESS_MS)
+            {
                 keys[i].long_press_fired = 1;
                 DEBUG_PRINTF("[KEY%d] Long Press", i + 1);
                 keys[i].last_repeat_tick = now;
@@ -133,8 +167,10 @@ int key_drv_scan(key_info_t *info)
          * 长按已触发后, 周期性产生 REPEAT 事件
          * 用于菜单快速滚动, 每 KEY_LONG_REPEAT_MS 一次
          */
-        if (keys[i].stable_state == 0 && keys[i].long_press_fired) {
-            if (now - keys[i].last_repeat_tick >= KEY_LONG_REPEAT_MS) {
+        if (keys[i].stable_state == 0 && keys[i].long_press_fired)
+        {
+            if (now - keys[i].last_repeat_tick >= KEY_LONG_REPEAT_MS)
+            {
                 keys[i].last_repeat_tick = now;
                 DEBUG_PRINTF("[KEY%d] Repeat", i + 1);
                 keys[i].pending_event = KEY_EVENT_LONG_PRESS_REPEAT;
@@ -145,7 +181,15 @@ int key_drv_scan(key_info_t *info)
     return 0;
 }
 
+/**
+ * @brief  按键 EXTI 中断回调（预留）
+ * @param  key_id 参数说明
+ * @date   2026-08-07
+ */
 void key_drv_exti_callback(uint8_t key_id)
 {
-    if (key_id < 1 || key_id > KEY_COUNT) return;
+    if (key_id < 1 || key_id > KEY_COUNT)
+    {
+        return;
+    }
 }

@@ -26,7 +26,8 @@ static const uint8_t crc8_table[256] = {
     0xDE,0xD9,0xD0,0xD7,0xC2,0xC5,0xCC,0xCB,0xE6,0xE1,0xE8,0xEF,0xFA,0xFD,0xF4,0xF3
 };
 
-typedef enum {
+typedef enum
+{
     RX_WAIT_SOF = 0,    /* 初始态：等待帧头 0xA5 */
     RX_WAIT_LEN,       /* 等待数据长度字段 */
     RX_WAIT_CMD,       /* 等待命令字 */
@@ -45,6 +46,13 @@ static volatile uint32_t last_byte_tick = 0;  /* 最后接收字节的时刻 (HA
 
 static uint8_t tx_buf[PROTO_FRAME_MAX];  /* 发送缓冲区 (全局复用，每次 proto_build_frame 覆盖) */
 
+/**
+ * @brief  计算 CRC-8-ATM 校验值
+ * @param  data 参数说明
+ * @param  len 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 uint8_t proto_crc8(const uint8_t *data, uint16_t len)
 {
     uint8_t crc = 0x00;
@@ -56,33 +64,52 @@ uint8_t proto_crc8(const uint8_t *data, uint16_t len)
  * 依赖 HAL_GetTick() 记录最后收到字节的时刻,
  * 用于调用方超时检测。调用方需引入 "stm32f4xx_hal.h"。
  */
+/**
+ * @brief  记录最后接收字节的时刻
+ * @date   2026-08-07
+ */
 static void proto_record_tick(void)
 {
     extern uint32_t HAL_GetTick(void);
     last_byte_tick = HAL_GetTick();
 }
 
+/**
+ * @brief  获取最后接收字节的时刻（用于超时检测）
+ * @date   2026-08-07
+ */
 uint32_t proto_get_last_byte_tick(void)
 {
     return last_byte_tick;
 }
 
+/**
+ * @brief  协议状态机逐字节喂入
+ * @param  byte 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 int proto_feed_byte(uint8_t byte)
 {
     proto_record_tick();
 
-    switch (rx_state) {
+    switch (rx_state)
+    {
     case RX_WAIT_SOF:
-        if (byte == PROTO_SOF) {
+        if (byte == PROTO_SOF)
+        {
             rx_crc_accum = crc8_table[0x00 ^ byte];
             rx_state = RX_WAIT_LEN;
         }
         break;
 
     case RX_WAIT_LEN:
-        if (byte > PROTO_MAX_DATA) {
+        if (byte > PROTO_MAX_DATA)
+        {
             rx_state = RX_WAIT_SOF;
-        } else {
+        }
+        else
+        {
             rx_expected_len = byte;
             rx_frame.len = byte;
             rx_crc_accum = crc8_table[rx_crc_accum ^ byte];
@@ -99,9 +126,12 @@ int proto_feed_byte(uint8_t byte)
     case RX_WAIT_SEQ:
         rx_frame.seq = byte;
         rx_crc_accum = crc8_table[rx_crc_accum ^ byte];
-        if (rx_expected_len == 0) {
+        if (rx_expected_len == 0)
+        {
             rx_state = RX_WAIT_CRC;
-        } else {
+        }
+        else
+        {
             rx_data_idx = 0;
             rx_state = RX_WAIT_DATA;
         }
@@ -111,21 +141,26 @@ int proto_feed_byte(uint8_t byte)
         rx_frame.data[rx_data_idx] = byte;
         rx_crc_accum = crc8_table[rx_crc_accum ^ byte];
         rx_data_idx++;
-        if (rx_data_idx >= rx_expected_len) {
+        if (rx_data_idx >= rx_expected_len)
+        {
             rx_state = RX_WAIT_CRC;
         }
         break;
 
     case RX_WAIT_CRC:
-        if (byte == rx_crc_accum) {
+        if (byte == rx_crc_accum)
+        {
             rx_state = RX_WAIT_EOF         /* 等待帧尾 0x5A，收到则完整帧解析完成 */;
-        } else {
+        }
+        else
+        {
             rx_state = RX_WAIT_SOF;
         }
         break;
 
     case RX_WAIT_EOF         /* 等待帧尾 0x5A，收到则完整帧解析完成 */:
-        if (byte == PROTO_EOF) {
+        if (byte == PROTO_EOF)
+        {
             rx_state = RX_WAIT_SOF;
             return 1;
         }
@@ -135,16 +170,34 @@ int proto_feed_byte(uint8_t byte)
     return 0;
 }
 
+/**
+ * @brief  获取已解析完成的帧指针
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 const proto_frame_t* proto_get_frame(void)
 {
     return &rx_frame;
 }
 
+/**
+ * @brief  复位接收状态机
+ * @date   2026-08-07
+ */
 void proto_reset_rx(void)
 {
     rx_state = RX_WAIT_SOF;
 }
 
+/**
+ * @brief  构建协议帧到发送缓冲区
+ * @param  cmd 参数说明
+ * @param  seq 参数说明
+ * @param  data 参数说明
+ * @param  len 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 uint16_t proto_build_frame(uint8_t cmd, uint8_t seq, const uint8_t *data, uint8_t len)
 {
     uint8_t idx = 0;
@@ -153,7 +206,8 @@ uint16_t proto_build_frame(uint8_t cmd, uint8_t seq, const uint8_t *data, uint8_
     tx_buf[idx++] = cmd;
     tx_buf[idx++] = seq;
 
-    if (len > 0 && data) {
+    if (len > 0 && data)
+    {
         memcpy(&tx_buf[idx], data, len);
         idx += len;
     }
@@ -165,6 +219,11 @@ uint16_t proto_build_frame(uint8_t cmd, uint8_t seq, const uint8_t *data, uint8_
     return idx;
 }
 
+/**
+ * @brief  获取发送缓冲区指针
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 const uint8_t* proto_get_tx_buf(void)
 {
     return tx_buf;

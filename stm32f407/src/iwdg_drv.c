@@ -12,6 +12,10 @@
 /* IWDG 句柄 */
 static IWDG_HandleTypeDef hiwdg;
 
+/**
+ * @brief  初始化独立看门狗，超时约 1s
+ * @date   2026-08-07
+ */
 void iwdg_drv_init(void)
 {
     /*
@@ -32,6 +36,10 @@ void iwdg_drv_init(void)
     }
 }
 
+/**
+ * @brief  喂狗（刷新看门狗计数器）
+ * @date   2026-08-07
+ */
 void iwdg_drv_feed(void)
 {
     HAL_IWDG_Refresh(&hiwdg);

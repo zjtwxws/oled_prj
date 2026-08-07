@@ -232,7 +232,8 @@ static const uint8_t font_chinese_demo[][32] = {
 /* === AUTO-GENERATED CHINESE FONT TABLE START === */
 /* 中文字模表 (UTF-8 编码, 16x16 点阵, 每字 32 字节) */
 /* 中文字符条目：UTF-8 编码 → 16×16 点阵字模 (每字 32 字节) */
-typedef struct {
+typedef struct
+{
     const char *utf8;      /* UTF-8 编码的单个汉字 */
     const uint8_t glyph[32]; /* 16x16 点阵, 按列扫描 */
 } chinese_char_t;
@@ -555,7 +556,7 @@ static const chinese_char_t chinese_font_table[] = {
     {"摸", {0x10, 0x04, 0x10, 0x44, 0x10, 0x82, 0xff, 0x7f, 0x10, 0x01, 0x94, 0x88, 0xe4, 0x4b, 0xaf, 0x2a, 0xa4, 0x1a, 0xa4, 0x0e, 0xa4, 0x1a, 0xaf, 0x2a, 0xe4, 0x4b, 0x04, 0x88, 0x00, 0x80, 0x00, 0x00}}, /* 摸 */
     {"儿", {0x00, 0x80, 0x00, 0x40, 0x00, 0x20, 0x00, 0x18, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x3f, 0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x40, 0x00, 0x78, 0x00, 0x00}}, /* 儿 */
     {"营", {0x44, 0x00, 0x34, 0x00, 0x14, 0xf8, 0xd4, 0x4b, 0x5f, 0x4a, 0x54, 0x4a, 0x54, 0x4a, 0x54, 0x4a, 0x54, 0x4a, 0x54, 0x4a, 0x5f, 0x4a, 0xd4, 0x4b, 0x14, 0xf8, 0x54, 0x00, 0x34, 0x00, 0x00, 0x00}}, /* 营 */
-	{"互", {0x00, 0x40, 0x04, 0x40, 0x04, 0x47, 0xc4, 0x44, 0x3c, 0x44, 0x24, 0x44, 0x24, 0x44, 0x24, 0x44, 0x24, 0x7c, 0xe4, 0x43, 0x04, 0x40, 0x04, 0x40, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}, /* 互 */
+    {"互", {0x00, 0x40, 0x04, 0x40, 0x04, 0x47, 0xc4, 0x44, 0x3c, 0x44, 0x24, 0x44, 0x24, 0x44, 0x24, 0x44, 0x24, 0x7c, 0xe4, 0x43, 0x04, 0x40, 0x04, 0x40, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}, /* 互 */
     {"享", {0x04, 0x08, 0x04, 0x08, 0x74, 0x09, 0x54, 0x09, 0x54, 0x49, 0x54, 0x49, 0x56, 0x7d, 0x54, 0x0d, 0x54, 0x0b, 0x54, 0x0b, 0x74, 0x09, 0x04, 0x08, 0x04, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}, /* 享 */
     {"亮", {0x04, 0x47, 0x04, 0x41, 0x74, 0x21, 0x54, 0x1d, 0x54, 0x05, 0x54, 0x05, 0x56, 0x05, 0x54, 0x05, 0x54, 0x05, 0x54, 0x3d, 0x74, 0x41, 0x04, 0x41, 0x04, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}, /* 亮 */
     {"侧", {0x40, 0x00, 0x20, 0x00, 0xf8, 0x7f, 0x06, 0x00, 0xfc, 0x47, 0x04, 0x30, 0xf4, 0x0f, 0x04, 0x10, 0xfc, 0x27, 0x00, 0x00, 0xf0, 0x47, 0x00, 0x40, 0xfe, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}, /* 侧 */
@@ -671,14 +672,27 @@ static const chinese_char_t chinese_font_table[] = {
 /* === AUTO-GENERATED CHINESE FONT TABLE END === */
 /* --- 公开接口 --- */
 
+/**
+ * @brief  获取 ASCII 字符字模
+ * @param  ch 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 const uint8_t* font_get_ascii(char ch)
 {
-    if (ch < 0x20 || ch > 0x7E) {
+    if (ch < 0x20 || ch > 0x7E)
+    {
         return ascii_8x16[0];  /* 返回空格 */
     }
     return ascii_8x16[ch - 0x20];
 }
 
+/**
+ * @brief  TODO: font_get_chinese
+ * @param  gb2312_code 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 const uint8_t* font_get_chinese(uint16_t gb2312_code)
 {
     /*
@@ -692,26 +706,37 @@ const uint8_t* font_get_chinese(uint16_t gb2312_code)
     uint8_t hi = (uint8_t)(gb2312_code >> 8);
     uint8_t lo = (uint8_t)(gb2312_code & 0xFF);
 
-    if (hi < 0xB0 || hi > 0xF7 || lo < 0xA1 || lo > 0xFE) {
+    if (hi < 0xB0 || hi > 0xF7 || lo < 0xA1 || lo > 0xFE)
+    {
         return NULL;  /* 非汉字区 */
     }
 
     int qu = hi - 0xA0;
     int wei = lo - 0xA0;
 
-    if (qu < 16) return NULL;
+    if (qu < 16)
+    {
+        return NULL;
+    }
 
     int index = (qu - 16) * 94 + (wei - 1);
 
     /* TODO: 接入完整字库后, 此处返回 font_chinese_16x16[index]
      *       当前演示版仅返回 demo 字模 */
     (void)index;
-    if (gb2312_code == 0xB0A1) {
+    if (gb2312_code == 0xB0A1)
+    {
         return font_chinese_demo[0];
     }
     return NULL;  /* 字库未收录 (演示期返回 NULL, 调用方用'?'替代) */
 }
 
+/**
+ * @brief  TODO: font_is_chinese_lead
+ * @param  byte 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 int font_is_chinese_lead(uint8_t byte)
 {
     return (byte >= 0xA1 && byte <= 0xF7) ? 1 : 0;
@@ -720,11 +745,23 @@ int font_is_chinese_lead(uint8_t byte)
 /* 根据 UTF-8 首字节判断字符占用字节数 (不校验畸形编码) */
 static size_t utf8_char_len(uint8_t first_byte)
 {
-    if ((first_byte & 0x80) == 0)       return 1;  /* 0xxxxxxx */
-    if ((first_byte & 0xE0) == 0xC0)    return 2;  /* 110xxxxx */
-    if ((first_byte & 0xF0) == 0xE0)    return 3;  /* 1110xxxx */
-    if ((first_byte & 0xF8) == 0xF0)    return 4;  /* 11110xxx */
-    return 1;  /* 非法字节按单字节处理 */
+    if ((first_byte & 0x80) == 0)
+    {
+        return 1;
+    }
+    if ((first_byte & 0xE0) == 0xC0)
+    {
+        return 2;
+    }
+    if ((first_byte & 0xF0) == 0xE0)
+    {
+        return 3;
+    }
+    if ((first_byte & 0xF8) == 0xF0)
+    {
+        return 4;
+    }
+    return 1;
 }
 
 
@@ -735,7 +772,8 @@ static size_t utf8_char_len(uint8_t first_byte)
 #define FONT_LRU_SIZE  5  /* LRU 缓存条目数 (5 条覆盖状态栏高频汉字) */
 
 /* 中文字符条目：UTF-8 编码 → 16×16 点阵字模 (每字 32 字节) */
-typedef struct {
+typedef struct
+{
     char     key[4];       /* UTF-8 字节序列 (最多 4 字节) */
     uint8_t  key_len;      /* 实际字节长度 */
     const uint8_t *glyph;  /* 字模指针 (或 NULL) */
@@ -744,32 +782,45 @@ typedef struct {
 static font_lru_entry_t font_lru_cache[FONT_LRU_SIZE];
 static uint8_t font_lru_next = 0;  /* round-robin 替换指针 (0~4 循环) */  /* 下次替换位置 (round-robin) */
 
+/**
+ * @brief  根据 UTF-8 编码获取中文字模
+ * @param  utf8_str 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 const uint8_t* font_get_chinese_utf8(const char *utf8_str)
 {
-    if (!utf8_str) return NULL;
+    if (!utf8_str)
+    {
+        return NULL;
+    }
 
     size_t len = utf8_char_len((uint8_t)utf8_str[0]);
 
     /* --- LRU 缓存查询 --- */
-    for (int i = 0; i < FONT_LRU_SIZE; i++) {
+    for (int i = 0; i < FONT_LRU_SIZE; i++)
+    {
         font_lru_entry_t *e = &font_lru_cache[i];
         if (e->key_len == len &&
             e->key[0] == utf8_str[0] &&
             e->key[1] == utf8_str[1] &&
             e->key[2] == utf8_str[2] &&
-            (len < 4 || e->key[3] == utf8_str[3])) {
+            (len < 4 || e->key[3] == utf8_str[3]))
+            {
             return e->glyph;
         }
     }
 
     /* --- 全表搜索 --- */
     const uint8_t *result = NULL;
-    for (size_t i = 0; i < CHINESE_FONT_TABLE_SIZE; i++) {
+    for (size_t i = 0; i < CHINESE_FONT_TABLE_SIZE; i++)
+    {
         const char *tbl = chinese_font_table[i].utf8;
         if (tbl[0] == utf8_str[0] &&
             tbl[1] == utf8_str[1] &&
             tbl[2] == utf8_str[2] &&
-            (len < 4 || tbl[3] == utf8_str[3])) {
+            (len < 4 || tbl[3] == utf8_str[3]))
+            {
             result = chinese_font_table[i].glyph;
             break;
         }

@@ -29,7 +29,8 @@
 #define SSD1306_COLOR_WHITE  1  /* 白色 (像素亮) */
 
 /* 显示状态 */
-typedef enum {
+typedef enum
+{
     SSD1306_STATE_OFF = 0,  /* 显示关闭 */
     SSD1306_STATE_ON  = 1   /* 显示开启 */
 } ssd1306_state_t;

@@ -36,7 +36,8 @@
 #define NAK_FLASH_ERROR     0x04     /* Flash 写入/擦除错误 */
 #define NAK_BUSY            0x05            /* 设备忙, 暂不可处理 */
 
-typedef struct {
+typedef struct
+{
     uint8_t cmd;    /* 命令字 (CMD_*) */
     uint8_t seq;    /* 序列号 (用于请求-应答匹配) */
     uint8_t len;    /* 负载数据长度 (字节) */
@@ -54,7 +55,8 @@ void proto_reset_rx(void);
  * 超时检查: 在调用 proto_feed_byte 的主循环中,
  * 若超过 PROTO_RX_TIMEOUT_MS 未收到完整帧, 调用此函数复位状态机。
  * 用法:
- *   if (HAL_GetTick() - last_byte_tick > PROTO_RX_TIMEOUT_MS) {
+ *   if (HAL_GetTick() - last_byte_tick > PROTO_RX_TIMEOUT_MS)
+ {
  *       proto_reset_rx();
  *       last_byte_tick = HAL_GetTick();
  *   }

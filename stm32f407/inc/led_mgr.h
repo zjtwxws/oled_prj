@@ -12,7 +12,8 @@
 
 #include <stdint.h>
 
-typedef enum {
+typedef enum
+{
     LED_STATE_OFF = 0,   /* LED 关闭 */
     LED_STATE_ON  = 1,    /* LED 常亮 */
     LED_STATE_BLINK = 2 /* LED 闪烁 (周期 = LED_BLINK_PERIOD_MS) */

@@ -17,7 +17,8 @@
 #define KEY_LONG_PRESS_MS  2000  /* 长按判定阈值 (ms)，超过此时间触发长按事件 */
 #define KEY_LONG_REPEAT_MS  150   /* 长按重复间隔 (ms)，长按保持期间周期性产生 REPEAT 事件 */
 
-typedef enum {
+typedef enum
+{
     KEY_EVENT_NONE        = 0,        /* 无事件 */
     KEY_EVENT_SHORT_PRESS = 1,   /* 短按 (按下后释放，时长 < 长按阈值) */
     KEY_EVENT_LONG_PRESS  = 2,    /* 长按 (按住达到 KEY_LONG_PRESS_MS 时触发一次) */
@@ -25,7 +26,8 @@ typedef enum {
     KEY_EVENT_LONG_PRESS_REPEAT = 4  /* 长按重复 (长按保持期间每 KEY_LONG_REPEAT_MS 产生一次) */
 } key_event_t;
 
-typedef struct {
+typedef struct
+{
     uint8_t key_id;     /* 按键编号 (1=KEY1, 2=KEY2, 3=KEY3, 4=KEY4) */
     key_event_t event;  /* 按键事件类型 */
 } key_info_t;

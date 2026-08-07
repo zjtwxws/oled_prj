@@ -20,6 +20,11 @@ static UART_HandleTypeDef *p_debug_uart = NULL;
 
 /* ---- 初始化 ---- */
 
+/**
+ * @brief  初始化调试串口
+ * @param  huart 参数说明
+ * @date   2026-08-07
+ */
 void debug_console_init(void *huart)
 {
     p_debug_uart = (UART_HandleTypeDef *)huart;
@@ -32,11 +37,18 @@ void debug_console_init(void *huart)
 
 /* ---- 原始字符串输出 ---- */
 
+/**
+ * @brief  调试串口输出原始字符串
+ * @param  str 参数说明
+ * @date   2026-08-07
+ */
 void debug_console_write(const char *str)
 {
-    if (p_debug_uart && str) {
+    if (p_debug_uart && str)
+    {
         uint16_t len = (uint16_t)strlen(str);
-        if (len > 0) {
+        if (len > 0)
+        {
             HAL_UART_Transmit(p_debug_uart, (uint8_t *)(uintptr_t)str, len, HAL_MAX_DELAY);
         }
     }
@@ -44,9 +56,18 @@ void debug_console_write(const char *str)
 
 /* ---- 格式化输出 (自动追加 \r\n) ---- */
 
+/**
+ * @brief  调试串口格式化输出（自动追加 \r\n）
+ * @param  fmt 参数说明
+ * @param  ... 参数说明
+ * @date   2026-08-07
+ */
 void debug_printf(const char *fmt, ...)
 {
-    if (p_debug_uart == NULL) return;
+    if (p_debug_uart == NULL)
+    {
+        return;
+    }
 
     char buf[256];
     va_list args;
@@ -61,7 +82,8 @@ void debug_printf(const char *fmt, ...)
 #endif
     va_end(args);
 
-    if (len > 0 && (uint16_t)len < sizeof(buf)) {
+    if (len > 0 && (uint16_t)len < sizeof(buf))
+    {
         HAL_UART_Transmit(p_debug_uart, (uint8_t *)buf, (uint16_t)len, HAL_MAX_DELAY);
     }
     /* 追加换行 */
@@ -70,21 +92,33 @@ void debug_printf(const char *fmt, ...)
 
 /* ---- 十六进制 dump ---- */
 
+/**
+ * @brief  调试串口十六进制 dump
+ * @param  data 参数说明
+ * @param  len 参数说明
+ * @date   2026-08-07
+ */
 void debug_hexdump(const uint8_t *data, uint16_t len)
 {
-    if (p_debug_uart == NULL || data == NULL) return;
+    if (p_debug_uart == NULL || data == NULL)
+    {
+        return;
+    }
 
-    for (uint16_t i = 0; i < len; i++) {
+    for (uint16_t i = 0; i < len; i++)
+    {
         char hex[4];
         snprintf(hex, sizeof(hex), "%02X ", data[i]);
         HAL_UART_Transmit(p_debug_uart, (uint8_t *)hex, 3, HAL_MAX_DELAY);
 
         /* 每 16 字节换行 */
-        if ((i + 1) % 16 == 0) {
+        if ((i + 1) % 16 == 0)
+        {
             HAL_UART_Transmit(p_debug_uart, (uint8_t *)"\r\n", 2, HAL_MAX_DELAY);
         }
     }
-    if (len % 16 != 0) {
+    if (len % 16 != 0)
+    {
         HAL_UART_Transmit(p_debug_uart, (uint8_t *)"\r\n", 2, HAL_MAX_DELAY);
     }
 }

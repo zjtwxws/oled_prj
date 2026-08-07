@@ -14,4 +14,3 @@ int user_app_init(void);
 int user_app_handle(void);
 
 #endif
-

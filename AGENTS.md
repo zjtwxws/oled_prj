@@ -1,6 +1,155 @@
 # AGENTS.md — oled_prj 项目约定
 
-## 编码约定
+## C 语言编码规范
+
+以下规范适用于 `stm32f407/` 目录下所有 `.c` 和 `.h` 源代码文件。
+其他目录（如 `rk3506/`、`tools/` 等）原有代码不做强制修改，但新增代码应遵循本规范。
+
+---
+
+### 1. 大括号 — Allman 风格（括号必须另起一行）
+
+所有大括号 `{` 必须**另起一行**，包括函数体、`if`/`else`、`for`/`while`/`do-while`、
+`switch`/`case`、`struct`/`union`/`enum` 及数组/结构体初始化。
+
+**正确示例：**
+```c
+void function_name(void)
+{
+    // 函数体
+}
+
+if (condition)
+{
+    // if 分支
+}
+else
+{
+    // else 分支
+}
+
+for (int i = 0; i < n; i++)
+{
+    // 循环体
+}
+
+typedef struct
+{
+    uint8_t cursor;
+    uint8_t scroll_offset;
+} menu_context_t;
+
+static const menu_item_t item_demo_a =
+{
+    .text = "选项A",
+    .type = MENU_TYPE_ACTION,
+    .action = cb_demo_a,
+};
+
+switch (value)
+{
+case 0:
+    do_something();
+    break;
+case 1:
+    do_other();
+    break;
+default:
+    break;
+}
+```
+
+**错误示例：**
+```c
+void function_name(void) {   // 禁止：括号跟在声明同行
+if (condition) {              // 禁止：括号跟在 if 同行
+```
+
+**适用范围：** 全体 `stm32f407/src/*.c` 和 `stm32f407/inc/*.h`
+
+---
+
+### 2. if 必须使用大括号（禁止无括号单行语句）
+
+所有 `if`、`else if`、`else` 后必须跟 `{ }`，即使只有一条语句。
+
+**正确示例：**
+```c
+if (x == 0)
+{
+    return;
+}
+
+if (ptr != NULL)
+{
+    *ptr = 1;
+}
+else
+{
+    return -1;
+}
+```
+
+**错误示例：**
+```c
+if (x == 0) return;          // 禁止：缺少大括号
+if (p == NULL) return -1;    // 禁止：缺少大括号
+```
+
+---
+
+### 3. 文件头注释
+
+每个 `.c` 和 `.h` 文件必须有文件头注释，描述文件内容。
+
+**格式：**
+```c
+/**
+ * @file    文件名
+ * @brief   文件功能简述
+ */
+```
+
+---
+
+### 4. 函数头注释
+
+每个函数（含 `static` 函数）必须有函数头注释。
+
+**格式：**
+```c
+/**
+ * @brief  功能简述
+ * @param  参数名 参数说明
+ * @return 返回值说明
+ * @note   使用注意事项（可选）
+ * @date   创建时间 YYYY-MM-DD
+ */
+```
+
+---
+
+### 5. 缩进：4 空格，禁止 Tab 字符
+
+所有缩进使用 **4 个空格**，禁止使用 Tab 字符（`\t`）。
+
+---
+
+### 6. 行宽 ≤ 120 字符
+
+每行代码不超过 120 个字符。超长行应合理断行。
+
+---
+
+### 7. 变量命名
+
+- 全局变量：`g_` 前缀（如 `g_menu`、`g_remote_mode`）
+- 静态变量：下划线分隔小写（如 `rx_buf`、`last_key_scan`）
+- 局部变量：下划线分隔小写（如 `item_idx`、`scroll_offset`）
+- 宏常量和枚举：全大写 + 下划线（如 `MENU_MAX_DEPTH`、`KEY_LONG_PRESS_MS`）
+- 类型定义：小写 + 下划线 + `_t` 后缀（如 `menu_item_t`、`key_event_t`）
+
+---
 
 ### 中文字符：永远使用真正的 UTF-8 汉字，禁止 \x 转义序列
 

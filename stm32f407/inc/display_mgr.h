@@ -13,7 +13,8 @@
 #include <stdbool.h>
 
 /* 远程子模式枚举 */
-typedef enum {
+typedef enum
+{
     REMOTE_SUB_TEXT    = 0,  /* 文字 (支持7种特效,PC端渲染) */
     REMOTE_SUB_TIME    = 1,  /* 时钟 (静态,PC端渲染) */
     REMOTE_SUB_WEATHER = 2,  /* 天气 (静态,PC端渲染) */
@@ -21,7 +22,8 @@ typedef enum {
 } remote_sub_mode_t;
 
 /* 显示特效枚举 (本地模式+远程文字子模式) */
-typedef enum {
+typedef enum
+{
     DISP_MODE_STATIC   = 0,    /* 静态显示 */
     DISP_MODE_SCROLL_L = 1,   /* 左滚 */
     DISP_MODE_SCROLL_R = 2,   /* 右滚 */
@@ -33,7 +35,8 @@ typedef enum {
 } display_mode_t;
 
 /* 时间/天气信息 (仅存储, 本地+远程均不绘制状态栏) */
-typedef struct {
+typedef struct
+{
     uint8_t  weather_type;   /* 天气类型 (0=晴,1=多云,2=雨,3=雪,4=风...由PC端定义) */
     int8_t   temperature;    /* 温度 (-128~127, 摄氏度) */
     uint8_t  humidity;      /* 湿度 (0~100%) */

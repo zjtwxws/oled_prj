@@ -21,7 +21,8 @@
 #endif
 
 /* 菜单项类型 */
-typedef enum {
+typedef enum
+{
     MENU_TYPE_SUBMENU,      /* 进入子菜单 */
     MENU_TYPE_TOGGLE,       /* ON/OFF 开关, 按确认切换 */
     MENU_TYPE_VALUE,        /* 数值调节, KEY3 进入编辑, KEY1/KEY2 增减 */

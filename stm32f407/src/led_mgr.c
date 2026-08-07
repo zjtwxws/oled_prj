@@ -18,19 +18,29 @@ static led_state_t led_state = LED_STATE_OFF;  /* 当前 LED 状态 (OFF/ON/BLIN
 static uint32_t blink_timer = 0;  /* 闪烁计时器 (ms累计) */
 static uint8_t  blink_on = 0;       /* 闪烁周期内当前亮灭状态 */
 
+/**
+ * @brief  初始化 LED 管理器
+ * @date   2026-08-07
+ */
 void led_mgr_init(void)
 {
     /* GPIO 初始化在 CubeMX 生成的 MX_GPIO_Init() 中完成 */
     HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
 }
 
+/**
+ * @brief  设置 LED 状态（关/亮/闪烁）
+ * @param  s 参数说明
+ * @date   2026-08-07
+ */
 void led_mgr_set_state(led_state_t s)
 {
     led_state = s;
     blink_timer = 0;
     blink_on = 0;
 
-    switch (s) {
+    switch (s)
+    {
     case LED_STATE_OFF:
         HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
         break;
@@ -44,17 +54,30 @@ void led_mgr_set_state(led_state_t s)
     }
 }
 
+/**
+ * @brief  获取当前 LED 状态
+ * @date   2026-08-07
+ */
 led_state_t led_mgr_get_state(void)
 {
     return led_state;
 }
 
+/**
+ * @brief  LED 定时刷新（用于闪烁逻辑）
+ * @param  elapsed_ms 参数说明
+ * @date   2026-08-07
+ */
 void led_mgr_tick(uint32_t elapsed_ms)
 {
-    if (led_state != LED_STATE_BLINK) return;
+    if (led_state != LED_STATE_BLINK)
+    {
+        return;
+    }
 
     blink_timer += elapsed_ms;
-    if (blink_timer >= LED_BLINK_PERIOD_MS) {
+    if (blink_timer >= LED_BLINK_PERIOD_MS)
+    {
         blink_timer = 0;
         blink_on = !blink_on;
         HAL_GPIO_WritePin(LED_PORT, LED_PIN, blink_on ? GPIO_PIN_SET : GPIO_PIN_RESET);

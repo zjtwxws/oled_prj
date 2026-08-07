@@ -75,6 +75,10 @@ static void effect_fade(void);
 /* --- 内部辅助 --- */
 
 /* 清空全屏 buffer (128×64 = 1024 字节) */
+/**
+ * @brief  清空全屏缓冲区
+ * @date   2026-08-07
+ */
 static void clear_full_screen(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
@@ -82,28 +86,55 @@ static void clear_full_screen(void)
 }
 
 /* 仅在 menu_suppress 为 false 时刷屏 */
+/**
+ * @brief  条件刷屏（菜单激活时抑制）
+ * @date   2026-08-07
+ */
 static void update_screen_if_allowed(void)
 {
-    if (!menu_suppress) {
+    if (!menu_suppress)
+    {
         ssd1306_update_screen();
     }
 }
 
 
 
+/**
+ * @brief  在 OLED 指定位置绘制一个中文字符
+ * @param  x 参数说明
+ * @param  page 参数说明
+ * @param  glyph 参数说明
+ * @date   2026-08-07
+ */
 static void draw_chinese_char(uint8_t x, uint8_t page, const uint8_t *glyph)
 {
-    if (!glyph) return;
+    if (!glyph)
+    {
+        return;
+    }
     uint8_t *buf = ssd1306_get_buffer();
-    for (uint8_t c = 0; c < FONT_CHINESE_W && x + c < SSD1306_WIDTH; c++, x++) {
-        if (page     < SSD1306_PAGES) buf[page     * SSD1306_WIDTH + x] = glyph[c * 2];
-        if (page + 1 < SSD1306_PAGES) buf[(page + 1) * SSD1306_WIDTH + x] = glyph[c * 2 + 1];
+    for (uint8_t c = 0; c < FONT_CHINESE_W && x + c < SSD1306_WIDTH; c++, x++)
+    {
+        if (page     < SSD1306_PAGES)
+        {
+            buf[page     * SSD1306_WIDTH + x] = glyph[c * 2];
+        }
+        if (page + 1 < SSD1306_PAGES)
+        {
+            buf[(page + 1) * SSD1306_WIDTH + x] = glyph[c * 2 + 1];
+        }
     }
 }
 
 /*
  * 全屏绘制 UTF-8 文字 (从 page 0 开始, 128×64 全屏)
  * 中文字符 16×16, ASCII 字符 8×16, 自动换行
+ */
+/**
+ * @brief  全屏绘制 UTF-8 文字（自动换行）
+ * @param  text 参数说明
+ * @date   2026-08-07
  */
 static void draw_text_fullscreen(const char *text)
 {
@@ -113,37 +144,66 @@ static void draw_text_fullscreen(const char *text)
     const char *p = text;
     uint8_t *buf = ssd1306_get_buffer();
 
-    while (*p && page < SSD1306_PAGES - 1) {
+    while (*p && page < SSD1306_PAGES - 1)
+    {
         uint8_t first = (uint8_t)*p;
 
-        if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+        if ((first & 0x80) && (first & 0xF0) == 0xE0)
+        {
             /* 3 字节 UTF-8 中文 */
             const uint8_t *glyph = font_get_chinese_utf8(p);
-            if (col + FONT_CHINESE_W > SSD1306_WIDTH) {
+            if (col + FONT_CHINESE_W > SSD1306_WIDTH)
+            {
                 col = 0; page += 2;
-                if (page >= SSD1306_PAGES - 1) break;
+                if (page >= SSD1306_PAGES - 1)
+                {
+                    break;
+                }
             }
-            if (glyph) {
+            if (glyph)
+            {
                 draw_chinese_char(col, page, glyph);
-            } else {
+            }
+            else
+            {
                 /* 缺字显示实心方块 */
-                for (uint8_t c = 0; c < FONT_CHINESE_W && col + c < SSD1306_WIDTH; c++) {
-                    if (page     < SSD1306_PAGES) buf[page     * SSD1306_WIDTH + col + c] = 0xFF;
-                    if (page + 1 < SSD1306_PAGES) buf[(page + 1) * SSD1306_WIDTH + col + c] = 0xFF;
+                for (uint8_t c = 0; c < FONT_CHINESE_W && col + c < SSD1306_WIDTH; c++)
+                {
+                    if (page     < SSD1306_PAGES)
+                    {
+                        buf[page     * SSD1306_WIDTH + col + c] = 0xFF;
+                    }
+                    if (page + 1 < SSD1306_PAGES)
+                    {
+                        buf[(page + 1) * SSD1306_WIDTH + col + c] = 0xFF;
+                    }
                 }
             }
             col += FONT_CHINESE_W;
             p += 3;
-        } else {
+        }
+        else
+        {
             /* ASCII */
-            if (col + FONT_ASCII_W > SSD1306_WIDTH) {
+            if (col + FONT_ASCII_W > SSD1306_WIDTH)
+            {
                 col = 0; page += 2;
-                if (page >= SSD1306_PAGES - 1) break;
+                if (page >= SSD1306_PAGES - 1)
+                {
+                    break;
+                }
             }
             const uint8_t *bm = font_get_ascii(*p);
-            for (uint8_t c = 0; c < FONT_ASCII_W && col < SSD1306_WIDTH; c++, col++) {
-                if (page     < SSD1306_PAGES) buf[page     * SSD1306_WIDTH + col] = bm[c];
-                if (page + 1 < SSD1306_PAGES) buf[(page + 1) * SSD1306_WIDTH + col] = bm[c + 8];
+            for (uint8_t c = 0; c < FONT_ASCII_W && col < SSD1306_WIDTH; c++, col++)
+            {
+                if (page     < SSD1306_PAGES)
+                {
+                    buf[page     * SSD1306_WIDTH + col] = bm[c];
+                }
+                if (page + 1 < SSD1306_PAGES)
+                {
+                    buf[(page + 1) * SSD1306_WIDTH + col] = bm[c + 8];
+                }
             }
             p++;
         }
@@ -154,18 +214,29 @@ static void draw_text_fullscreen(const char *text)
  * 计算 text 在 SSD1306 上的像素宽度。
  * 中文字符=16px, ASCII字符=8px。
  */
+/**
+ * @brief  计算文字像素宽度
+ * @param  text 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 static int16_t calc_text_pixel_width(const char *text)
 {
     int16_t w = 0;
     const char *p = text;
-    while (*p) {
+    while (*p)
+    {
         uint8_t first = (uint8_t)*p;
-        if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+        if ((first & 0x80) && (first & 0xF0) == 0xE0)
+        {
             w += FONT_CHINESE_W;
             p += 3;
-        } else if ((first & 0x80) && (first & 0xE0) == 0xC0) {
+        } else if ((first & 0x80) && (first & 0xE0) == 0xC0)
+        {
             p += 2;
-        } else {
+        }
+        else
+        {
             w += FONT_ASCII_W;
             p++;
         }
@@ -175,39 +246,59 @@ static int16_t calc_text_pixel_width(const char *text)
 
 /* --- 特效实现 (全屏 128×64) --- */
 
+/**
+ * @brief  静态显示特效
+ * @date   2026-08-07
+ */
 static void effect_static(void)
 {
     draw_text_fullscreen(content_text);
 }
 
+/**
+ * @brief  左滚显示特效
+ * @date   2026-08-07
+ */
 static void effect_scroll_left(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
-    for (uint8_t p = 0; p < SSD1306_PAGES; p++) {
+    for (uint8_t p = 0; p < SSD1306_PAGES; p++)
+    {
         uint8_t *line = &buf[p * SSD1306_WIDTH];
         memmove(line, line + SCROLL_STEP_PX, SSD1306_WIDTH - SCROLL_STEP_PX);
         memset(line + SSD1306_WIDTH - SCROLL_STEP_PX, 0, SCROLL_STEP_PX);
     }
     scroll_offset_x += SCROLL_STEP_PX;
-    if (scroll_offset_x >= calc_text_pixel_width(content_text)) {
+    if (scroll_offset_x >= calc_text_pixel_width(content_text))
+    {
         scroll_offset_x = 0;
     }
 }
 
+/**
+ * @brief  右滚显示特效
+ * @date   2026-08-07
+ */
 static void effect_scroll_right(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
-    for (uint8_t p = 0; p < SSD1306_PAGES; p++) {
+    for (uint8_t p = 0; p < SSD1306_PAGES; p++)
+    {
         uint8_t *line = &buf[p * SSD1306_WIDTH];
         memmove(line + SCROLL_STEP_PX, line, SSD1306_WIDTH - SCROLL_STEP_PX);
         memset(line, 0, SCROLL_STEP_PX);
     }
 }
 
+/**
+ * @brief  上滚显示特效
+ * @date   2026-08-07
+ */
 static void effect_scroll_up(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
-    for (uint8_t p = 0; p < SSD1306_PAGES - 1; p++) {
+    for (uint8_t p = 0; p < SSD1306_PAGES - 1; p++)
+    {
         memcpy(&buf[p * SSD1306_WIDTH],
                &buf[(p + 1) * SSD1306_WIDTH],
                SSD1306_WIDTH);
@@ -215,10 +306,15 @@ static void effect_scroll_up(void)
     memset(&buf[(SSD1306_PAGES - 1) * SSD1306_WIDTH], 0, SSD1306_WIDTH);
 }
 
+/**
+ * @brief  下滚显示特效
+ * @date   2026-08-07
+ */
 static void effect_scroll_down(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
-    for (uint8_t p = SSD1306_PAGES - 1; p > 0; p--) {
+    for (uint8_t p = SSD1306_PAGES - 1; p > 0; p--)
+    {
         memcpy(&buf[p * SSD1306_WIDTH],
                &buf[(p - 1) * SSD1306_WIDTH],
                SSD1306_WIDTH);
@@ -226,11 +322,30 @@ static void effect_scroll_down(void)
     memset(&buf[0], 0, SSD1306_WIDTH);
 }
 
-static void effect_flip(void)  { /* tick 中处理 */ }
-static void effect_fade(void)  { /* tick 中处理 */ }
+/**
+ * @brief  翻页显示特效
+ * @date   2026-08-07
+ */
+static void effect_flip(void)
+{
+    /* tick 中处理 */;
+}
+/**
+ * @brief  淡入淡出显示特效
+ * @date   2026-08-07
+ */
+static void effect_fade(void)
+{
+    /* tick 中处理 */;
+}
 
 /* --- 公开接口: 初始化 --- */
 
+/**
+ * @brief  初始化显示管理器
+ * @param  boot_text_str 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_init(const char *boot_text_str)
 {
     effects[DISP_MODE_STATIC]   = effect_static;
@@ -241,7 +356,8 @@ void display_mgr_init(const char *boot_text_str)
     effects[DISP_MODE_FLIP]     = effect_flip;
     effects[DISP_MODE_FADE]     = effect_fade;
 
-    if (boot_text_str && boot_text_str[0]) {
+    if (boot_text_str && boot_text_str[0])
+    {
         strncpy(boot_text, boot_text_str, BOOT_TEXT_MAX_LEN - 1);
         boot_text[BOOT_TEXT_MAX_LEN - 1] = '\0';
     }
@@ -263,7 +379,8 @@ void display_mgr_init(const char *boot_text_str)
 
     /* 根据 Flash 中记录的上电显示类型渲染启动画面 */
     uint8_t ptype = sys_config_get_poweron_type();
-    switch (ptype) {
+    switch (ptype)
+    {
     case SYS_CONFIG_POWERON_LOGO:
         memcpy(ssd1306_get_buffer(), logo_boot_bmp, 1024);
         break;
@@ -279,20 +396,31 @@ void display_mgr_init(const char *boot_text_str)
 
 /* --- 公开接口: 本地/远程模式切换 --- */
 
+/**
+ * @brief  切换本地/远程显示模式
+ * @param  remote 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_set_remote(bool remote)
 {
-    if (remote == is_remote) return;
+    if (remote == is_remote)
+    {
+        return;
+    }
 
     is_remote = remote;
 
-    if (remote) {
+    if (remote)
+    {
         /* 切换到远程模式: 清屏准备接收帧缓冲 */
         clear_full_screen();
         update_screen_if_allowed();
         memset(frame_buf, 0, FRAME_BUF_SIZE);
         frame_seg_received = 0;
         frame_seg_total = 0;
-    } else {
+    }
+    else
+    {
         /* 切换到本地模式: 恢复本地渲染 */
         scroll_offset_x = 0;
         flip_phase = 0;
@@ -303,6 +431,10 @@ void display_mgr_set_remote(bool remote)
     }
 }
 
+/**
+ * @brief  查询是否处于远程模式
+ * @date   2026-08-07
+ */
 bool display_mgr_is_remote(void)
 {
     return is_remote;
@@ -310,43 +442,75 @@ bool display_mgr_is_remote(void)
 
 /* --- 公开接口: 远程子模式 --- */
 
+/**
+ * @brief  设置远程子模式
+ * @param  sub_mode 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_set_sub_mode(uint8_t sub_mode)
 {
     remote_sub_mode = sub_mode;
 }
 
+/**
+ * @brief  获取远程子模式
+ * @date   2026-08-07
+ */
 uint8_t display_mgr_get_sub_mode(void)
 {
-    if (!is_remote) return REMOTE_SUB_TEXT;
+    if (!is_remote)
+    {
+        return REMOTE_SUB_TEXT;
+    }
     return remote_sub_mode;
 }
 
 /* --- 公开接口: 远程帧缓冲接收 --- */
 
+/**
+ * @brief  接收远程帧缓冲分段数据并拼装
+ * @param  seg 参数说明
+ * @param  total 参数说明
+ * @param  data 参数说明
+ * @param  len 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, uint8_t len)
 {
-    if (!is_remote) return;
-    if (total == 0) return;
+    if (!is_remote)
+    {
+        return;
+    }
+    if (total == 0)
+    {
+        return;
+    }
 
     uint16_t offset = (uint16_t)seg * 200;
     uint16_t copy_len = (offset + len > FRAME_BUF_SIZE) ? (FRAME_BUF_SIZE - offset) : len;
 
-    if (seg == 0) {
+    if (seg == 0)
+    {
         memset(frame_buf, 0, FRAME_BUF_SIZE);
         frame_seg_received = 0;
         frame_seg_total = total;
     }
 
-    if (seg >= total) return;
+    if (seg >= total)
+    {
+        return;
+    }
 
     memcpy(&frame_buf[offset], data, copy_len);
     frame_seg_received++;
 
-    if (frame_seg_received >= frame_seg_total) {
+    if (frame_seg_received >= frame_seg_total)
+    {
         uint8_t *buf = ssd1306_get_buffer();
         memcpy(buf, frame_buf, FRAME_BUF_SIZE);
         /* 菜单激活期间只拼装帧缓冲, 不直接刷屏 */
-        if (!menu_suppress) {
+        if (!menu_suppress)
+        {
             ssd1306_update_screen();
         }
         frame_seg_received = 0;
@@ -355,61 +519,100 @@ void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, u
 
 /* --- 公开接口: 本地模式 文字+特效 --- */
 
+/**
+ * @brief  设置本地模式显示文字
+ * @param  text 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_set_text(const char *text)
 {
-    if (text) {
+    if (text)
+    {
         strncpy(content_text, text, CONTENT_MAX_LEN - 1);
         content_text[CONTENT_MAX_LEN - 1] = '\0';
         scroll_offset_x = 0;
-        if (!is_remote) {
+        if (!is_remote)
+        {
             draw_text_fullscreen(content_text);
             update_screen_if_allowed();
         }
     }
 }
 
+/**
+ * @brief  设置上电默认文字
+ * @param  text 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_set_boot_text(const char *text)
 {
-    if (text) {
+    if (text)
+    {
         strncpy(boot_text, text, BOOT_TEXT_MAX_LEN - 1);
         boot_text[BOOT_TEXT_MAX_LEN - 1] = '\0';
     }
 }
 
+/**
+ * @brief  获取上电默认文字
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 const char* display_mgr_get_boot_text(void)
 {
     return boot_text;
 }
 
+/**
+ * @brief  设置本地模式显示特效
+ * @param  mode 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_set_mode(display_mode_t mode)
 {
-    if (mode >= DISP_MODE_COUNT) return;
+    if (mode >= DISP_MODE_COUNT)
+    {
+        return;
+    }
     ssd1306_scroll_stop();
     current_mode = mode;
     scroll_offset_x = 0;
     fade_step = 0;
 
-    if (mode == DISP_MODE_STATIC) {
+    if (mode == DISP_MODE_STATIC)
+    {
         draw_text_fullscreen(content_text);
-    } else if (mode == DISP_MODE_FADE) {
+    } else if (mode == DISP_MODE_FADE)
+    {
         fade_dir = 1;
         fade_step = 0;
         ssd1306_set_contrast(0);
         draw_text_fullscreen(content_text);
-    } else {
+    }
+    else
+    {
         draw_text_fullscreen(content_text);
     }
 
-    if (!is_remote) {
+    if (!is_remote)
+    {
         update_screen_if_allowed();
     }
 }
 
+/**
+ * @brief  获取当前显示特效模式
+ * @date   2026-08-07
+ */
 display_mode_t display_mgr_get_mode(void)
 {
     return current_mode;
 }
 
+/**
+ * @brief  切换到下一个显示特效
+ * @date   2026-08-07
+ */
 void display_mgr_next_mode(void)
 {
     display_mode_t next = (display_mode_t)((current_mode + 1) % DISP_MODE_COUNT);
@@ -418,13 +621,24 @@ void display_mgr_next_mode(void)
 
 /* --- 公开接口: 时间/天气数据 (仅存储, v3.1不绘制状态栏) --- */
 
+/**
+ * @brief  更新时间/天气状态数据
+ * @param  new_status 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_update_status(const display_status_t *new_status)
 {
-    if (new_status) {
+    if (new_status)
+    {
         memcpy(&status, new_status, sizeof(display_status_t));
     }
 }
 
+/**
+ * @brief  获取时间/天气状态数据指针
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 const display_status_t* display_mgr_get_status(void)
 {
     return &status;
@@ -432,9 +646,16 @@ const display_status_t* display_mgr_get_status(void)
 
 /* --- 公开接口: 远程模式串口断开提示 --- */
 
+/**
+ * @brief  显示串口断开提示
+ * @date   2026-08-07
+ */
 void display_mgr_show_disconnect(void)
 {
-    if (!is_remote || disconnect_msg_shown) return;
+    if (!is_remote || disconnect_msg_shown)
+    {
+        return;
+    }
 
     disconnect_msg_shown = true;
     clear_full_screen();
@@ -447,15 +668,23 @@ void display_mgr_show_disconnect(void)
     const char *p = msg;
     uint8_t col = 24;
     uint8_t page = 2;
-    while (*p && page < SSD1306_PAGES - 1) {
+    while (*p && page < SSD1306_PAGES - 1)
+    {
         const uint8_t *glyph = font_get_chinese_utf8(p);
-        if (glyph) draw_chinese_char(col, page, glyph);
+        if (glyph)
+        {
+            draw_chinese_char(col, page, glyph);
+        }
         col += FONT_CHINESE_W;
         p += 3;
     }
     ssd1306_update_screen();
 }
 
+/**
+ * @brief  隐藏串口断开提示
+ * @date   2026-08-07
+ */
 void display_mgr_hide_disconnect(void)
 {
     disconnect_msg_shown = false;
@@ -463,16 +692,22 @@ void display_mgr_hide_disconnect(void)
 
 /* --- 公开接口: 双模式主 tick --- */
 
+/**
+ * @brief  双模式主 tick 调度
+ * @date   2026-08-07
+ */
 void display_mgr_tick(void)
 {
-    if (is_remote) {
+    if (is_remote)
+    {
         /* 远程模式: 帧缓冲由 rx_frame_seg 驱动, tick 不做额外操作 */
         return;
     }
 
     /* --- 本地模式: 特效 tick --- */
 
-    switch (current_mode) {
+    switch (current_mode)
+    {
     case DISP_MODE_STATIC:
         break;
 
@@ -480,7 +715,8 @@ void display_mgr_tick(void)
     case DISP_MODE_SCROLL_R:
     case DISP_MODE_SCROLL_U:
     case DISP_MODE_SCROLL_D:
-        if (effects[current_mode]) {
+        if (effects[current_mode])
+        {
             effects[current_mode]();
             ssd1306_update_screen();
         }
@@ -488,7 +724,8 @@ void display_mgr_tick(void)
 
     case DISP_MODE_FLIP:
         flip_timer += 50;
-        if (flip_timer >= FLIP_INTERVAL_MS) {
+        if (flip_timer >= FLIP_INTERVAL_MS)
+        {
             flip_timer = 0;
             flip_phase ^= 1;
             draw_text_fullscreen(flip_phase ? content_text : "");
@@ -498,14 +735,24 @@ void display_mgr_tick(void)
 
     case DISP_MODE_FADE:
         fade_timer += 50;
-        if (fade_timer >= FADE_INTERVAL_MS) {
+        if (fade_timer >= FADE_INTERVAL_MS)
+        {
             fade_timer = 0;
-            if (fade_dir == 1) {
+            if (fade_dir == 1)
+            {
                 fade_step++;
-                if (fade_step >= FADE_STEPS) fade_dir = 0;
-            } else {
+                if (fade_step >= FADE_STEPS)
+                {
+                    fade_dir = 0;
+                }
+            }
+            else
+            {
                 fade_step--;
-                if (fade_step == 0) fade_dir = 1;
+                if (fade_step == 0)
+                {
+                    fade_dir = 1;
+                }
             }
             uint8_t contrast = (uint8_t)((uint32_t)fade_step * 255 / FADE_STEPS);
             ssd1306_set_contrast(contrast);
@@ -520,6 +767,11 @@ void display_mgr_tick(void)
 
 /* --- 公开接口: 菜单激活期间抑制远程帧刷屏 --- */
 
+/**
+ * @brief  菜单激活期间抑制自行刷屏
+ * @param  suppress 参数说明
+ * @date   2026-08-07
+ */
 void display_mgr_set_menu_suppress(bool suppress)
 {
     menu_suppress = suppress;
@@ -527,16 +779,23 @@ void display_mgr_set_menu_suppress(bool suppress)
 
 /* --- 公开接口: 菜单退出后恢复显示 --- */
 
+/**
+ * @brief  菜单退出后恢复显示
+ * @date   2026-08-07
+ */
 void display_mgr_redraw(void)
 {
     menu_suppress = false;
 
-    if (is_remote) {
+    if (is_remote)
+    {
         /* 远程模式: 将最近拼装完成的帧刷到屏幕 */
         uint8_t *buf = ssd1306_get_buffer();
         memcpy(buf, frame_buf, FRAME_BUF_SIZE);
         ssd1306_update_screen();
-    } else {
+    }
+    else
+    {
         /* 本地模式: 重绘当前文字 + 特效 */
         scroll_offset_x = 0;
         flip_phase = 0;

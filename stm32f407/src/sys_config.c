@@ -26,28 +26,43 @@
 static sys_config_t config;
 
 /* 简单 CRC-32 校验（IEEE 802.3 反射多项式 0xEDB88320），用于验证 Flash 中配置数据的完整性。 */
+/**
+ * @brief  计算 CRC-32 校验值（IEEE 802.3）
+ * @param  data 参数说明
+ * @param  len 参数说明
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 static uint32_t crc32_simple(const uint8_t *data, uint32_t len)
 {
     uint32_t crc = 0xFFFFFFFF;
-    for (uint32_t i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++)
+    {
         crc ^= data[i];
-        for (int j = 0; j < 8; j++) {
+        for (int j = 0; j < 8; j++)
+        {
             crc = (crc >> 1) ^ (0xEDB88320 & -(crc & 1));
         }
     }
     return ~crc;
 }
 
+/**
+ * @brief  初始化系统配置（从 Flash 加载，无效时使用默认值）
+ * @date   2026-08-07
+ */
 int sys_config_init(void)
 {
     /* 读取 Flash 中的配置 */
     const sys_config_t *flash_cfg = (const sys_config_t *)CONFIG_FLASH_ADDR;
 
-    if (flash_cfg->magic == CONFIG_MAGIC) {
+    if (flash_cfg->magic == CONFIG_MAGIC)
+    {
         /* 校验 CRC (不包含 crc32 字段自身) */
         uint32_t calc_crc = crc32_simple((const uint8_t *)flash_cfg,
                                           sizeof(sys_config_t) - 4);
-        if (calc_crc == flash_cfg->crc32) {
+        if (calc_crc == flash_cfg->crc32)
+        {
             /* 有效配置, 复制到 RAM */
             memcpy(&config, flash_cfg, sizeof(sys_config_t));
             return 0;
@@ -66,6 +81,10 @@ int sys_config_init(void)
     return 1;  /* 使用了默认值 */
 }
 
+/**
+ * @brief  保存系统配置到 Flash
+ * @date   2026-08-07
+ */
 int sys_config_save(void)
 {
     HAL_FLASH_Unlock();
@@ -81,7 +100,8 @@ int sys_config_save(void)
     erase_init.NbSectors    = 1;
     erase_init.VoltageRange = FLASH_VOLTAGE_RANGE_3;
 
-    if (HAL_FLASHEx_Erase(&erase_init, &sector_error) != HAL_OK) {
+    if (HAL_FLASHEx_Erase(&erase_init, &sector_error) != HAL_OK)
+    {
         HAL_FLASH_Lock();
         return -1;
     }
@@ -91,7 +111,8 @@ int sys_config_save(void)
     uint32_t  addr = CONFIG_FLASH_ADDR;
     uint32_t  words = sizeof(sys_config_t) / 4;
 
-    for (uint32_t i = 0; i < words; i++) {
+    for (uint32_t i = 0; i < words; i++)
+    {
         HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, addr, src[i]);
         addr += 4;
     }
@@ -100,11 +121,18 @@ int sys_config_save(void)
     return 0;
 }
 
+/**
+ * @brief  设置上电显示文字（内容变化时才擦写 Flash）
+ * @param  text 参数说明
+ * @date   2026-08-07
+ */
 void sys_config_set_boot_text(const char *text)
 {
-    if (text) {
+    if (text)
+    {
         /* 仅内容变化时才擦写 Flash, 减少磨损 */
-        if (strncmp(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN) == 0) {
+        if (strncmp(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN) == 0)
+        {
             return;
         }
         strncpy(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN - 1);
@@ -114,25 +142,49 @@ void sys_config_set_boot_text(const char *text)
     }
 }
 
+/**
+ * @brief  获取上电显示文字
+ * @return 返回值说明
+ * @date   2026-08-07
+ */
 const char* sys_config_get_boot_text(void)
 {
     return config.boot_text;
 }
 
+/**
+ * @brief  设置上电显示类型并保存到 Flash
+ * @param  type 参数说明
+ * @date   2026-08-07
+ */
 void sys_config_set_poweron_type(uint8_t type)
 {
-    if (type > 2) return;
-    if (config.poweron_type == type) return;
+    if (type > 2)
+    {
+        return;
+    }
+    if (config.poweron_type == type)
+    {
+        return;
+    }
     config.poweron_type = type;
     config.crc32 = crc32_simple((const uint8_t *)&config, sizeof(sys_config_t) - 4);
     sys_config_save();
 }
 
+/**
+ * @brief  系统复位
+ * @date   2026-08-07
+ */
 void sys_config_reset(void)
 {
     NVIC_SystemReset();
 }
 
+/**
+ * @brief  获取上电显示类型
+ * @date   2026-08-07
+ */
 uint8_t sys_config_get_poweron_type(void)
 {
     return config.poweron_type;

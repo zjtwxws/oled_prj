@@ -37,70 +37,178 @@ static uint8_t g_poweron_type = SYS_CONFIG_POWERON_WELCOME;  /* 当前选中的�
  * ================================================================ */
 
 /* --- 工作模式 TOGGLE 回调 --- */
+/**
+ * @brief  工作模式切换回调
+ * @param  new_val 参数说明
+ * @date   2026-08-07
+ */
 static void cb_mode_changed(uint8_t new_val)
 {
     display_mgr_set_remote(new_val != 0);
 }
 
 /* --- 显示内容 ACTION 回调 --- */
+/**
+ * @brief  显示时间回调
+ * @date   2026-08-07
+ */
 static void cb_disp_time(void)
 {
     display_mgr_set_remote(true);
     display_mgr_set_sub_mode(REMOTE_SUB_TIME);
 }
 
+/**
+ * @brief  显示天气回调
+ * @date   2026-08-07
+ */
 static void cb_disp_weather(void)
 {
     display_mgr_set_remote(true);
     display_mgr_set_sub_mode(REMOTE_SUB_WEATHER);
 }
 
+/**
+ * @brief  显示日期回调
+ * @date   2026-08-07
+ */
 static void cb_disp_date(void)
 {
     display_mgr_set_remote(true);
     display_mgr_set_sub_mode(REMOTE_SUB_DATE);
 }
 
+/**
+ * @brief  显示自定义文字回调
+ * @date   2026-08-07
+ */
 static void cb_disp_custom(void)
 {
     display_mgr_set_sub_mode(REMOTE_SUB_TEXT);
 }
 
 /* --- 显示特效 ACTION 回调 --- */
-static void cb_effect_static(void)   { display_mgr_set_mode(DISP_MODE_STATIC); }
-static void cb_effect_scroll_l(void) { display_mgr_set_mode(DISP_MODE_SCROLL_L); }
-static void cb_effect_scroll_r(void) { display_mgr_set_mode(DISP_MODE_SCROLL_R); }
-static void cb_effect_scroll_u(void) { display_mgr_set_mode(DISP_MODE_SCROLL_U); }
-static void cb_effect_scroll_d(void) { display_mgr_set_mode(DISP_MODE_SCROLL_D); }
-static void cb_effect_flip(void)     { display_mgr_set_mode(DISP_MODE_FLIP); }
-static void cb_effect_fade(void)     { display_mgr_set_mode(DISP_MODE_FADE); }
+/**
+ * @brief  静态特效回调
+ * @date   2026-08-07
+ */
+static void cb_effect_static(void)
+{
+    display_mgr_set_mode(DISP_MODE_STATIC);
+}
+/**
+ * @brief  左滚特效回调
+ * @date   2026-08-07
+ */
+static void cb_effect_scroll_l(void)
+{
+    display_mgr_set_mode(DISP_MODE_SCROLL_L);
+}
+/**
+ * @brief  右滚特效回调
+ * @date   2026-08-07
+ */
+static void cb_effect_scroll_r(void)
+{
+    display_mgr_set_mode(DISP_MODE_SCROLL_R);
+}
+/**
+ * @brief  上滚特效回调
+ * @date   2026-08-07
+ */
+static void cb_effect_scroll_u(void)
+{
+    display_mgr_set_mode(DISP_MODE_SCROLL_U);
+}
+/**
+ * @brief  下滚特效回调
+ * @date   2026-08-07
+ */
+static void cb_effect_scroll_d(void)
+{
+    display_mgr_set_mode(DISP_MODE_SCROLL_D);
+}
+/**
+ * @brief  翻页特效回调
+ * @date   2026-08-07
+ */
+static void cb_effect_flip(void)
+{
+    display_mgr_set_mode(DISP_MODE_FLIP);
+}
+/**
+ * @brief  淡入淡出特效回调
+ * @date   2026-08-07
+ */
+static void cb_effect_fade(void)
+{
+    display_mgr_set_mode(DISP_MODE_FADE);
+}
 
 /* --- 对比度 VALUE 回调 --- */
+/**
+ * @brief  对比度变化回调
+ * @param  val 参数说明
+ * @date   2026-08-07
+ */
 static void cb_contrast_changed(uint8_t val)
 {
     ssd1306_set_contrast(val);
 }
 
 /* --- LED 控制 ACTION 回调 --- */
+/**
+ * @brief  LED 关闭回调
+ * @date   2026-08-07
+ */
 static void cb_led_off(void)
 {
     led_mgr_set_state(LED_STATE_OFF);
 }
 
+/**
+ * @brief  LED 常亮回调
+ * @date   2026-08-07
+ */
 static void cb_led_on(void)
 {
     led_mgr_set_state(LED_STATE_ON);
 }
 
+/**
+ * @brief  LED 闪烁回调
+ * @date   2026-08-07
+ */
 static void cb_led_blink(void)
 {
     led_mgr_set_state(LED_STATE_BLINK);
 }
 
 /* --- 三级示例 ACTION 回调 --- */
-static void cb_demo_a(void) { DEBUG_PRINTF("menu: demo level3 - option A"); }
-static void cb_demo_b(void) { DEBUG_PRINTF("menu: demo level3 - option B"); }
-static void cb_demo_c(void) { DEBUG_PRINTF("menu: demo level3 - option C"); }
+/**
+ * @brief  三级示例选项A回调
+ * @date   2026-08-07
+ */
+static void cb_demo_a(void)
+{
+    DEBUG_PRINTF("menu: demo level3 - option A");
+}
+/**
+ * @brief  三级示例选项B回调
+ * @date   2026-08-07
+ */
+static void cb_demo_b(void)
+{
+    DEBUG_PRINTF("menu: demo level3 - option B");
+}
+/**
+ * @brief  三级示例选项C回调
+ * @date   2026-08-07
+ */
+static void cb_demo_c(void)
+{
+    DEBUG_PRINTF("menu: demo level3 - option C");
+}
 
 /* --- 上电文字 PREVIEW 回调 --- */
 
@@ -195,19 +303,35 @@ static const uint8_t glyph32_si[128] = {
 };
 
 /* 用 32×32 字模在全屏绘制一个字符 (SSD1306 page 格式, 目标 x/y 为像素坐标) */
+/**
+ * @brief  在缓冲区绘制 32×32 点阵字模
+ * @param  buf 参数说明
+ * @param  glyph 参数说明
+ * @param  dx 参数说明
+ * @param  dy 参数说明
+ * @date   2026-08-07
+ */
 static void draw_glyph32(uint8_t *buf, const uint8_t *glyph, int16_t dx, int16_t dy)
 {
     /* glyph 128 字节: 32 列 × 4 组 8 行 (LSB=页顶), 列优先 */
-    for (int16_t col = 0; col < 32; col++) {
+    for (int16_t col = 0; col < 32; col++)
+    {
         int16_t tx = dx + col;
-        if (tx < 0 || tx >= 128) continue;
-        for (int16_t rp = 0; rp < 4; rp++) {
+        if (tx < 0 || tx >= 128)
+        {
+            continue;
+        }
+        for (int16_t rp = 0; rp < 4; rp++)
+        {
             uint8_t byte_val = glyph[col * 4 + rp];
             int16_t base_y = dy + rp * 8;
-            for (int16_t bit = 0; bit < 8; bit++) {
-                if (byte_val & (1 << bit)) {
+            for (int16_t bit = 0; bit < 8; bit++)
+            {
+                if (byte_val & (1 << bit))
+                {
                     int16_t ty = base_y + bit;
-                    if (ty >= 0 && ty < 64) {
+                    if (ty >= 0 && ty < 64)
+                    {
                         buf[(ty / 8) * 128 + tx] |= (1 << (ty % 8));
                     }
                 }
@@ -217,6 +341,10 @@ static void draw_glyph32(uint8_t *buf, const uint8_t *glyph, int16_t dx, int16_t
 }
 
 /* 大号文字 "赵四" 32×32 真点阵, 全屏居中 */
+/**
+ * @brief  绘制大号文字「赵四」（32×32 真点阵，全屏居中）
+ * @date   2026-08-07
+ */
 void draw_bigtext_zhaosi(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
@@ -227,13 +355,18 @@ void draw_bigtext_zhaosi(void)
     int16_t x = 32;
     int16_t y = 16;
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++)
+    {
         draw_glyph32(buf, glyphs[i], x, y);
         x += 32;
     }
 }
 
 /* PREVIEW 渲染回调：欢迎语 */
+/**
+ * @brief  上电文字预览渲染：欢迎语
+ * @date   2026-08-07
+ */
 static void preview_render_welcome(void)
 {
     const char *text = sys_config_get_boot_text();
@@ -243,6 +376,10 @@ static void preview_render_welcome(void)
 }
 
 /* PREVIEW 渲染回调：Logo */
+/**
+ * @brief  上电文字预览渲染：Logo
+ * @date   2026-08-07
+ */
 static void preview_render_logo(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
@@ -251,6 +388,10 @@ static void preview_render_logo(void)
 }
 
 /* PREVIEW 渲染回调：大号文字 */
+/**
+ * @brief  上电文字预览渲染：大号文字
+ * @date   2026-08-07
+ */
 static void preview_render_bigtext(void)
 {
     draw_bigtext_zhaosi();
@@ -258,6 +399,10 @@ static void preview_render_bigtext(void)
 }
 
 /* PREVIEW 确认回调 */
+/**
+ * @brief  上电文字确认回调：欢迎语
+ * @date   2026-08-07
+ */
 static void preview_confirm_welcome(void)
 {
     g_poweron_type = SYS_CONFIG_POWERON_WELCOME;
@@ -265,12 +410,20 @@ static void preview_confirm_welcome(void)
     display_mgr_set_boot_text(sys_config_get_boot_text());
 }
 
+/**
+ * @brief  上电文字确认回调：Logo
+ * @date   2026-08-07
+ */
 static void preview_confirm_logo(void)
 {
     g_poweron_type = SYS_CONFIG_POWERON_LOGO;
     sys_config_set_poweron_type(SYS_CONFIG_POWERON_LOGO);
 }
 
+/**
+ * @brief  上电文字确认回调：大号文字
+ * @date   2026-08-07
+ */
 static void preview_confirm_bigtext(void)
 {
     g_poweron_type = SYS_CONFIG_POWERON_BIGTEXT;
@@ -278,6 +431,10 @@ static void preview_confirm_bigtext(void)
 }
 
 /* --- 系统重启确认回调 --- */
+/**
+ * @brief  重启确认回调
+ * @date   2026-08-07
+ */
 static void cb_reboot_confirm(void)
 {
     sys_config_reset();
