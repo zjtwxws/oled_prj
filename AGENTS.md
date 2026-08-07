@@ -180,7 +180,7 @@ if (p == NULL) return -1;    // 禁止：缺少大括号
 - MCU: STM32F407 (ARM Cortex-M4)
 - HAL: STM32F4xx HAL Driver
 - 显示: SSD1306 OLED 128x64 (I2C)
-- 编译器: ARMCC (Keil MDK)
+- 编译器: ARMCC (Keil MDK) / arm-none-eabi-gcc (Makefile)
 
 ## 驱动层隔离
 
@@ -226,5 +226,5 @@ python .skills/gen-font-cn/scripts/gen_glyph.py stm32f407/src/font.c <缺失汉�
 菜单定义文件: `stm32f407/src/menu_items.c`
 菜单引擎: `stm32f407/src/menu_mgr.c`
 
-菜单项类型: SUBMENU / TOGGLE / VALUE / ACTION / INFO
+菜单项类型: SUBMENU / TOGGLE / VALUE / ACTION / INFO / PREVIEW / CONFIRM
 最大深度: `MENU_MAX_DEPTH = 8`

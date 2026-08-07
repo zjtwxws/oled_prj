@@ -1,4 +1,5 @@
 # ==================== 编译产物 ====================
+## C/C++
 # 通用中间文件
 *.o
 *.obj
@@ -15,6 +16,26 @@ build/
 Build/
 Debug/
 Release/
+x64/
+*.tlog/
+
+## Keil MDK
+*.uvoptx
+*.uvprojx
+*.crf
+*.dep
+*.axf
+*.htm
+*.lnp
+*.lst
+*.i
+JLinkLog.txt
+RTX_*.lib
+
+## Python
+__pycache__/
+*.py[cod]
+*.egg-info/
 
 # ==================== IDE / 编辑器 ====================
 .vscode/
@@ -24,6 +45,8 @@ Release/
 *~
 *.bak
 .vs
+*.user
+*.suo
 
 # ==================== 操作系统 ====================
 Thumbs.db
@@ -36,19 +59,6 @@ Desktop.ini
 *.so
 *.so.*
 
-# ==================== 第三方库（mongoose.c 等如需保留请自行放开） ====================
-# mongoose.c
-# mongoose.h
-
-# ==================== stm32cubemx ====================
-LICENSE.txt
-*.crf
-*.i
-*.o
-.uvoptx
-.uvprojx
-.axf
-.htm
-.lnp
-.png
+# ==================== 项目特定 ====================
+.venv/
 tmp_screenshot.png

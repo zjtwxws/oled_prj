@@ -23,7 +23,7 @@ main.c (MX_NVIC_Init -> USART2_IRQn)
                    └─ 原有协议/显示逻辑
 
 HAL_UART_RxCpltCallback (uart_drv.c)
-  ├─ UART1 → uart_drv_rx_callback     ← RK3506 协议
+  ├─ UART1 → uart_drv_rx_callback     ← PC 上位机协议
   └─ UART2 → debug_console_rx_callback ← CLI
 
 debug_console.c
@@ -201,7 +201,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (p_uart && huart->Instance == p_uart->Instance)
     {
-        uart_drv_rx_callback(rx_byte);     // UART1 → RK3506
+        uart_drv_rx_callback(rx_byte);     // UART1 → PC 上位机
     }
     else if (huart->Instance == USART2)
     {

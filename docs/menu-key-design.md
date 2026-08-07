@@ -22,7 +22,7 @@
 user_app (编排层)
   ├─ 按键分发: key_drv → menu_mgr / display_mgr / led_mgr
   ├─ 显示调度: menu_mgr (菜单激活时) 或 display_mgr (正常运行时)
-  └─ 协议通信: protocol → uart_drv → RK3506
+  └─ 协议通信: protocol → uart_drv → PC 上位机 (USART1)
 
 menu_mgr (菜单引擎)
   ├─ 依赖: ssd1306 (显存操作), font (字模渲染)

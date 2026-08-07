@@ -1,103 +1,166 @@
-# OLED 串口直连控制项目 (v3.1)
+# OLED Serial Direct Control
 
-## 项目结构
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Platform: STM32F407](https://img.shields.io/badge/Platform-STM32F407-orange)](stm32f407/)
+[![Language: C/C++](https://img.shields.io/badge/Language-C%2FC%2B%2B-green)]()
 
-```
-oled_prj/
-├── 需求描述.md              # 需求描述 (v3.1)
-├── 最终需求文档.md          # 详细需求规格文档 (v3.1)
-├── README.md               # 本文件
-├── stm32f407/               # STM32F407 端代码 (裸机 HAL)
-│   ├── Makefile
-│   ├── inc/                 # 头文件
-│   │   ├── display_mgr.h    # 本地/远程双模式显示管理器
-│   │   ├── menu_mgr.h       # 多级菜单管理器
-│   │   ├── protocol.h       # 二进制帧协议
-│   │   ├── key_drv.h        # 按键驱动 (含长按+重复)
-│   │   └── ...
-│   ├── src/                 # 源文件
-│   │   ├── display_mgr.c    # 本地渲染文字+7种特效 / 远程帧缓冲刷屏
-│   │   ├── menu_mgr.c       # 菜单导航状态机+渲染
-│   │   ├── menu_items.c     # 菜单树静态数据 (Flash)
-│   │   ├── user_app.c       # 主循环编排
-│   │   └── ...
-│   └── tools/               # 字模生成工具
-├── pc_host/                 # Windows 上位机 (VS2019 Win32 对话框 + C++17)
-│   ├── oled_control.sln
-│   └── oled_control/
-│       ├── oled_control.vcxproj
-│       ├── protocol.h/cpp       # 二进制帧协议（与 STM32 端一致）
-│       ├── serial_port.h/cpp    # 串口驱动
-│       ├── frame_queue.h        # 线程安全环形队列 + TxTask
-│       ├── oled_preview.h/cpp   # OLED GDI 本地模拟预览
-│       ├── oled_preview_gen.h   # 字模数据 (316汉字)
-│       ├── main.cpp             # WinMain + DialogProc
-│       ├── resource.h           # 控件 ID 定义
-│       └── oled_control.rc      # 对话框资源
-├── rk3506/                  # RK3506 网关 (预留, 已实现基础代码)
-├── docs/                    # 项目文档
-│   ├── protocol-uart.md     # UART 协议说明
-│   ├── menu-design.md       # 菜单系统方案设计
-│   ├── pc-host-code-reference.md  # 上位机代码参考
-│   └── stm32cubemx-f407-hal-setup.md  # CubeMX 操作文档
-└── oled_cubemx/             # STM32CubeMX HAL 工程
-```
+A desktop OLED control system that connects a Windows PC to an STM32F407 microcontroller via USB-TTL serial, driving a 0.96" SSD1306 OLED display (128×64) over I²C. Supports both **remote mode** (PC-rendered framebuffer streaming) and **local mode** (STM32 standalone rendering with 7 visual effects).
 
-## 系统架构 (v3.1)
+## Features
+
+- **Dual Operating Modes**
+  - **Remote Mode** — PC renders full 128×64 framebuffer and streams it to STM32 via UART. Supports 4 display modes: Text, Clock, Weather, Date.
+  - **Local Mode** — STM32 runs independently without a PC. Renders user text with 7 built-in effects.
+- **7 Visual Effects** — Static / Scroll Left / Scroll Right / Scroll Up / Scroll Down / Page Flip / Fade In-Out
+- **Multi-Level Menu System** — 8-item main menu navigated via 4 onboard buttons, with TOGGLE / VALUE / ACTION / INFO / SUBMENU item types
+- **Windows Desktop App** — VS2019 Win32 dialog application with GDI OLED preview (128×64 at 4x scale)
+- **Custom Binary Protocol** — CRC-8-ATM protected frame protocol with 500ms timeout retransmission
+- **Debug CLI** — On-chip debug console via USART2 with command-line interface (nr_micro_shell)
+- **Linux Gateway (optional)** — RK3506-based HTTP/WebSocket + TCP server with web-based control panel
+
+## Hardware
+
+| Component | Specification |
+|-----------|--------------|
+| MCU | STM32F407VGTx (ARM Cortex-M4, 168 MHz) |
+| Display | 0.96" SSD1306 OLED, 128×64 pixels, I²C |
+| Connection | USB-TTL serial (115200 8N1) |
+| Input | 4 push buttons (PE1~PE4) |
+| LED | PF9 (push-pull output) |
+
+**Pin Connections:**
+
+| Function | STM32 Pin | Description |
+|----------|-----------|-------------|
+| USART1 TX | PA9 | PC communication |
+| USART1 RX | PA10 | PC communication |
+| I²C2 SCL | PB10 | OLED clock |
+| I²C2 SDA | PB11 | OLED data |
+| KEY1~KEY4 | PE1~PE4 | Menu navigation |
+| LED | PF9 | Status indicator |
+
+## System Architecture
 
 ```
-Windows PC (VS2019 Win32 对话框) → STM32F407 → OLED (128x64 SSD1306)
-        ↑ USB-TTL 串口              ↑ USART1      ↑ I2C
-                                     PA9/PA10      PB10/PB11
+┌─────────────────┐     USB-TTL (115200 8N1)     ┌──────────────┐     I²C     ┌────────────┐
+│  Windows PC      │ ◄──────────────────────────► │  STM32F407   │ ◄─────────► │ SSD1306    │
+│  (Win32 Dialog)  │     Custom Binary Protocol   │  (bare metal) │            │ 128×64 OLED│
+└─────────────────┘                              └──────────────┘            └────────────┘
+                                                         ▲
+                                                         │ UART (optional)
+                                                  ┌──────┴──────┐
+                                                  │  RK3506      │
+                                                  │  Gateway     │
+                                                  │ (HTTP/WS/TCP)│
+                                                  └──────────────┘
 ```
 
-**双模式**: 
-- **远程模式**: PC 渲染帧缓冲 → 分段下发 → STM32 仅刷屏 (支持文字/时间/天气/日期)
-- **本地模式**: STM32 自行渲染文字 + 7 种特效 (静态/左右上下滚/翻页/淡入淡出), 可脱离 PC 独立运行
-- **模式切换**: 上位机命令 + 板载按键 KEY4 长按进入菜单 + 菜单中切换
+### Remote Mode (PC → STM32)
+PC renders framebuffer → segments into ≤200B chunks → streams via `CMD_FRAME_SYNC` → STM32 assembles and writes to SSD1306.
 
-STM32 端集成**多级菜单系统** (menu_mgr), 8 项主菜单含工作模式/显示内容/显示特效/设置/LED控制/上电文字/系统信息/预留, 通过 4 键导航。
+### Local Mode (STM32 standalone)
+STM32 reads boot text from Flash → renders with selected effect → updates OLED at 20 FPS. No PC required.
 
-## STM32F407 编译
+## Quick Start
+
+### Prerequisites
+
+- **STM32**: `arm-none-eabi-gcc` (Arm GNU Toolchain), `st-flash` (optional for flashing)
+- **PC Host**: Visual Studio 2019 with C++17 support
+- **Hardware**: STM32F407 board, SSD1306 OLED, USB-TTL adapter, 4 push buttons
+
+### Build STM32 Firmware
 
 ```bash
 cd stm32f407
-make
-make flash
+make          # builds oled_f407.elf, .bin, .hex into build/
+make flash    # flash via ST-Link
 ```
 
-## Windows 上位机编译
+### Build Windows Host
 
-1. VS2019 打开 `pc_host/oled_control.sln`（纯 Win32 对话框，无 MFC 依赖）
-2. 选择 Debug/Release + Win32/x64
-3. 生成解决方案
+1. Open `pc_host/oled_control.sln` in Visual Studio 2019
+2. Select `Debug` or `Release`, `x64` or `Win32`
+3. Build → `oled_control.exe`
 
-## 运行
+### Run
 
-### 设备连接
+1. Connect hardware per pin table above
+2. Launch `oled_control.exe`
+3. Select COM port and click "Open"
+4. Use the control panel or onboard buttons (KEY4 long-press activates the menu)
+
+## Project Structure
+
 ```
-USB-TTL TX → STM32F407 PA10 (USART1 RX)
-USB-TTL RX → STM32F407 PA9  (USART1 TX)
-USB-TTL GND → STM32F407 GND
-
-OLED SCL → STM32F407 PB10 (I2C2 SCL)
-OLED SDA → STM32F407 PB11 (I2C2 SDA)
-OLED VCC → 3.3V, GND → GND
-
-KEY1~4 → STM32F407 PE1~PE4 (上拉输入)
-LED    → STM32F407 PF9  (推挽输出)
+oled_prj/
+├── stm32f407/              # STM32F407 firmware (bare metal, GCC)
+│   ├── inc/                # Headers (driver layer + application layer)
+│   ├── src/                # Sources (16 modules, ~6200 lines C)
+│   │   ├── ssd1306.c       # SSD1306 OLED driver
+│   │   ├── display_mgr.c   # Dual-mode display manager + 7 effects
+│   │   ├── menu_mgr.c      # Multi-level menu state machine
+│   │   ├── menu_items.c    # Menu tree static data
+│   │   ├── protocol.c      # Binary frame protocol (CRC-8-ATM)
+│   │   ├── font.c          # ASCII 8×16 + Chinese 16×16 font engine
+│   │   ├── key_drv.c       # Key driver (long-press + repeat)
+│   │   ├── user_app.c      # Main loop orchestration
+│   │   └── ...
+│   ├── Makefile
+│   └── tools/              # Font generation scripts
+├── pc_host/                # Windows desktop application (C++17, Win32)
+│   └── oled_control/
+│       ├── main.cpp        # WinMain + DialogProc
+│       ├── protocol.cpp    # Binary frame protocol (C++ port)
+│       ├── serial_port.cpp # Win32 serial port driver
+│       ├── oled_preview.cpp# GDI OLED preview (128×64 at 4x)
+│       └── ...
+├── rk3506/                 # Linux gateway (optional, C11)
+│   ├── src/                # UART adapter, TCP/Web server, command dispatcher
+│   ├── web/index.html      # Web control panel
+│   └── mongoose.c/h        # Embedded HTTP/WebSocket library
+├── oled_cubemx/            # STM32CubeMX HAL project files
+├── docs/                   # Detailed documentation
+│   ├── protocol-uart.md    # Binary protocol specification
+│   ├── menu-design.md      # Menu system design
+│   ├── menu-key-design.md  # Key mapping and navigation rules
+│   ├── pc-host-code-reference.md  # PC host code reference
+│   ├── stm32cubemx-f407-hal-setup.md  # CubeMX setup guide
+│   └── ...
+└── .skills/                # Codex AI assistant skills
 ```
 
-### 启动上位机
-运行编译后的 `oled_control.exe`，选择 COM 口，点击"打开"即可。
+## Communication Protocol
 
-## 通信协议
+The system uses a custom binary frame protocol over UART (115200 8N1):
 
-PC ↔ STM32F407 使用自定义二进制帧协议（详见 `docs/protocol-uart.md`）。
+```
+┌──────┬──────┬──────┬──────┬────────────┬──────┬──────┐
+│ SOF  │ LEN  │ CMD  │ SEQ  │   DATA     │ CRC8 │ EOF  │
+│ 0xA5 │ 1B   │ 1B   │ 1B   │  0~251B    │ 1B   │ 0x5A │
+└──────┴──────┴──────┴──────┴────────────┴──────┴──────┘
+```
 
-## 版本历史
+- CRC-8-ATM (polynomial 0x07)
+- Master-slave: PC initiates, STM32 replies ACK/NAK
+- Timeout retransmission: 500ms × 3 attempts
+- Framebuffer streaming: 1024 bytes in ≤200B segments via `CMD_FRAME_SYNC`
 
-- v1.4: 三级架构 PC→RK3506→STM32→OLED
-- v2.0: 两级架构 PC→STM32→OLED, 上位机为 VS2019 Win32 对话框应用
-- v3.0: 增加本地/远程双模式, 帧缓冲分段下发
-- v3.1: 集成多级菜单系统 (menu_mgr), 按键长按重复, 状态栏, 串口断开检测
+Full specification: [docs/protocol-uart.md](docs/protocol-uart.md)
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Protocol Specification](docs/protocol-uart.md) | Complete binary frame protocol with state machine |
+| [Menu System Design](docs/menu-design.md) | Multi-level menu architecture and navigation |
+| [Key Mapping](docs/menu-key-design.md) | Button assignments and input handling |
+| [PC Host Reference](docs/pc-host-code-reference.md) | Windows application module breakdown |
+| [CubeMX Setup](docs/stm32cubemx-f407-hal-setup.md) | STM32CubeMX project creation guide |
+| [AGENTS.md](AGENTS.md) | Coding conventions and project rules |
+
+## License
+
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+
+The STM32F4xx HAL Driver and CMSIS components under `oled_cubemx/Drivers/` are provided by STMicroelectronics under their respective license terms.
