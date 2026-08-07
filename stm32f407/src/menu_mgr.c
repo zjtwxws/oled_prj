@@ -791,6 +791,7 @@ void menu_mgr_tick(void)
             ssd1306_update_screen();
         } else if (g_menu.info_showing) {
             render_info();
+            ssd1306_update_screen();
         } else {
             render_menu();
             ssd1306_update_screen();
