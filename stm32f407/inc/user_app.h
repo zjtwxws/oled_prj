@@ -6,7 +6,10 @@
 #ifndef __USER_APP_H
 #define __USER_APP_H
 /** 固件版本号 */
-#define FW_VERSION  "V1.0.2"
+#define FW_VERSION  "V1.0.3"
+#define FW_AUTHOR  "赵四"
+#define FW_BUILD_TIME  "2026.08.07 16:02"
+#define FW_EMAIL  "429511192@qq.com"
 
 /** @brief 用户应用初始化 (外设+驱动+显示+菜单)，在 main() 中调用一次 */
 int user_app_init(void);

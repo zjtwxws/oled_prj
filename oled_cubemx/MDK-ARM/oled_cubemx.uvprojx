@@ -651,6 +651,21 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>Cli</GroupName>
+          <Files>
+            <File>
+              <FileName>cli_cmds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\cli_cmds.c</FilePath>
+            </File>
+            <File>
+              <FileName>nr_micro_shell_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\nr_micro_shell_core.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>

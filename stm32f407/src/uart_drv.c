@@ -4,6 +4,8 @@
  */
 
 #include "uart_drv.h"
+
+#include "debug_console.h"
 #include "stm32f4xx_hal.h"
 #include <string.h>
 
@@ -170,7 +172,7 @@ void uart_drv_rx_callback(uint8_t byte)
 }
 
 /**
- * @brief  TODO: HAL_UART_RxCpltCallback
+ * @brief  UART 接收完成回调 — 分发到 UART1(RK3506)/UART2(CLI)
  * @param  huart 参数说明
  * @date   2026-08-07
  */
@@ -180,4 +182,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
         uart_drv_rx_callback(rx_byte);
     }
+    else if (huart->Instance == USART2)
+    {
+        debug_console_rx_callback();
+    }
 }
+
+
+

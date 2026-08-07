@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 #define KEY_DEBOUNCE_MS    20     /* 消抖时间 (ms)，连续采样确认稳定后才判定按下 */
-#define KEY_LONG_PRESS_MS  2000  /* 长按判定阈值 (ms)，超过此时间触发长按事件 */
+#define KEY_LONG_PRESS_MS  1000  /* 长按判定阈值 (ms)，超过此时间触发长按事件 */
 #define KEY_LONG_REPEAT_MS  150   /* 长按重复间隔 (ms)，长按保持期间周期性产生 REPEAT 事件 */
 
 typedef enum

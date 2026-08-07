@@ -10,6 +10,7 @@
 #include "ssd1306.h"
 #include "font.h"
 #include "display_mgr.h"
+#include "debug_console.h"
 #include <string.h>
 
 /* menu_items.c 提供的接口 (跨编译单元, 无独立 .h) */
@@ -48,6 +49,8 @@ typedef struct
     /* INFO 模式: 显示详情页 */
     bool               info_showing;       /* INFO 详情页显示中 */
     const char        *info_detail;  /* INFO 详情页文本 */
+    uint8_t            info_total_rows;    /* INFO 文本总行数 */
+    uint8_t            info_scroll_row;    /* INFO 当前滚动行号 */
     /* PREVIEW 模式: 全屏预览 + 确认/取消 */
     bool               preview_showing;    /* 预览模式激活 */
     /* CONFIRM 模式: 确认对话框 */
@@ -133,7 +136,7 @@ static uint8_t draw_chinese_normal(uint8_t page, uint8_t x, const char *utf8)
     uint8_t *buf = ssd1306_get_buffer();
     if (glyph)
     {
-        for (uint8_t c = 0; c < FONT_CHINESE_W && x + c < SSD1306_WIDTH; c++, x++)
+        for (uint8_t c = 0; c < FONT_CHINESE_W && x     < SSD1306_WIDTH; c++, x++)
         {
             buf[page     * SSD1306_WIDTH + x] = glyph[c * 2];
             buf[(page + 1) * SSD1306_WIDTH + x] = glyph[c * 2 + 1];
@@ -142,7 +145,7 @@ static uint8_t draw_chinese_normal(uint8_t page, uint8_t x, const char *utf8)
     else
     {
         /* 缺字显示实心方块 */
-        for (uint8_t c = 0; c < FONT_CHINESE_W && x + c < SSD1306_WIDTH; c++, x++)
+        for (uint8_t c = 0; c < FONT_CHINESE_W && x     < SSD1306_WIDTH; c++, x++)
         {
             buf[page     * SSD1306_WIDTH + x] = 0xFF;
             buf[(page + 1) * SSD1306_WIDTH + x] = 0xFF;
@@ -170,7 +173,7 @@ static uint8_t draw_chinese_inverted(uint8_t page, uint8_t x, const char *utf8)
     uint8_t *buf = ssd1306_get_buffer();
     if (glyph)
     {
-        for (uint8_t c = 0; c < FONT_CHINESE_W && x + c < SSD1306_WIDTH; c++, x++)
+        for (uint8_t c = 0; c < FONT_CHINESE_W && x     < SSD1306_WIDTH; c++, x++)
         {
             buf[page     * SSD1306_WIDTH + x] &= ~glyph[c * 2];
             buf[(page + 1) * SSD1306_WIDTH + x] &= ~glyph[c * 2 + 1];
@@ -179,7 +182,7 @@ static uint8_t draw_chinese_inverted(uint8_t page, uint8_t x, const char *utf8)
     else
     {
         /* 缺字擦除为黑色方块 */
-        for (uint8_t c = 0; c < FONT_CHINESE_W && x + c < SSD1306_WIDTH; c++, x++)
+        for (uint8_t c = 0; c < FONT_CHINESE_W && x     < SSD1306_WIDTH; c++, x++)
         {
             buf[page     * SSD1306_WIDTH + x] = 0x00;
             buf[(page + 1) * SSD1306_WIDTH + x] = 0x00;
@@ -496,53 +499,135 @@ static void render_confirm(void)
  * @brief  渲染 INFO 详情页
  * @date   2026-08-07
  */
+/* 计算 INFO 文本的总行数 */
+static uint8_t compute_info_rows(const char *text)
+{
+    uint8_t rows = 0;
+    uint8_t col  = 0;
+    const char *p = text;
+
+    while (*p) {
+        if (*p == '\n') {
+            rows++;
+            col = 0;
+            p++;
+            continue;
+        }
+        uint8_t first = (uint8_t)*p;
+        uint8_t char_w;
+        if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+            char_w = FONT_CHINESE_W;
+        } else if ((first & 0x80) && (first & 0xE0) == 0xC0) {
+            p += 2;
+            continue;
+        } else {
+            char_w = FONT_ASCII_W;
+        }
+        if (col + char_w > SSD1306_WIDTH) {
+            rows++;
+            col = 0;
+        }
+        col += char_w;
+        if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+            p += 3;
+        } else {
+            p++;
+        }
+    }
+    if (col > 0) rows++;
+    return rows;
+}
+
+/* INFO 详情页渲染 (支持 \n 换行和滚动) */
 static void render_info(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
     memset(buf, 0x00, SSD1306_WIDTH * SSD1306_PAGES);
 
-    if (!g_menu.info_detail)
-    {
-        return;
-    }
+    if (!g_menu.info_detail) return;
+
+    g_menu.info_total_rows = compute_info_rows(g_menu.info_detail);
 
     const char *p = g_menu.info_detail;
+    uint8_t current_row = 0;
+    uint8_t col = 0;
     uint8_t page = 0;
-    uint8_t col  = 0;
 
-    while (*p && page < SSD1306_PAGES - 1)
-    {
-        uint8_t first = (uint8_t)*p;
-        if ((first & 0x80) && (first & 0xF0) == 0xE0)
-        {
-            if (col + FONT_CHINESE_W > SSD1306_WIDTH)
-            {
-                col = 0; page += 2;
-                if (page >= SSD1306_PAGES - 1)
-                {
-                    break;
-                }
-            }
-            col = draw_chinese_normal(page, col, p);
-            p += 3;
-        } else if ((first & 0x80) && (first & 0xE0) == 0xC0)
-        {
-            p += 2;
-        }
-        else
-        {
-            if (col + FONT_ASCII_W > SSD1306_WIDTH)
-            {
-                col = 0; page += 2;
-                if (page >= SSD1306_PAGES - 1)
-                {
-                    break;
-                }
-            }
-            col = draw_ascii_normal(page, col, *p);
+    while (*p && current_row < g_menu.info_scroll_row + 4) {
+        /* 换行符处理 */
+        if (*p == '\n') {
             p++;
+            current_row++;
+            col = 0;
+            if (current_row >= g_menu.info_scroll_row) {
+                page = (uint8_t)((current_row - g_menu.info_scroll_row) * 2);
+                if (page >= SSD1306_PAGES - 1) break;
+            }
+            continue;
+        }
+
+        uint8_t first = (uint8_t)*p;
+        uint8_t char_w;
+
+        if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+            char_w = FONT_CHINESE_W;
+        } else if ((first & 0x80) && (first & 0xE0) == 0xC0) {
+            p += 2;
+            continue;
+        } else {
+            char_w = FONT_ASCII_W;
+        }
+
+        /* 行末自动换行 */
+        if (col + char_w > SSD1306_WIDTH) {
+            current_row++;
+            if (current_row >= g_menu.info_scroll_row + 4) break;
+            col = 0;
+            if (current_row >= g_menu.info_scroll_row) {
+                page = (uint8_t)((current_row - g_menu.info_scroll_row) * 2);
+                if (page >= SSD1306_PAGES - 1) break;
+            }
+        }
+
+        if (current_row >= g_menu.info_scroll_row) {
+            if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+                col = draw_chinese_normal(page, col, p);
+                p += 3;
+            } else {
+                col = draw_ascii_normal(page, col, *p);
+                p++;
+            }
+        } else {
+            /* 跳过不可见行 */
+            if ((first & 0x80) && (first & 0xF0) == 0xE0) {
+                col += FONT_CHINESE_W;
+                p += 3;
+            } else {
+                col += FONT_ASCII_W;
+                p++;
+            }
         }
     }
+	// 在 render_info() 中 compute_info_rows 之后添加
+	DEBUG_PRINTF("INFO rows=%d scroll=%d/%d", 
+	    g_menu.info_total_rows, 
+	    g_menu.info_scroll_row,
+	    g_menu.info_scroll_row + 4);
+	
+#if 0
+    /* 滚动指示器 */
+    if (g_menu.info_total_rows > 4) {
+        uint8_t indic_page = 6;
+        uint8_t indic_x    = SSD1306_WIDTH - FONT_ASCII_W;
+        if (g_menu.info_scroll_row > 0) {
+            draw_ascii_normal(indic_page, indic_x, '^');
+        }
+        if (g_menu.info_scroll_row + 4 < g_menu.info_total_rows) {
+            if (g_menu.info_scroll_row > 0) indic_x -= FONT_ASCII_W;
+            draw_ascii_normal(indic_page, indic_x, 'v');
+        }
+    }
+#endif
 }
 
 /* ================================================================
@@ -838,6 +923,7 @@ static void handle_confirm(void)
         /* 进入 INFO 详情页 */
         g_menu.info_showing = true;
         g_menu.info_detail  = item->info.detail_text;
+        g_menu.info_scroll_row = 0;
         g_menu.dirty = true;
         break;
 
@@ -989,13 +1075,27 @@ void menu_mgr_handle_key(uint8_t key_id, key_event_t event)
         return;
     }
 
-    /* INFO 显示中: 任意键退出 */
+    /* INFO 显示中: KEY1/KEY2 滚动, KEY3/KEY4 退出 */
     if (g_menu.info_showing)
     {
         if (event == KEY_EVENT_SHORT_PRESS)
         {
-            g_menu.info_showing = false;
-            g_menu.dirty = true;
+            if (key_id == 1 && g_menu.info_scroll_row + 4 < g_menu.info_total_rows)
+            {
+                g_menu.info_scroll_row++;
+                g_menu.dirty = true;
+            }
+            else if (key_id == 2 && g_menu.info_scroll_row > 0)
+            {
+                g_menu.info_scroll_row--;
+                g_menu.dirty = true;
+            }
+            else if (key_id == 3 || key_id == 4)
+            {
+                g_menu.info_showing = false;
+                g_menu.info_scroll_row = 0;
+                g_menu.dirty = true;
+            }
         }
         return;
     }

@@ -17,6 +17,7 @@
 #include "sys_config.h"
 #include "sys_tick.h"
 #include "debug_console.h"
+#include "cli_cmds.h"
 #include "menu_mgr.h"
 
 /* 外设定义 — HAL 句柄类型前向声明 (定义于 CubeMX 生成的 main.c) */
@@ -60,6 +61,7 @@ int user_app_init(void)
     i2c_drv_init(&hi2c2);   /* I2C2: SSD1306 OLED 通信 */
     uart_drv_init(&huart1);  /* USART1: 与 PC 上位机通信 (115200, 中断接收) */
     debug_console_init(&huart2);
+    cli_init();
 
     ssd1306_init();
     sys_config_init();
@@ -89,6 +91,8 @@ int user_app_handle(void)
     static uint32_t last_tick = 0;
     static uint32_t last_key_scan = 0;
     static uint32_t led_tick_acc = 0;
+    cli_poll();
+
     uint32_t bytes_read_this_loop = 0;
     key_info_t key_info;
     uint8_t rx_byte;
@@ -459,3 +463,4 @@ static void send_mode_status(void)
     uint16_t len = proto_build_frame(CMD_MODE_STATUS, tx_seq++, data, 2);
     safe_send(proto_get_tx_buf(), len);
 }
+

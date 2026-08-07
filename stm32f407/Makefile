@@ -19,10 +19,10 @@ MCU     = $(CPU) -mthumb $(FPU)
 PROJ_SRC = src/ssd1306.c src/font.c src/display_mgr.c \
            src/i2c_drv.c src/uart_drv.c src/protocol.c \
            src/led_mgr.c src/key_drv.c src/iwdg_drv.c src/sys_config.c \
-           src/sys_tick.c src/user_app.c src/menu_mgr.c src/menu_items.c
+           src/sys_tick.c src/user_app.c src/menu_mgr.c src/menu_items.c src/debug_console.c src/nr_micro_shell_core.c src/cli_cmds.c
 
 # 调试串口模块: DEBUG_UART_ENABLE=0 时注释下行以彻底剔除
-# PROJ_SRC += src/debug_console.c
+# debug_console.c now included in PROJ_SRC above
 
 # CubeMX 生成的 HAL 源文件
 HAL_SRC  = $(CORE_DIR)/Src/main.c $(CORE_DIR)/Src/stm32f4xx_it.c \
@@ -58,3 +58,4 @@ flash:
 	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 
 .PHONY: all clean flash
+
