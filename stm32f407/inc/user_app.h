@@ -5,6 +5,13 @@
 
 #ifndef __USER_APP_H
 #define __USER_APP_H
+
+/* APP Slot 基地址 — 编译宏 APP_SLOT_B 控制 */
+#ifndef APP_SLOT_B
+#define APP_VTOR_ADDR  0x08008000UL
+#else
+#define APP_VTOR_ADDR  0x08060000UL
+#endif
 /** 固件版本号 */
 #define FW_VERSION  "V1.0.3"
 #define FW_AUTHOR  "赵四"

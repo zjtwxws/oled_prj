@@ -19,6 +19,7 @@
 #include "debug_console.h"
 #include "cli_cmds.h"
 #include "menu_mgr.h"
+#include "app_fw_info.h"
 
 /* 外设定义 — HAL 句柄类型前向声明 (定义于 CubeMX 生成的 main.c) */
 typedef struct I2C_HandleTypeDef  I2C_HandleTypeDef;
@@ -379,6 +380,17 @@ static void process_frame(const proto_frame_t *frame)
             send_nak(frame->seq, NAK_PARAM_ERROR);
         }
         break;
+
+    case CMD_OTA_RESERVED:
+    {
+        /* APP 收到 OTA 命令: 写 ota_request → 复位进入 Bootloader */
+        DEBUG_PRINTF("OTA: request received, rebooting to bootloader...");
+        app_fw_info_set_ota_request();
+        send_ack(frame->seq);
+        sys_tick_delay_ms(100);
+        sys_config_reset();
+    }
+    break;
 
     case CMD_ACK:
         break;

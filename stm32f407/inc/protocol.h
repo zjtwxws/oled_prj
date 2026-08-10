@@ -23,6 +23,10 @@
 #define CMD_WEATHER_DATA    0x05    /* PC->STM: 天气数据 (类型/温度/湿度/风向) */
 #define CMD_BOOT_TEXT       0x06       /* PC->STM: 上电文字配置 (写入 Flash) */
 #define CMD_OTA_RESERVED    0x07    /* 预留: OTA 升级 */
+#define CMD_OTA_DATA        0x08    /* PC->STM: OTA 固件数据块 [offset:4B][payload:N] */
+#define CMD_OTA_FINISH      0x09    /* PC->STM: OTA 传输完成, 校验激活 */
+#define CMD_OTA_ABORT       0x0A    /* PC->STM: 取消 OTA 升级 */
+
 #define CMD_LED_STATUS      0x10      /* STM->PC: LED 当前状态上报 */
 #define CMD_MODE_STATUS     0x11     /* STM->PC: 当前显示模式状态上报 */
 #define CMD_KEY_EVENT       0x12       /* STM->PC: 按键事件上报 */
@@ -35,6 +39,10 @@
 #define NAK_PARAM_ERROR     0x03     /* 参数错误 */
 #define NAK_FLASH_ERROR     0x04     /* Flash 写入/擦除错误 */
 #define NAK_BUSY            0x05            /* 设备忙, 暂不可处理 */
+#define NAK_OTA_OFFSET      0x06     /* OTA 写入偏移越界 */
+#define NAK_OTA_CRC         0x07     /* OTA 整体 CRC32 校验失败 */
+#define NAK_OTA_ERASE       0x08     /* OTA Flash 擦除失败 */
+
 
 typedef struct
 {

@@ -85,6 +85,8 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
+  /* 设置中断向量表偏移 (A/B 槽位，由 APP_SLOT_B 宏控制) */
+  SCB->VTOR = APP_VTOR_ADDR;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */

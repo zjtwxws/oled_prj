@@ -91,20 +91,11 @@
 /*!< Uncomment the following line if you need to relocate the vector table
      anywhere in Flash or Sram, else the vector table is kept at the automatic
      remap of boot address selected */
-#define USER_VECT_TAB_ADDRESS
+/* #define USER_VECT_TAB_ADDRESS */
 
 #if defined(USER_VECT_TAB_ADDRESS)
 /*!< Uncomment the following line if you need to relocate your vector Table
      in Sram else user remap will be done in Flash. */
-
-#if defined(APP_SLOT_B)
-#define VECT_TAB_OFFSET  0x00060000U
-#elif defined(APP_SLOT_A)
-#define VECT_TAB_OFFSET  0x00008000U
-#else
-#define VECT_TAB_OFFSET  0x00000000U
-#endif
-
 /* #define VECT_TAB_SRAM */
 #if defined(VECT_TAB_SRAM)
 #define VECT_TAB_BASE_ADDRESS   SRAM_BASE       /*!< Vector Table base address field.
