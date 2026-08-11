@@ -16,7 +16,7 @@
 
 /* Slot 基地址 */
 #ifndef APP_SLOT_B
-#define APP_VTOR_ADDR       0x08008000UL
+#define APP_VTOR_ADDR       0x08000000UL
 #else
 #define APP_VTOR_ADDR       0x08060000UL
 #endif

@@ -7,10 +7,12 @@
 #define __USER_APP_H
 
 /* APP Slot 基地址 — 编译宏 APP_SLOT_B 控制 */
-#ifndef APP_SLOT_B
-#define APP_VTOR_ADDR  0x08008000UL
+#if defined(APP_SLOT_B)
+#define APP_VTOR_ADDR  0x08060000UL     /* Slot B */
+#elif defined(APP_SLOT_A)
+#define APP_VTOR_ADDR  0x08008000UL     /* Slot A (bootloader 下运行) */
 #else
-#define APP_VTOR_ADDR  0x08060000UL
+#define APP_VTOR_ADDR  0x08000000UL     /* 独立运行 (无 bootloader) */
 #endif
 /** 固件版本号 */
 #define FW_VERSION  "V1.0.3"

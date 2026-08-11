@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Mon Aug 10 16:32:08 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Mon Aug 10 17:36:35 2026
 <BR><P>
 <H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1130,7 +1130,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[63]"></a>SystemInit</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, system_stm32f4xx.o(.text.SystemInit))
+<P><STRONG><a name="[63]"></a>SystemInit</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, system_stm32f4xx.o(.text.SystemInit))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(.text)
 </UL>
 <P><STRONG><a name="[d3]"></a>UART_Start_Receive_IT</STRONG> (Thumb, 52 bytes, Stack size 0 bytes, stm32f4xx_hal_uart.o(.text.UART_Start_Receive_IT))
@@ -1456,7 +1456,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[62]"></a>main</STRONG> (Thumb, 86 bytes, Stack size 0 bytes, main.o(.text.main))
+<P><STRONG><a name="[62]"></a>main</STRONG> (Thumb, 82 bytes, Stack size 0 bytes, main.o(.text.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 688<LI>Call Chain = main &rArr; user_app_handle &rArr; key_drv_scan &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init

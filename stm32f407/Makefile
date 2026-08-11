@@ -66,7 +66,7 @@ app_slot_a: $(BUILD_DIR)/app_slot_a.bin
 
 $(BUILD_DIR)/app_slot_a.elf: $(APP_SRC) $(HAL_SRC) $(HAL_LIB) $(STARTUP)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(INC_APP) $(LDFLAGS) \
+	$(CC) $(CFLAGS) -DAPP_SLOT_A $(INC_APP) $(LDFLAGS) \
 		-Tbootloader/STM32F407VGTx_FLASH_SLOTA.ld \
 		$(APP_SRC) $(HAL_SRC) $(HAL_LIB) $(STARTUP) -o $@
 	$(SIZE) $@

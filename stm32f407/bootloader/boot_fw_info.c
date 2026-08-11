@@ -5,7 +5,11 @@
 
 #include "boot_fw_info.h"
 #include "boot_flash.h"
+#include "usart.h"
 #include <string.h>
+
+/* 本地调试输出宏 — 直接使用 HAL_UART_Transmit */
+#define FW_DBG(msg)  do {     static const char __s[] = "[FW] " msg "\r\n";     HAL_UART_Transmit(&huart2, (uint8_t *)__s, sizeof(__s) - 1, 100); } while(0)
 
 static fw_info_t g_fw_info;
 
@@ -17,24 +21,35 @@ int fw_info_load(void)
 {
     const fw_info_t *flash_info = (const fw_info_t *)FW_INFO_ADDR;
 
+    FW_DBG("fw_info_load: reading magic from S10...");
     if (flash_info->magic == FW_INFO_MAGIC)
     {
+        FW_DBG("fw_info_load: magic OK, verifying CRC...");
         uint32_t calc_crc = boot_crc32((const uint8_t *)flash_info,
                                         sizeof(fw_info_t) - 4);
         if (calc_crc == flash_info->crc32)
         {
+            FW_DBG("fw_info_load: CRC OK, memcpy to RAM...");
             memcpy(&g_fw_info, flash_info, sizeof(fw_info_t));
+            FW_DBG("fw_info_load: loaded OK");
             return 0;
         }
+        FW_DBG("fw_info_load: CRC mismatch");
+    }
+    else
+    {
+        FW_DBG("fw_info_load: magic mismatch (first boot)");
     }
 
     /* 首次使用: 初始化默认 fw_info + 写入 S10 */
+    FW_DBG("fw_info_load: memset g_fw_info to 0xFF...");
     memset(&g_fw_info, 0xFF, sizeof(fw_info_t));
     g_fw_info.magic = FW_INFO_MAGIC;
     g_fw_info.active_slot = 0;
     g_fw_info.slot_a_state = SLOT_STATE_INVALID;
     g_fw_info.slot_b_state = SLOT_STATE_INVALID;
     g_fw_info.ota_request = 0;
+    FW_DBG("fw_info_load: g_fw_info populated, erasing S10...");
     g_fw_info.slot_a_size = 0;
     g_fw_info.slot_a_crc = 0;
     g_fw_info.slot_a_version = 0;
@@ -43,6 +58,7 @@ int fw_info_load(void)
     g_fw_info.slot_b_version = 0;
 
     boot_erase_sector(FW_INFO_SECTOR);
+    FW_DBG("fw_info_load: S10 erased, writing...");
 
     uint32_t *src = (uint32_t *)&g_fw_info;
     uint32_t addr = FW_INFO_ADDR;
@@ -53,6 +69,7 @@ int fw_info_load(void)
         src++;
     }
 
+    FW_DBG("fw_info_load: write done, first boot complete");
     return 1;
 }
 
@@ -74,6 +91,7 @@ int fw_info_save(void)
                                   sizeof(fw_info_t) - 4);
 
     boot_erase_sector(FW_INFO_SECTOR);
+    FW_DBG("fw_info_load: S10 erased, writing...");
 
     uint32_t *src = (uint32_t *)&g_fw_info;
     uint32_t addr = FW_INFO_ADDR;
@@ -141,6 +159,7 @@ void fw_info_set_slot_info(uint8_t slot, uint32_t size, uint32_t crc, uint32_t v
 void fw_info_clear_ota_request(void)
 {
     g_fw_info.ota_request = 0;
+    FW_DBG("fw_info_load: g_fw_info populated, erasing S10...");
     fw_info_save();
 }
 

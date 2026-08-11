@@ -1,59 +1,43 @@
 /**
  * @file    boot_main.c
- * @brief   Bootloader 主入口 — 启动决策 + OTA 更新状态机 + APP 跳转
+ * @brief   Bootloader 主入口 — 基于 CubeMX 硬件初始化 + 启动决策 / OTA / APP 跳转
  *
  * 编译条件: KEIL 下预定义 STM32F407xx, USE_HAL_DRIVER, BOOTLOADER
  * 链接地址: ROM=0x08000000 RAM=0x20000000
  *
+ * 硬件初始化复用 oled_cubemx CubeMX 生成代码:
+ *   HAL_Init → SystemClock_Config → MX_GPIO_Init → MX_USART2_UART_Init
+ *
  * 进入固件更新模式的条件:
- *   1. KEY1(PE1) + KEY2(PE2) 同时长按 ≥3s
+ *   1. KEY1(PE1) + KEY2(PE2) 同时长按 >= 3s
  *   2. APP 设置 ota_request 标志后复位
  *   3. 两个 APP 槽均无效 (全新芯片或固件损坏)
  */
 
-#include "stm32f4xx_hal.h"
+#include "main.h"
+#include "gpio.h"
+#include "usart.h"
+#include "stm32f4xx_it.h"
 #include "boot_fw_info.h"
 #include "boot_flash.h"
 #include "boot_proto.h"
 #include <string.h>
-#include <stdio.h>
 #include <stdarg.h>
 
 /* ---- 调试串口开关 (生产版本注释此行) ---- */
 #define BOOT_DEBUG_ENABLE
 
-/* ---- 硬件引脚 (与 oled_cubemx 一致) ---- */
-#define KEY1_PORT          GPIOE
-#define KEY1_PIN           GPIO_PIN_1
-#define KEY2_PORT          GPIOE
-#define KEY2_PIN           GPIO_PIN_2
-#define LED_PORT           GPIOF
-#define LED_PIN            GPIO_PIN_9
-#define DEBUG_USART        USART2
-#define DEBUG_TX_PORT      GPIOA
-#define DEBUG_TX_PIN       GPIO_PIN_2
-#define DEBUG_RX_PORT      GPIOA
-#define DEBUG_RX_PIN       GPIO_PIN_3
-
 /* ---- 常量 ---- */
-#define KEY_LONG_PRESS_MS  3000    /* 长按阈值 */
-#define LED_BLINK_FAST_MS  150     /* 快速闪烁 (更新模式等待) */
-#define LED_BLINK_SLOW_MS  500     /* 慢速闪烁 (正常启动) */
-#define UART_RX_TIMEOUT_MS 1       /* 每字节轮询超时 */
+#define KEY_LONG_PRESS_MS  3000
+#define LED_BLINK_FAST_MS  150
+#define LED_BLINK_SLOW_MS  500
+#define UART_RX_TIMEOUT_MS 1
 #define SLOT_A_BASE        0x08008000UL
 #define SLOT_B_BASE        0x08060000UL
-#define DEBUG_BAUDRATE     115200
 #define DEBUG_PRINTF_BUF   128
 
-/* ---- 全局 ---- */
-static UART_HandleTypeDef g_uart1;
-static UART_HandleTypeDef g_uart2;
-
 /* ---- 前向声明 ---- */
-static void system_clock_config(void);
-static void gpio_init(void);
-static void uart_init(void);
-static void debug_uart_init(void);
+void SystemClock_Config(void);
 static void uart_send(const uint8_t *data, uint16_t len);
 static int  uart_recv_byte(uint8_t *ch);
 static void delay_ms(uint32_t ms);
@@ -71,164 +55,197 @@ static void boot_printf(const char *fmt, ...);
 #define BOOT_LOG(fmt, ...)  ((void)0)
 #endif
 
-/* ---- 硬件初始化 ---- */
-
-/**
- * @brief  HSE 8MHz → PLL 168MHz → SYSCLK=168MHz, APB1=42MHz, APB2=84MHz
- */
-static void system_clock_config(void)
+/* ================================================================
+ *  自定义 vsnprintf — 避免 ARMCC semihosting 在无调试器时挂死
+ *  支持格式: %s, %d, %u, %x, %X, %02X, %08X, %%
+ * ================================================================ */
+#ifdef BOOT_DEBUG_ENABLE
+static int boot_vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 {
-    RCC_OscInitTypeDef osc = {0};
-    RCC_ClkInitTypeDef clk = {0};
+    char *dst = buf;
+    char *end = buf + size - 1;
+
+    if (size == 0)
+    {
+        return 0;
+    }
+
+    while (*fmt && dst < end)
+    {
+        if (*fmt != '%')
+        {
+            *dst++ = *fmt++;
+            continue;
+        }
+
+        fmt++;
+
+        int width = 0;
+        char pad = ' ';
+        if (*fmt == '0')
+        {
+            pad = '0';
+            fmt++;
+        }
+        while (*fmt >= '0' && *fmt <= '9')
+        {
+            width = width * 10 + (*fmt - '0');
+            fmt++;
+        }
+
+        switch (*fmt)
+        {
+        case 's':
+        {
+            const char *s = va_arg(args, const char *);
+            if (s == NULL) { s = "(null)"; }
+            while (*s && dst < end) { *dst++ = *s++; }
+            break;
+        }
+        case 'd':
+        {
+            int32_t val = va_arg(args, int32_t);
+            if (val < 0) { *dst++ = '-'; val = -val; }
+            goto do_unsigned;
+        }
+        case 'u':
+        {
+            uint32_t val = va_arg(args, uint32_t);
+do_unsigned:
+        {
+            char tmp[16];
+            int pos = 15;
+            tmp[15] = '\0';
+            do
+            {
+                tmp[--pos] = (char)('0' + (val % 10));
+                val /= 10;
+            }
+            while (val > 0 && pos > 0);
+
+            int num_digits = 15 - pos;
+            int pad_count = (width > num_digits) ? (width - num_digits) : 0;
+            while (pad_count > 0 && dst < end) { *dst++ = pad; pad_count--; }
+            while (tmp[pos] && dst < end) { *dst++ = tmp[pos++]; }
+        }
+            break;
+        }
+        case 'x':
+        case 'X':
+        {
+            uint32_t val = va_arg(args, uint32_t);
+            char tmp[16];
+            int pos = 15;
+            tmp[15] = '\0';
+            char hex_base = (char)((*fmt == 'X') ? 'A' : 'a');
+
+            do
+            {
+                uint32_t digit = val & 0x0F;
+                tmp[--pos] = (char)((digit < 10) ? ('0' + digit) : (hex_base + digit - 10));
+                val >>= 4;
+            }
+            while (val > 0 && pos > 0);
+
+            int num_digits = 15 - pos;
+            int pad_count = (width > num_digits) ? (width - num_digits) : 0;
+            while (pad_count > 0 && dst < end) { *dst++ = pad; pad_count--; }
+            while (tmp[pos] && dst < end) { *dst++ = tmp[pos++]; }
+            break;
+        }
+        case '%':
+            *dst++ = '%';
+            break;
+        default:
+            *dst++ = *fmt;
+            break;
+        }
+        fmt++;
+    }
+
+    *dst = '\0';
+    return (int)(dst - buf);
+}
+#endif
+
+/* ================================================================
+ *  SystemClock_Config — 严格匹配 CubeMX 生成代码
+ * ================================================================ */
+void SystemClock_Config(void)
+{
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
     __HAL_RCC_PWR_CLK_ENABLE();
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-    osc.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    osc.HSEState = RCC_HSE_ON;
-    osc.PLL.PLLState = RCC_PLL_ON;
-    osc.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    osc.PLL.PLLM = 4;
-    osc.PLL.PLLN = 168;
-    osc.PLL.PLLP = RCC_PLLP_DIV2;
-    osc.PLL.PLLQ = 4;
-    HAL_RCC_OscConfig(&osc);
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 4;
+    RCC_OscInitStruct.PLL.PLLN = 168;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 4;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        Error_Handler();
+    }
 
-    clk.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-                  | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    clk.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    clk.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    clk.APB1CLKDivider = RCC_HCLK_DIV4;
-    clk.APB2CLKDivider = RCC_HCLK_DIV2;
-    HAL_RCC_ClockConfig(&clk, FLASH_LATENCY_5);
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+                                | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+    {
+        Error_Handler();
+    }
 }
 
-/**
- * @brief  GPIO 初始化 — KEY1(PE1) + KEY2(PE2) 输入, LED(PF9) 输出
- */
-static void gpio_init(void)
+/* ================================================================
+ *  Error_Handler — HAL 库错误回调
+ * ================================================================ */
+void Error_Handler(void)
 {
-    __HAL_RCC_GPIOE_CLK_ENABLE();
-    __HAL_RCC_GPIOF_CLK_ENABLE();
-
-    GPIO_InitTypeDef init = {0};
-
-    /* KEY1: PE1, KEY2: PE2, 上拉输入 */
-    init.Pin = KEY1_PIN | KEY2_PIN;
-    init.Mode = GPIO_MODE_INPUT;
-    init.Pull = GPIO_PULLUP;
-    HAL_GPIO_Init(KEY1_PORT, &init);
-
-    /* LED: PF9, 推挽输出 */
-    init.Pin = LED_PIN;
-    init.Mode = GPIO_MODE_OUTPUT_PP;
-    init.Pull = GPIO_NOPULL;
-    init.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(LED_PORT, &init);
-
-    /* 默认关闭 LED */
-    HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
-}
-
-/**
- * @brief  USART1 初始化 — PA9(TX)/PA10(RX), 115200-8-N-1
- */
-static void uart_init(void)
-{
-    __HAL_RCC_USART1_CLK_ENABLE();
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-
-    /* PA9=TX(AF7), PA10=RX(AF7) */
-    GPIO_InitTypeDef gpio = {0};
-    gpio.Pin = GPIO_PIN_9 | GPIO_PIN_10;
-    gpio.Mode = GPIO_MODE_AF_PP;
-    gpio.Pull = GPIO_PULLUP;
-    gpio.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    gpio.Alternate = GPIO_AF7_USART1;
-    HAL_GPIO_Init(GPIOA, &gpio);
-
-    g_uart1.Instance = USART1;
-    g_uart1.Init.BaudRate = 115200;
-    g_uart1.Init.WordLength = UART_WORDLENGTH_8B;
-    g_uart1.Init.StopBits = UART_STOPBITS_1;
-    g_uart1.Init.Parity = UART_PARITY_NONE;
-    g_uart1.Init.Mode = UART_MODE_TX_RX;
-    g_uart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    g_uart1.Init.OverSampling = UART_OVERSAMPLING_16;
-    HAL_UART_Init(&g_uart1);
-}
-
-/**
- * @brief  USART2 调试串口 — PA2(TX)/PA3(RX), 115200-8-N-1
- * @note   仅 TX 使用, RX 不使用但需初始化以免浮空
- */
-static void debug_uart_init(void)
-{
-#ifdef BOOT_DEBUG_ENABLE
-    __HAL_RCC_USART2_CLK_ENABLE();
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-
-    /* PA2=TX(AF7), PA3=RX(AF7) */
-    GPIO_InitTypeDef gpio = {0};
-    gpio.Pin = DEBUG_TX_PIN | DEBUG_RX_PIN;
-    gpio.Mode = GPIO_MODE_AF_PP;
-    gpio.Pull = GPIO_PULLUP;
-    gpio.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    gpio.Alternate = GPIO_AF7_USART2;
-    HAL_GPIO_Init(DEBUG_TX_PORT, &gpio);
-
-    g_uart2.Instance = DEBUG_USART;
-    g_uart2.Init.BaudRate = DEBUG_BAUDRATE;
-    g_uart2.Init.WordLength = UART_WORDLENGTH_8B;
-    g_uart2.Init.StopBits = UART_STOPBITS_1;
-    g_uart2.Init.Parity = UART_PARITY_NONE;
-    g_uart2.Init.Mode = UART_MODE_TX_RX;
-    g_uart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    g_uart2.Init.OverSampling = UART_OVERSAMPLING_16;
-    HAL_UART_Init(&g_uart2);
-#endif
+    __disable_irq();
+    while (1)
+    {
+    }
 }
 
 /* ---- 外设操作 ---- */
 
 static void uart_send(const uint8_t *data, uint16_t len)
 {
-    HAL_UART_Transmit(&g_uart1, (uint8_t *)data, len, 100);
+    HAL_UART_Transmit(&huart2, (uint8_t *)data, len, 100);
 }
 
-/**
- * @brief  轮询接收 1 字节
- * @return 1=收到, 0=超时
- */
 static int uart_recv_byte(uint8_t *ch)
 {
-    return (HAL_UART_Receive(&g_uart1, ch, 1, UART_RX_TIMEOUT_MS) == HAL_OK);
+    return (HAL_UART_Receive(&huart2, ch, 1, UART_RX_TIMEOUT_MS) == HAL_OK);
 }
 
-/**
- * @brief  调试串口格式化输出 (轮询, 阻塞)
- * @note   仅在 BOOT_DEBUG_ENABLE 定义时有效
- */
 #ifdef BOOT_DEBUG_ENABLE
 static void boot_printf(const char *fmt, ...)
 {
     char buf[DEBUG_PRINTF_BUF];
     va_list args;
     va_start(args, fmt);
-    int len = vsnprintf(buf, sizeof(buf), fmt, args);
+    int len = boot_vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
 
     if (len > 0)
     {
-        HAL_UART_Transmit(&g_uart2, (uint8_t *)buf, (uint16_t)len, 100);
+        HAL_UART_Transmit(&huart2, (uint8_t *)buf, (uint16_t)len, 100);
     }
 }
 #endif
 
-/**
- * @brief  简单阻塞延时 (基于指令计数，非 SysTick)
- * @note   168MHz 下约 168000 个循环 = 1ms
- */
+/* ---- 延时 (基于指令循环, 168MHz 约 42000 循环 = 1ms) ---- */
+
 static void delay_ms(uint32_t ms)
 {
     for (uint32_t i = 0; i < ms; i++)
@@ -240,9 +257,12 @@ static void delay_ms(uint32_t ms)
     }
 }
 
+/* ---- LED 控制 (PF9, 低电平亮) ---- */
+
 static void led_set(uint8_t on)
 {
-    HAL_GPIO_WritePin(LED_PORT, LED_PIN, on ? GPIO_PIN_RESET : GPIO_PIN_SET);
+    HAL_GPIO_WritePin(USER_LED0_GPIO_Port, USER_LED0_Pin,
+                      on ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }
 
 static void led_blink(int count, uint32_t period_ms)
@@ -258,10 +278,6 @@ static void led_blink(int count, uint32_t period_ms)
 
 /* ---- 启动决策 ---- */
 
-/**
- * @brief  检查 KEY1 + KEY2 是否同时长按 (≥3s)
- * @return 1=双键长按, 0=未满足条件
- */
 static int check_key12_long_press(void)
 {
     uint32_t press_ms = 0;
@@ -271,8 +287,8 @@ static int check_key12_long_press(void)
 
     while (press_ms < KEY_LONG_PRESS_MS)
     {
-        uint8_t k1 = (HAL_GPIO_ReadPin(KEY1_PORT, KEY1_PIN) == GPIO_PIN_RESET) ? 1 : 0;
-        uint8_t k2 = (HAL_GPIO_ReadPin(KEY2_PORT, KEY2_PIN) == GPIO_PIN_RESET) ? 1 : 0;
+        uint8_t k1 = (HAL_GPIO_ReadPin(USER_KEY1_GPIO_Port, USER_KEY1_Pin) == GPIO_PIN_RESET) ? 1 : 0;
+        uint8_t k2 = (HAL_GPIO_ReadPin(USER_KEY2_GPIO_Port, USER_KEY2_Pin) == GPIO_PIN_RESET) ? 1 : 0;
 
         if (k1 && k2)
         {
@@ -297,10 +313,6 @@ static uint32_t get_slot_base(uint8_t slot)
 
 /* ---- APP 跳转 ---- */
 
-/**
- * @brief  跳转到指定地址的 APP
- * @param  app_base  APP 向量表基地址 (0x08008000 或 0x08060000)
- */
 static void boot_jump_to_app(uint32_t app_base)
 {
     uint32_t app_sp = *((volatile uint32_t *)app_base);
@@ -326,10 +338,7 @@ static void boot_jump_to_app(uint32_t app_base)
     SysTick->LOAD = 0;
     SysTick->VAL  = 0;
 
-    __HAL_RCC_USART1_CLK_DISABLE();
-#ifdef BOOT_DEBUG_ENABLE
     __HAL_RCC_USART2_CLK_DISABLE();
-#endif
 
     __set_MSP(app_sp);
     SCB->VTOR = app_base;
@@ -577,18 +586,20 @@ send_ack:
     }
 }
 
-/* ---- 主入口 ---- */
-
+/* ================================================================
+ *  main — CubeMX 标准初始化 + Bootloader 业务逻辑
+ * ================================================================ */
 int main(void)
 {
+    /* ---- CubeMX 标准初始化序列 ---- */
     HAL_Init();
-    system_clock_config();
-    gpio_init();
-    uart_init();
-    debug_uart_init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    MX_USART2_UART_Init();
 
+    /* ---- Bootloader 启动 ---- */
     BOOT_LOG("========================================");
-    BOOT_LOG("STM32F407 Bootloader V1.0");
+    BOOT_LOG("STM32F407 Bootloader V2.0");
     BOOT_LOG("build: %s %s", __DATE__, __TIME__);
     BOOT_LOG("========================================");
 
@@ -596,8 +607,8 @@ int main(void)
 
     /* 检查 KEY1 + KEY2 同时按下 */
     {
-        uint8_t k1 = (HAL_GPIO_ReadPin(KEY1_PORT, KEY1_PIN) == GPIO_PIN_RESET) ? 1 : 0;
-        uint8_t k2 = (HAL_GPIO_ReadPin(KEY2_PORT, KEY2_PIN) == GPIO_PIN_RESET) ? 1 : 0;
+        uint8_t k1 = (HAL_GPIO_ReadPin(USER_KEY1_GPIO_Port, USER_KEY1_Pin) == GPIO_PIN_RESET) ? 1 : 0;
+        uint8_t k2 = (HAL_GPIO_ReadPin(USER_KEY2_GPIO_Port, USER_KEY2_Pin) == GPIO_PIN_RESET) ? 1 : 0;
         BOOT_LOG("key check: KEY1=%d KEY2=%d", k1, k2);
 
         if (k1 && k2)
@@ -660,7 +671,7 @@ int main(void)
         }
     }
 
-    /* 活跃槽无效 → 尝试另一个槽 */
+    /* 活跃槽无效 -> 尝试另一个槽 */
     {
         uint8_t alt    = (fi->active_slot == 0) ? 1 : 0;
         uint8_t state  = (alt == 0) ? fi->slot_a_state : fi->slot_b_state;
@@ -687,12 +698,10 @@ int main(void)
         }
     }
 
-    /* 两槽均无效 → 进入更新模式等待固件 */
+    /* 两槽均无效 -> 进入更新模式等待固件 */
     BOOT_LOG("no valid firmware found, entering update mode");
+    led_blink(4, LED_BLINK_SLOW_MS);
     enter_update_mode();
 
-    while (1)
-    {
-        led_blink(1, 1000);
-    }
+    /* unreachable */
 }

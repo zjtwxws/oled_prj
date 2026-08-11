@@ -1,4 +1,8 @@
 *** Using Compiler 'V6.13.1', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'bootloader'
+compiling boot_main.c...
+linking...
+Program Size: Code=19110 RO-data=3562 RW-data=44 ZI-data=5412  
+FromELF: creating hex file...
 ".\build\bootloader.axf" - 0 Error(s), 0 Warning(s).
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
