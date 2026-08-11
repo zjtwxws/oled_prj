@@ -15,10 +15,12 @@
 #define APP_FW_INFO_OTA_REQ_OFFSET  7
 
 /* Slot 基地址 */
+#ifndef APP_VTOR_ADDR
 #ifndef APP_SLOT_B
 #define APP_VTOR_ADDR       0x08000000UL
 #else
 #define APP_VTOR_ADDR       0x08060000UL
+#endif
 #endif
 
 /**
