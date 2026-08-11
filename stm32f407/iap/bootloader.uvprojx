@@ -19,29 +19,29 @@
           <PackID>Keil.STM32F4xx_DFP.3.1.1</PackID>
           <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IRAM2(0x10000000,0x00010000) IROM(0x08000000,0x00100000) CPUTYPE("Cortex-M4") FPU2 DSP CLOCK(12000000) ELITTLE</Cpu>
-          <FlashUtilSpec>
-          </FlashUtilSpec><StartupFile>
-          </StartupFile><FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_1024 -FS08000000 -FL0100000 -FP0($$Device:STM32F407ZGTx$CMSIS\Flash\STM32F4xx_1024.FLM))</FlashDriverDll>
+          <FlashUtilSpec></FlashUtilSpec>
+          <StartupFile></StartupFile>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_1024 -FS08000000 -FL0100000 -FP0($$Device:STM32F407ZGTx$CMSIS\Flash\STM32F4xx_1024.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>
-          </RegisterFile><MemoryEnv>
-          </MemoryEnv><Cmp>
-          </Cmp><Asm>
-          </Asm><Linker>
-          </Linker><OHString>
-          </OHString><InfinionOptionDll>
-          </InfinionOptionDll><SLE66CMisc>
-          </SLE66CMisc><SLE66AMisc>
-          </SLE66AMisc><SLE66LinkerMisc>
-          </SLE66LinkerMisc><SFDFile>$$Device:STM32F407ZGTx$CMSIS\SVD\STM32F407.svd</SFDFile>
+          <RegisterFile></RegisterFile>
+          <MemoryEnv></MemoryEnv>
+          <Cmp></Cmp>
+          <Asm></Asm>
+          <Linker></Linker>
+          <OHString></OHString>
+          <InfinionOptionDll></InfinionOptionDll>
+          <SLE66CMisc></SLE66CMisc>
+          <SLE66AMisc></SLE66AMisc>
+          <SLE66LinkerMisc></SLE66LinkerMisc>
+          <SFDFile>$$Device:STM32F407ZGTx$CMSIS\SVD\STM32F407.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
-          <BinPath>
-          </BinPath><IncludePath>
-          </IncludePath><LibPath>
-          </LibPath><RegisterFilePath>
-          </RegisterFilePath><DBRegisterFilePath>
-          </DBRegisterFilePath><TargetStatus>
+          <BinPath></BinPath>
+          <IncludePath></IncludePath>
+          <LibPath></LibPath>
+          <RegisterFilePath></RegisterFilePath>
+          <DBRegisterFilePath></DBRegisterFilePath>
+          <TargetStatus>
             <Error>0</Error>
             <ExitCodeStop>0</ExitCodeStop>
             <ButtonStop>0</ButtonStop>
@@ -62,9 +62,9 @@
           <BeforeCompile>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>
-            </UserProg1Name><UserProg2Name>
-            </UserProg2Name><UserProg1Dos16Mode>0</UserProg1Dos16Mode>
+            <UserProg1Name></UserProg1Name>
+            <UserProg2Name></UserProg2Name>
+            <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopU1X>0</nStopU1X>
             <nStopU2X>0</nStopU2X>
@@ -72,9 +72,9 @@
           <BeforeMake>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>
-            </UserProg1Name><UserProg2Name>
-            </UserProg2Name><UserProg1Dos16Mode>0</UserProg1Dos16Mode>
+            <UserProg1Name></UserProg1Name>
+            <UserProg2Name></UserProg2Name>
+            <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopB1X>0</nStopB1X>
             <nStopB2X>0</nStopB2X>
@@ -82,16 +82,16 @@
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>
-            </UserProg1Name><UserProg2Name>
-            </UserProg2Name><UserProg1Dos16Mode>0</UserProg1Dos16Mode>
+            <UserProg1Name></UserProg1Name>
+            <UserProg2Name></UserProg2Name>
+            <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
             <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
-          <SVCSIdString>
-          </SVCSIdString></TargetCommonOption>
+          <SVCSIdString></SVCSIdString>
+        </TargetCommonOption>
         <CommonProperty>
           <UseCPPCompiler>0</UseCPPCompiler>
           <RVCTCodeConst>0</RVCTCodeConst>
@@ -104,9 +104,9 @@
           <AssembleAssemblyFile>0</AssembleAssemblyFile>
           <PublicsOnly>0</PublicsOnly>
           <StopOnExitCode>3</StopOnExitCode>
-          <CustomArgument>
-          </CustomArgument><IncludeLibraryModules>
-          </IncludeLibraryModules><ComprImg>1</ComprImg>
+          <CustomArgument></CustomArgument>
+          <IncludeLibraryModules></IncludeLibraryModules>
+          <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
@@ -138,12 +138,12 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3>
-          </Flash3><Flash4>
-          </Flash4><pFcarmOut>
-          </pFcarmOut><pFcarmGrp>
-          </pFcarmGrp><pFcArmRoot>
-          </pFcArmRoot><FcArmLst>0</FcArmLst>
+          <Flash3></Flash3>
+          <Flash4></Flash4>
+          <pFcarmOut></pFcarmOut>
+          <pFcarmGrp></pFcarmGrp>
+          <pFcArmRoot></pFcArmRoot>
+          <FcArmLst>0</FcArmLst>
         </Utilities>
         <TargetArmAds>
           <ArmAdsMisc>
@@ -175,8 +175,8 @@
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M4"</AdsCpuType>
-            <RvctDeviceName>
-            </RvctDeviceName><mOS>0</mOS>
+            <RvctDeviceName></RvctDeviceName>
+            <mOS>0</mOS>
             <uocRom>0</uocRom>
             <uocRam>0</uocRam>
             <hadIROM>1</hadIROM>
@@ -188,7 +188,7 @@
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -210,7 +210,7 @@
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
             <Im1Chk>1</Im1Chk>
-            <Im2Chk>0</Im2Chk>
+            <Im2Chk>1</Im2Chk>
             <OnChipMemories>
               <Ocm1>
                 <Type>0</Type>
@@ -308,11 +308,11 @@
                 <Size>0x10000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
-            <RvctStartVector>
-            </RvctStartVector></ArmAdsMisc>
+            <RvctStartVector></RvctStartVector>
+          </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>0</Optim>
+            <Optim>3</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -335,10 +335,10 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls>
-              </MiscControls><Define>USE_HAL_DRIVER,STM32F407xx,BOOTLOADER</Define>
-              <Undefine>
-              </Undefine><IncludePath>..\inc;..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Inc;..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\oled_cubemx\Drivers\CMSIS\Include;..\..\oled_cubemx\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\..\oled_cubemx\Inc</IncludePath>
+              <MiscControls></MiscControls>
+              <Define>USE_HAL_DRIVER,STM32F407xx,BOOTLOADER</Define>
+              <Undefine></Undefine>
+              <IncludePath>.\inc;..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Inc;..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\oled_cubemx\Drivers\CMSIS\Include;..\..\oled_cubemx\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\..\oled_cubemx\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -353,11 +353,11 @@
             <useXO>0</useXO>
             <uClangAs>0</uClangAs>
             <VariousControls>
-              <MiscControls>
-              </MiscControls><Define>
-              </Define><Undefine>
-              </Undefine><IncludePath>
-              </IncludePath></VariousControls>
+              <MiscControls></MiscControls>
+              <Define>__MICROLIB</Define>
+              <Undefine></Undefine>
+              <IncludePath></IncludePath>
+            </VariousControls>
           </Aads>
           <LDads>
             <umfTarg>0</umfTarg>
@@ -368,84 +368,29 @@
             <useFile>0</useFile>
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
-            <pXoBase>
-            </pXoBase><ScatterFile>.\bootloader.sct</ScatterFile>
-            <IncludeLibs>
-            </IncludeLibs><IncludeLibsPath>
-            </IncludeLibsPath><Misc>
-            </Misc><LinkerInputFile>
-            </LinkerInputFile><DisabledWarnings>
-            </DisabledWarnings></LDads>
+            <pXoBase></pXoBase>
+            <ScatterFile>.\build\bootloader.sct</ScatterFile>
+            <IncludeLibs></IncludeLibs>
+            <IncludeLibsPath></IncludeLibsPath>
+            <Misc>--library_type=microlib</Misc>
+            <LinkerInputFile></LinkerInputFile>
+            <DisabledWarnings></DisabledWarnings>
+          </LDads>
         </TargetArmAds>
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Bootloader</GroupName>
-          <Files>
-            <File>
-              <FileName>boot_flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\boot_flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>boot_fw_info.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\boot_fw_info.c</FilePath>
-            </File>
-            <File>
-              <FileName>boot_main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\boot_main.c</FilePath>
-            </File>
-            <File>
-              <FileName>boot_proto.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\boot_proto.c</FilePath>
-            </File>
-            <File>
-              <FileName>system_stm32f4xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\system_stm32f4xx.c</FilePath>
-            </File>
-            <File>
-              <FileName>gpio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_msp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\stm32f4xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>i2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\oled_cubemx\Src\i2c.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_it.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\stm32f4xx_it.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Startup</GroupName>
+          <GroupName>startup</GroupName>
           <Files>
             <File>
               <FileName>startup_stm32f407xx.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\startup_stm32f407xx.s</FilePath>
+              <FilePath>.\startup\startup_stm32f407xx.s</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>HAL_Driver</GroupName>
+          <GroupName>hal_driver</GroupName>
           <Files>
             <File>
               <FileName>stm32f4xx_hal.c</FileName>
@@ -483,11 +428,6 @@
               <FilePath>..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_flash_ex.c</FilePath>
             </File>
             <File>
-              <FileName></FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f4xx_hal_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c</FilePath>
@@ -501,6 +441,66 @@
               <FileName>stm32f4xx_hal_dma_ex.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_pwr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pwr.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_pwr_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pwr_ex.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>app</GroupName>
+          <Files>
+            <File>
+              <FileName>boot_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\boot_flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>boot_fw_info.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\boot_fw_info.c</FilePath>
+            </File>
+            <File>
+              <FileName>boot_main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\boot_main.c</FilePath>
+            </File>
+            <File>
+              <FileName>boot_proto.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\boot_proto.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_msp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\stm32f4xx_hal_msp.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\stm32f4xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f4xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\system_stm32f4xx.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\usart.c</FilePath>
             </File>
           </Files>
         </Group>
