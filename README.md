@@ -15,6 +15,8 @@ A desktop OLED control system that connects a Windows PC to an STM32F407 microco
 - **Multi-Level Menu System** — 8-item main menu navigated via 4 onboard buttons, with TOGGLE / VALUE / ACTION / INFO / SUBMENU item types
 - **Windows Desktop App** — VS2019 Win32 dialog application with GDI OLED preview (128×64 at 4x scale)
 - **Custom Binary Protocol** — CRC-8-ATM protected frame protocol with 500ms timeout retransmission
+- **A/B Dual-Slot Bootloader** — OTA firmware upgrade with automatic fallback, CRC32 verification, and OLED progress display (in stm32f407/iap/)
+- **OTA Upgrade Tool** — Python CLI tool for firmware upgrade via serial port (in 	ools/ota_tool/)
 - **Debug CLI** — On-chip debug console via USART2 with command-line interface (nr_micro_shell)
 - **Linux Gateway (optional)** — RK3506-based HTTP/WebSocket + TCP server with web-based control panel
 
@@ -77,6 +79,28 @@ make          # builds oled_f407.elf, .bin, .hex into build/
 make flash    # flash via ST-Link
 ```
 
+### Build Bootloader (Keil MDK)
+
+1. Open stm32f407/iap/bootloader.uvprojx in Keil MDK
+2. Rebuild → uild/bootloader.hex
+3. Flash via ST-Link: st-flash write build/bootloader.bin 0x08000000
+
+Or via GCC Makefile:
+`ash
+make bootloader    # → build/bootloader.bin
+make flash_boot    # flash via ST-Link
+`
+
+### OTA Firmware Upgrade
+
+Use the Python OTA tool:
+`ash
+pip install -r tools/ota_tool/requirements.txt
+python tools/ota_tool/ota_tool.py COM3 build/app_slot_b.bin
+`
+
+Full bootloader documentation: [docs/bootloader-design.md](docs/bootloader-design.md)
+
 ### Build Windows Host
 
 1. Open `pc_host/oled_control.sln` in Visual Studio 2019
@@ -96,7 +120,8 @@ make flash    # flash via ST-Link
 oled_prj/
 ├── stm32f407/              # STM32F407 firmware (bare metal, GCC)
 │   ├── inc/                # Headers (driver layer + application layer)
-│   ├── src/                # Sources (16 modules, ~6200 lines C)
+│   ├── src/                # Sources (18 modules, ~6800 lines C)
+│   ├── iap/                # A/B dual-slot Bootloader (Keil MDK project)
 │   │   ├── ssd1306.c       # SSD1306 OLED driver
 │   │   ├── display_mgr.c   # Dual-mode display manager + 7 effects
 │   │   ├── menu_mgr.c      # Multi-level menu state machine
@@ -157,6 +182,9 @@ Full specification: [docs/protocol-uart.md](docs/protocol-uart.md)
 | [Key Mapping](docs/menu-key-design.md) | Button assignments and input handling |
 | [PC Host Reference](docs/pc-host-code-reference.md) | Windows application module breakdown |
 | [CubeMX Setup](docs/stm32cubemx-f407-hal-setup.md) | STM32CubeMX project creation guide |
+| [Bootloader Design](docs/bootloader-design.md) | A/B dual-slot bootloader design and usage |
+| [OTA Tool Design](docs/ota-tool-design.md) | OTA firmware upgrade tool specification |
+| [CLI Integration](docs/cli-integration.md) | Debug console (nr_micro_shell) porting guide |
 | [AGENTS.md](AGENTS.md) | Coding conventions and project rules |
 
 ## License

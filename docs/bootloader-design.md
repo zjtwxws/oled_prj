@@ -1,6 +1,6 @@
-# STM32F407 A/B 双分区 Bootloader 设计说明书
+# STM32F407 A/B 双分区 Bootloader 详细设计与工程使用手册
 
-> 版本: V1.0 | 日期: 2026-08-10 | 适用: oled_prj 项目
+> 版本: V2.0 | 日期: 2026-08-10 | 最后更新: 2026-08-11 | 适用: oled_prj 项目
 
 ---
 
@@ -35,12 +35,12 @@ S8      0x08080000 - 0x0809FFFF   128KB   ├ Slot B (384KB)
 S9      0x080A0000 - 0x080BFFFF   128KB   ┘ base = 0x08060000
 ─────────────────────────────────────────────────────
 S10     0x080C0000 - 0x080DFFFF   128KB     固件信息区 (fw_info)
-S11     0x080E0000 - 0x080FFFFF   128KB     sys_config (不动)
+S11     0x080E0000 - 0x080FFFFF   128KB     sys_config (APP 使用, 不动)
 ─────────────────────────────────────────────────────
 总计                            1024KB
 ```
 
-**容量验证**: APP 57KB, Slot A/B 均有 6× 以上余量。S10 整体划给 fw_info 仅因扇区是最小擦除单元, 实际仅用 ~64 字节。
+**容量验证**: APP 57KB, Slot A/B 均有 6x 以上余量。S10 整体划给 fw_info 仅因扇区是最小擦除单元, 实际仅用 ~64 字节。
 
 ---
 
@@ -59,7 +59,7 @@ typedef struct {
     uint32_t slot_b_size;
     uint32_t slot_b_crc;
     uint32_t slot_b_version;
-    uint32_t crc32;          // 结构体自身 CRC32
+    uint32_t crc32;          // 结构体自身 CRC32 (前 48 字节)
 } fw_info_t;
 ```
 
@@ -67,6 +67,8 @@ typedef struct {
 - `slot_x_state = 0xFF` (Flash 擦除后默认值) 表示无效, `0x01` 表示有效
 - `ota_request`: APP 在收到上位机 OTA 命令时写入 `1`, Bootloader 读取后清除
 - Bootloader 独占管理 S10, APP 仅能读和写 `ota_request` 单字节
+- **日志结构存储**: S10 扇区采用追加写入方式, 每次 `fw_info_save()` 将新记录写入下一个空槽位, 避免整扇擦除。扇区写满后整体擦除并从头重新写入
+- `fw_info_load()` 扫描 S10 全部槽位, 取最后一条有效记录 (magic + crc32 均正确)
 
 ---
 
@@ -74,42 +76,51 @@ typedef struct {
 
 ```
 上电/复位
-  │
-  ▼
+   │
+   ▼
 Bootloader (0x08000000)
-  │
-  ├─ 初始化: 时钟 168MHz, GPIO, USART1 (115200)
-  ├─ 读取 S10 fw_info
-  │   ├─ magic 无效 → 初始化 fw_info, 两槽标记无效
-  │   └─ magic 正确 → 继续
-  │
-  ├─ KEY1 长按 ≥3s? ──→ 进入更新模式
-  ├─ ota_request == 1? ──→ 清除标志 → 进入更新模式
-  │
-  ├─ active_slot 有效且 CRC32 正确? ──→ 跳转 APP
-  ├─ 备用槽有效且 CRC32 正确? ──→ 切换 active_slot → 跳转 APP
-  └─ 两槽均无效 ──→ 进入更新模式 (LED 快闪, 等待 PC 下发)
+   │
+   ├─ HAL_Init → SystemClock_Config (168MHz) → MX_GPIO_Init
+   ├─ MX_USART2_UART_Init                         (调试串口)
+   ├─ boot_oled_init()                            (GPIO 位控 I2C 初始化 SSD1306)
+   ├─ MX_USART1_UART_Init                         (与 PC 通信, 115200)
+   ├─ LED 闪烁 2 次 (500ms 周期) 指示启动
+   │
+   ├─ KEY1 (PE1) 是否按下? ──是──→ enter_update_mode()
+   │
+   ├─ 读取 S10 fw_info
+   │   ├─ magic 无效 → 初始化 fw_info, 两槽标记无效
+   │   └─ magic 正确 → 继续
+   │
+   ├─ ota_request == 1? ──→ 清除标志 → enter_update_mode()
+   │
+   ├─ active_slot 状态有效且 CRC32 正确? ──→ 跳转 APP
+   ├─ 备用槽有效且 CRC32 正确? ──→ 切换 active_slot → 跳转 APP
+   └─ 两槽均无效 ──→ enter_update_mode() (LED 快闪 4 次)
 
-进入更新模式:
-  ├─ 等待 CMD_OTA_START → 擦除目标槽 → ACK
-  ├─ 循环接收 CMD_OTA_DATA → 写入 Flash → ACK
-  ├─ 收到 CMD_OTA_FINISH → CRC32 校验
-  │   ├─ 通过 → 更新 fw_info, 标记新槽有效, 切换 active → 跳转
-  │   └─ 失败 → NAK, 旧槽仍是 active, 等待重试
-  └─ 收到 CMD_OTA_ABORT → 回到启动决策
+enter_update_mode():
+   ├─ OLED 显示"进入升级模式", LED 快闪 3 次 (150ms)
+   ├─ 等待 CMD_OTA_START → 擦除目标槽 → OLED 显示"擦除中..." → ACK
+   ├─ 循环接收 CMD_OTA_DATA → 写入 Flash → OLED 显示进度条 → ACK
+   ├─ 收到 CMD_OTA_FINISH:
+   │   ├─ CRC32 校验, OLED 显示"校验中..."
+   │   ├─ 通过 → 更新 fw_info, 切换 active → OLED"升级完成"→"启动APP"→ 跳转
+   │   └─ 失败 → NAK, 状态回到 UPD_IDLE, 等待重试
+   └─ 收到 CMD_OTA_ABORT → 退出更新模式, 重新执行启动决策
 ```
 
 ---
 
 ## 5. OTA 协议
 
-### 5.1 帧格式 (与 APP 协议一致)
+### 5.1 帧格式 (自包含实现, 与 APP 协议帧格式一致但无 SEQ 字段)
 
 ```
 SOF(0xA5) | LEN(1B) | CMD(1B) | DATA(0~251B) | CRC8(1B) | EOF(0x5A)
 ```
 
 LEN 仅计 DATA 段字节数, 不含 CMD。CRC-8-ATM (多项式 0x07), 覆盖 SOF~DATA。
+Bootloader 协议引擎是独立实现 (`boot_proto.c`), 6 状态机 (无 SEQ 状态), 不与 APP 的 `protocol.c` 共享代码。
 
 ### 5.2 OTA 专用命令
 
@@ -119,7 +130,7 @@ LEN 仅计 DATA 段字节数, 不含 CMD。CRC-8-ATM (多项式 0x07), 覆盖 SO
 |-----|------|-----------|------|
 | `0x07` | `CMD_OTA_START` | `[slot:1B][size:4B LE][crc32:4B LE][ver:4B LE]` | 开始升级, 13 字节 |
 | `0x08` | `CMD_OTA_DATA` | `[offset:4B LE][payload:≤200B]` | 数据块, N+4 字节 |
-| `0x09` | `CMD_OTA_FINISH` | 无 (LEN=0) | 传输完成 |
+| `0x09` | `CMD_OTA_FINISH` | 无 (LEN=0) | 传输完成, Bootloader 校验 CRC32 |
 | `0x0A` | `CMD_OTA_ABORT` | 无 (LEN=0) | 取消升级 |
 
 **Bootloader → PC**:
@@ -127,7 +138,20 @@ LEN 仅计 DATA 段字节数, 不含 CMD。CRC-8-ATM (多项式 0x07), 覆盖 SO
 | CMD | 名称 | 说明 |
 |-----|------|------|
 | `0xF0` | ACK | 成功 |
-| `0xFF` | NAK + `[code:1B]` | 失败: `0x06`=偏移越界, `0x07`=CRC 失败, `0x08`=擦除失败 |
+| `0xFF` | NAK + `[code:1B]` | 失败: 见下方错误码 |
+
+**NAK 错误码全集**:
+
+| 错误码 | 宏名 | 含义 |
+|:-----:|------|------|
+| `0x01` | `NAK_CRC_ERROR` | CRC 校验失败 |
+| `0x02` | `NAK_UNKNOWN_CMD` | 未知命令或当前状态下不允许 |
+| `0x03` | `NAK_PARAM_ERROR` | 参数错误 (长度不足/槽号无效) |
+| `0x04` | `NAK_FLASH_ERROR` | Flash 写入失败 |
+| `0x05` | `NAK_BUSY` | 系统忙 (UPD_DONE 状态下收到命令) |
+| `0x06` | `NAK_OTA_OFFSET` | 偏移越界 |
+| `0x07` | `NAK_OTA_CRC` | OTA CRC32 校验失败 |
+| `0x08` | `NAK_OTA_ERASE` | Flash 擦除失败 |
 
 ### 5.3 OTA 时序
 
@@ -155,22 +179,45 @@ IEEE 802.3, 多项式 0xEDB88320 (反射), 初始值 0xFFFFFFFF, 结果取反。
 ## 6. Bootloader 代码结构
 
 ```
-stm32f407/bootloader/
-├── boot_main.c         主入口, 启动决策, OTA 状态机, APP 跳转
-├── boot_fw_info.h/c    S10 fw_info 管理 (读/写/CRC)
-├── boot_flash.h/c      Flash 擦写 + CRC32 计算
-├── boot_proto.h/c      简化协议帧解析/构建
-├── bootloader.sct      Keil 散列文件 (ROM 0x08000000, 32KB)
-├── STM32F407VGTx_FLASH_BOOT.ld   GCC 链接脚本
-├── STM32F407VGTx_FLASH_SLOTA.ld  Slot A GCC 链接脚本
-├── STM32F407VGTx_FLASH_SLOTB.ld  Slot B GCC 链接脚本
-├── oled_cubemx_slota.sct         Slot A Keil 散列文件
-├── oled_cubemx_slotb.sct         Slot B Keil 散列文件
-├── startup_stm32f407xx.s         启动文件 (CubeMX 复制)
-└── system_stm32f4xx.c            系统初始化 (CubeMX 复制)
+stm32f407/iap/
+├── src/
+│   ├── boot_main.c         主入口, 启动决策, OTA 状态机, APP 跳转, boot_vsnprintf
+│   ├── boot_fw_info.c      S10 fw_info 管理 (日志结构读写/CRC)
+│   ├── boot_flash.c        Flash 擦写 + CRC32 计算 (IEEE 802.3)
+│   ├── boot_proto.c        简化协议帧解析/构建 (6 状态机, 无 SEQ)
+│   ├── boot_oled.c         GPIO 位控 I2C SSD1306 驱动 + 精简字库 + 进度条
+│   ├── gpio.c              CubeMX 复制: MX_GPIO_Init
+│   ├── usart.c             CubeMX 复制: MX_USART1_UART_Init, MX_USART2_UART_Init
+│   ├── stm32f4xx_hal_msp.c CubeMX 复制: HAL_MspInit
+│   ├── stm32f4xx_it.c      CubeMX 复制: 中断服务 (SysTick/USARTx)
+│   └── system_stm32f4xx.c  CubeMX 复制: SystemInit
+├── inc/
+│   ├── boot_fw_info.h      fw_info 结构体 + 分区常量 + API
+│   ├── boot_flash.h        Flash 操作 API + 扇区宏
+│   ├── boot_proto.h        帧常量 + 命令码 + 错误码 + 帧结构 + API
+│   ├── boot_oled.h         OLED 显示 API (status / progress)
+│   └── main.h, gpio.h, usart.h, stm32f4xx_hal_conf.h, stm32f4xx_it.h
+├── startup/
+│   └── startup_stm32f407xx.s   启动文件 (CubeMX 复制)
+├── bootloader.uvprojx       Keil MDK 工程文件
+├── build/                   GCC Makefile 编译产物
+├── DebugConfig/             Keil 调试配置
+├── Listings/                Keil map 文件
+└── Objects/                 Keil 编译产物
 ```
 
-**Bootloader 依赖**: 仅 HAL 库, 不引用任何 `stm32f407/src/` 下的 APP 代码。
+**Bootloader 依赖**: 仅 HAL 库 + oled_cubemx 硬件初始化文件副本, 不引用任何 `stm32f407/src/` 下的 APP 代码。
+
+另外 `stm32f407/` 根目录下包含链接脚本和散列文件:
+
+```
+stm32f407/
+├── Makefile                     GCC 编译 (含 bootloader, app_slot_a, app_slot_b)
+├── oled_cubemx_slota.sct        Slot A Keil 散列文件 (ROM 0x08008000)
+├── oled_cubemx_slotb.sct        Slot B Keil 散列文件 (ROM 0x08060000)
+├── src/app_fw_info.c            APP 侧 fw_info 操作 (写 ota_request 单字节)
+└── inc/app_fw_info.h            APP 侧 fw_info 头文件
+```
 
 ---
 
@@ -178,12 +225,12 @@ stm32f407/bootloader/
 
 | 文件 | 改动 |
 |------|------|
-| `user_app.h` | 新增 `APP_VTOR_ADDR` 宏 (由 `APP_SLOT_B` 控制) |
+| `user_app.h` | 新增 `APP_VTOR_ADDR` 宏 (由 `APP_SLOT_A` / `APP_SLOT_B` 控制) |
 | `main.c` (USER CODE SysInit) | 新增 `SCB->VTOR = APP_VTOR_ADDR` |
 | `user_app.c` | 新增 `CMD_OTA_RESERVED` 处理 — 写 ota_request → ACK → 复位 |
 | `app_fw_info.h/c` | APP 侧 fw_info 操作 — 写 ota_request 单字节 |
 | `protocol.h` | 新增 `CMD_OTA_DATA/FINISH/ABORT` 和 `NAK_OTA_*` 常量 |
-| `Makefile` | 新增 `bootloader`, `app_slot_a`, `app_slot_b` 三个 target |
+| `Makefile` | 新增 `bootloader`, `app_slot_a`, `app_slot_b` 三个 target (见 §12) |
 
 **编译命令**:
 ```bash
@@ -199,77 +246,226 @@ make               # 编译全部
 
 | 优先级 | 条件 | 实现 |
 |--------|------|------|
-| 1 | KEY1 (PE1) 上电长按 ≥3s | Bootloader 在跳转前轮询 GPIO |
-| 2 | APP 收到 `CMD_OTA_RESERVED (0x07)` | APP 写 S10 `ota_request=1` → `NVIC_SystemReset()` |
-| 3 | 两槽均无效 | Bootloader 自动进入更新模式 |
+| 1 | **KEY1 (PE1) 上电时按下** (低电平) | Bootloader 在初始化后立即检测 GPIO, **不需要长按**, 开机时按住即可 |
+| 2 | APP 收到 `CMD_OTA_RESERVED (0x07)` | APP 写 S10 `ota_request=1` → 通过 `sys_config_reset()` 复位 |
+| 3 | 两槽均无效 | Bootloader 自动进入更新模式 (LED 快闪 4 次, 等待固件下发) |
+
+> **注意**: 原设计文档中的 "KEY1+KEY2 同时长按 3s" 已简化为单一 KEY1 开机检测。
 
 ---
 
-## 9. 异常处理
+## 9. OLED 显示 (Bootloader 内置)
+
+Bootloader 内置了精简的 SSD1306 OLED 驱动, 通过 GPIO 位控 I2C 操作 PB10(SCL)/PB11(SDA)。
+不依赖 HAL I2C 模块, 约 ~100kHz 软件模拟 I2C 时钟。
+
+### 9.1 字库
+
+- **ASCII 8x16**: 95 个可打印字符 (0x20~0x7E)
+- **中文 16x16**: 19 个升级状态所需汉字:
+  进、入、升、级、模、式、擦、除、中、正、在、下、载、完、成、启、动、校、验
+
+### 9.2 显示 API
+
+```c
+void boot_oled_init(void);                              // 初始化 SSD1306 OLED
+void boot_oled_clear(void);                              // 清空显存缓冲区
+void boot_oled_flush(void);                              // 刷新缓冲区到 OLED
+void boot_oled_status(const char *text);                 // 居中显示一行文本并刷新
+void boot_oled_progress(uint32_t done, uint32_t total);  // 显示进度条 + 百分比
+```
+
+### 9.3 升级过程 OLED 显示
+
+| 阶段 | OLED 显示 | LED |
+|------|-----------|-----|
+| 进入升级模式 | "进入升级模式" (居中) | 快闪 3 次 (150ms) |
+| 擦除目标槽 | "擦除中..." | — |
+| 数据下载 | "正在下载" + 进度条 + 百分比 | — |
+| 完成校验 | "校验中..." | — |
+| 升级成功 | "升级完成" → "启动APP" (500ms 后) | 亮 1s → 灭 → 跳转 |
+
+---
+
+## 10. 异常处理
 
 | 场景 | 行为 |
 |------|------|
 | OTA 写入途中断电 | 旧槽不变, 下次上电自动启动旧版本 |
 | OTA CRC32 校验失败 | NAK → fw_info 不变 → 旧槽仍是 active → 等待重试 |
-| 新固件可启动但有逻辑 bug | 可通过 KEY1 长按强制进入 Bootloader 重刷 |
+| 新固件可启动但有逻辑 bug | 可通过 KEY1 上电进入 Bootloader 重刷 |
 | S10 fw_info 损坏 (CRC32 错) | Bootloader 初始化默认值 → 两槽标记无效 → 进入更新模式 |
+| APP 跳转前: SP 不在 SRAM 范围 | 放弃跳转, 继续尝试备用槽 |
+| APP 跳转前: PC 不在 Flash 范围 | 放弃跳转, 继续尝试备用槽 |
+
+> **跳转安全校验**: 跳转前检查 SP ∈ [0x20000000, 0x2001C000] 和 PC ∈ [0x08000000, 0x080FFFFF], 非法则拒绝跳转并尝试备用槽或进入更新模式。
 
 ---
 
-## 10. 上位机 OTA 工具
+## 11. 上位机 OTA 工具
 
-独立的上位机工具 `tools/ota_tool/`, 详见 [ota-tool-design.md](ota-tool-design.md)。
+独立的上位机工具 `tools/ota_tool/`, 基于 Python + pySerial, 详见 [ota-tool-design.md](ota-tool-design.md)。
 
----
-
-## 11. 测试用例
-
-| 编号 | 场景 | 预期 |
-|------|------|------|
-| T01 | 全新芯片首次上电 | 初始化 fw_info → 两槽无效 → 进入更新模式 |
-| T02 | 正常 OTA Slot A→B | 擦除 B → 写入 → CRC 通过 → active=B → 跳转 B |
-| T03 | OTA 写入途中断电 | 重上电 → A 槽仍有效 → 跳转 A 正常 |
-| T04 | OTA FINISH 后 CRC 错 | fw_info 不变 → A 仍是 active → 重上电跳转 A |
-| T05 | KEY1 长按上电 | 强制进入更新模式 |
-| T06 | APP 收到 OTA 命令 | 写 ota_request → 复位 → Bootloader 识别 → 更新模式 |
-| T07 | 两槽均无效 | Bootloader 等待固件 |
-| T08 | 活跃槽 CRC 损坏 | 自动切换到备用槽 |
+```bash
+python tools/ota_tool/ota_tool.py COM3 firmware.bin
+```
 
 ---
 
 ## 12. 构建与烧录
 
-```bash
-# GCC 编译 (推荐)
-cd stm32f407
-make                    # 编译全部 3 个目标
+### 12.1 Keil MDK (当前使用)
 
-# 烧录 (ST-Link)
-make flash_boot         # 烧录 Bootloader 到 0x08000000
-make flash_slot_a       # 烧录 APP 到 Slot A (0x08008000)
-make flash_slot_b       # 烧录 APP 到 Slot B (0x08060000)
-
-# OTA 升级 (通过上位机)
-python tools/ota_tool/ota_tool.py COM3 app_slot_b.bin
-```
-
----
-
-## 附录: Keil 工程配置参考
-
-### Bootloader Target 配置
+**Bootloader 工程**: 打开 `stm32f407/iap/bootloader.uvprojx`
 
 | 项 | 值 |
 |----|-----|
 | 芯片 | STM32F407VG |
-| ROM Start | 0x08000000, Size: 0x8000 |
-| RAM Start | 0x20000000, Size: 0x1C000 |
+| ROM Start | 0x08000000, Size: 0x8000 (32KB) |
+| RAM Start | 0x20000000, Size: 0x1C000 (112KB) |
 | Preprocessor | `STM32F407xx, USE_HAL_DRIVER, BOOTLOADER` |
-| Scatter File | `bootloader/bootloader.sct` |
+| Scatter File | `build/bootloader.sct` (自动生成) |
+| 优化 | `-O2` |
 
-### APP Slot B Target 配置
+**编译输出**: `build/bootloader.axf` / `build/bootloader.hex`
 
-| 项 | 值 |
-|----|-----|
-| Preprocessor | 追加 `APP_SLOT_B` |
-| Scatter File | `bootloader/oled_cubemx_slotb.sct` |
+**APP 工程 (Slot A/B)**: 打开 `oled_cubemx/MDK-ARM/oled_cubemx.uvprojx`
+
+| Target | ROM Start | Size | Preprocessor | Scatter File |
+|--------|-----------|------|--------------|--------------|
+| Slot A (默认) | 0x08008000 | 0x58000 | 无额外宏 | `oled_cubemx_slota.sct` |
+| Slot B | 0x08060000 | 0x60000 | 加 `APP_SLOT_B` | `oled_cubemx_slotb.sct` |
+
+### 12.2 GCC Makefile
+
+```bash
+cd stm32f407
+make                    # 编译全部 3 个目标
+
+make bootloader         # → build/bootloader.bin
+make app_slot_a         # → build/app_slot_a.bin
+make app_slot_b         # → build/app_slot_b.bin
+
+make flash_boot         # 烧录 Bootloader 到 0x08000000
+make flash_slot_a       # 烧录 APP 到 Slot A (0x08008000)
+make flash_slot_b       # 烧录 APP 到 Slot B (0x08060000)
+```
+
+### 12.3 首次烧录流程
+
+全新芯片首次烧录完整流程:
+
+1. **烧录 Bootloader**: `st-flash write build/bootloader.bin 0x08000000`
+2. **烧录 APP (Slot A)**: `st-flash write build/app_slot_a.bin 0x08008000`
+3. **上电**: Bootloader 检测到两槽无效 → 初始化 fw_info → 进入更新模式
+4. **用 OTA 工具升级到 Slot A**: `python tools/ota_tool/ota_tool.py COM3 build/app_slot_a.bin`
+5. **正常启动**: 设备从 Slot A 启动运行
+
+> **备选**: 如果使用 J-Link 或 ST-Link Utility, 可以直接烧录 Bootloader + APP 到对应地址, 无需 OTA 工具初始化。
+
+### 12.4 OTA 升级流程 (日常使用)
+
+```bash
+# 1. PC 连接设备串口, 设备正常运行中
+# 2. 执行 OTA 升级 (自动检测非活跃槽)
+python tools/ota_tool/ota_tool.py COM3 build/app_slot_b.bin
+
+# 可选参数:
+python tools/ota_tool/ota_tool.py COM3 firmware.bin --force-slot 0   # 强制升级 Slot A
+python tools/ota_tool/ota_tool.py COM3 firmware.bin --baud 460800    # 非标波特率
+python tools/ota_tool/ota_tool.py COM3 firmware.bin --version 1.2.0  # 指定版本号
+```
+
+---
+
+## 13. 测试用例
+
+| 编号 | 场景 | 操作 | 预期 |
+|------|------|------|------|
+| T01 | 全新芯片首次上电 | 烧录 Bootloader 后上电 | 初始化 fw_info → 两槽无效 → 进入更新模式 |
+| T02 | 正常 OTA Slot A→B | OTA 升级到 Slot B | 擦除 B → 写入 → CRC 通过 → active=B → 跳转 B |
+| T03 | OTA 写入途中断电 | OTA 中拔电再上电 | A 槽仍有效 → 跳转 A 正常 |
+| T04 | OTA FINISH 后 CRC 错 | 固件损坏 | fw_info 不变 → A 仍是 active → 重上电跳转 A |
+| T05 | KEY1 上电进入 | 按住 KEY1 上电 | 强制进入更新模式, OLED 显示"进入升级模式" |
+| T06 | APP 收到 OTA 命令 | PC 发 CMD_OTA_RESERVED | 写 ota_request → 复位 → Bootloader 识别 → 更新模式 |
+| T07 | 两槽均无效 | 擦除 S2-S9 后上电 | Bootloader 等待固件, LED 快闪 |
+| T08 | 活跃槽 CRC 损坏 | 手动破坏部分 Flash | 自动切换到备用槽 |
+| T09 | SP 非法跳过 | 人为损坏向量表 | 跳过该槽, 尝试备用槽 |
+
+---
+
+## 14. 设计亮点与实现细节
+
+### 14.1 日志结构 fw_info 存储
+
+传统方案: 每次保存 fw_info 都用 sector erase → write, 增加 Flash 磨损且慢。
+
+本方案: S10 (128KB) 可容纳 `128KB / 64B = 2048` 条记录。`fw_info_save()` 追加写入下一空槽,
+`fw_info_load()` 扫描取最后一条有效记录。扇区写满后才整体擦除回绕, 大幅减少擦除次数。
+
+### 14.2 自定义 vsnprintf
+
+ARMCC semihosting 在无调试器连接时, `printf` 会挂死 MCU。Bootloader 实现了轻量
+`boot_vsnprintf`, 支持 `%s %d %u %x %X %02X %08X %%`, 避免依赖标准库的 I/O 实现。
+
+### 14.3 OLED 位控 I2C
+
+Bootloader 不依赖 HAL I2C 模块, 直接 GPIO 位控 PB10/PB11 模拟 I2C 时序。优势:
+- 减少 HAL 模块依赖, 降低 Bootloader 体积
+- 不依赖 CubeMX 生成的 I2C 初始化
+- 约 100kHz 的软件 I2C 足够驱动 SSD1306
+
+### 14.4 APP 跳转前安全校验
+
+跳转前校验 SP 和 PC 地址范围, 防止跳转到损坏固件导致不可恢复的死机:
+
+```c
+if (app_sp < 0x20000000UL || app_sp > 0x2001C000UL) return;  // SP 不在 SRAM
+if (app_pc < 0x08000000UL || app_pc > 0x080FFFFFUL) return;  // PC 不在 Flash
+```
+
+跳转前还执行: `__disable_irq()` → 停 SysTick → 关 USART2 时钟 → `__set_MSP(app_sp)` → `SCB->VTOR = app_base` → `__enable_irq()` → 跳转。
+
+### 14.5 Flash 写入的未对齐尾部处理
+
+`CMD_OTA_DATA` 的 payload 长度为 N 字节。代码先将 N/4 个完整 4 字节字写入, 剩余 `N%4` 字节采用**读-改-写**方式: 先读取目标地址所在字的当前值, 修改对应字节后再整字写回。确保非 4 字节对齐的尾部数据也能正确写入。
+
+### 14.6 HAL 擦除 API 的使用
+
+Flash 擦除使用标准 HAL API (`HAL_FLASH_Unlock` → `HAL_FLASHEx_Erase` → `HAL_FLASH_Lock`), 并标记为 `__RAM_FUNC` 将函数放入 RAM 执行。已验证对相同规格的 128KB Sector 10/11 擦除正常。
+
+---
+
+## 15. 调试
+
+Bootloader 通过 USART2 (PA2/PA3, 115200 8N1) 输出调试日志。格式:
+`[BOOT] function:line message`
+
+在 `boot_main.c` 中定义 `BOOT_DEBUG_ENABLE` 启用调试输出。生产版本注释此行。
+
+硬件连接:
+
+| STM32F407 | USB-TTL 模块 |
+|-----------|-------------|
+| PA2 (USART2 TX) | RXD |
+| PA3 (USART2 RX) | TXD |
+| GND | GND |
+
+使用 MobaXterm / SecureCRT 等终端软件, 波特率 115200 8N1 查看输出。
+
+**示例输出**:
+```
+[BOOT] main:113 ========================================
+[BOOT] main:114 STM32F407 Bootloader V3.0
+[BOOT] main:115 build: Aug 11 2026 10:30:00
+[BOOT] main:116 ========================================
+[BOOT] main:127 loading fw_info from S10 (0x080C0000)...
+[BOOT] main:130 fw_info_load: loaded OK
+[BOOT] main:134 fw_info: active=0x08008000 a_state=0x01 a_ver=0x00010003 ...
+[BOOT] main:155 active slot 0x08008000 CRC OK, jumping...
+[BOOT] boot_jump_to_app:162 jumping to APP at 0x08008000 ...
+```
+
+---
+
+**文档版本**: V2.0 | **创建日期**: 2026-08-10 | **最后更新**: 2026-08-11

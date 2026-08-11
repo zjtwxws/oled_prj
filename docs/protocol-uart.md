@@ -1,4 +1,4 @@
-# UART 自定义二进制帧协议 (v3.1)
+# UART 自定义二进制帧协议 (v3.2)
 
 > 适用于 PC 上位机 ↔ STM32F407 之间的串口通信。
 > RK3506 网关作为可选中继，帧格式保持不变。
@@ -275,7 +275,50 @@ A5 00 F0 00 65 5A
 
 ---
 
-## 9. 源代码位置
+## 9. OTA 协议 (Bootloader 专用)
+
+Bootloader 使用与 APP 相同的帧格式，但协议引擎为独立实现（不含 SEQ 字段，6 状态状态机）。
+
+Bootloader 启动后仅响应 CMD_OTA_START/DATA/FINISH/ABORT 四条命令，其他命令返回 NAK(0x02)。
+
+### 9.1 CMD_OTA_START — 开始升级
+
+DATA: 13 字节 [slot(1B)][size(4B LE)][crc32(4B LE)][version(4B LE)]`r
+
+| 偏移 | 长度 | 含义 | 说明 |
+|:---:|:----:|:----|:-----|
+| 0 | 1 B | slot | 目标槽: 0=Slot A, 1=Slot B |
+| 1 | 4 B | size | 固件总大小 (LE) |
+| 5 | 4 B | crc32 | 固件 CRC32 (IEEE 802.3) |
+| 9 | 4 B | version | 固件版本号 (如 V1.0.3 → 0x00010003) |
+
+Bootloader 收到后擦除目标槽全部扇区 (Slot A: S2~S6, Slot B: S7~S9) → ACK 或 NAK(0x08)。
+
+### 9.2 CMD_OTA_DATA — 数据块
+
+DATA: [offset(4B LE)][payload(N≤200B)]`r
+
+Bootloader 将 payload 写入 Flash (offset 所在地址)。若 offset + len 超过 fw_size 则返回 NAK(0x06)。
+
+写入方式: 先写 N/4 个完整 4 字节字，剩余 N%4 字节用读-改-写方式写回。每块写入成功回复 ACK。
+
+### 9.3 CMD_OTA_FINISH — 传输完成
+
+DATA: 无 (LEN=0)
+
+Bootloader 计算目标槽固件的 CRC32 并与 OTA_START 中的期望值比对:
+- 匹配 → 更新 fw_info (标记新槽有效 + 切换 active) → ACK → 跳转新固件
+- 不匹配 → NAK(0x07) → 状态回 IDLE, 等待重试
+
+### 9.4 CMD_OTA_ABORT — 取消升级
+
+DATA: 无 (LEN=0)
+
+Bootloader 返回 ACK 后退出更新模式，重新执行启动决策流程。
+
+---
+
+## 10. 源代码位置
 
 | 端 | 头文件 | 实现文件 |
 |:--|:-------|:---------|
@@ -287,4 +330,8 @@ A5 00 F0 00 65 5A
 
 ---
 
-**文档版本**: v3.1 | **创建日期**: 2026-08-05
+**文档版本**: v3.2 | **创建日期**: 2026-08-05 | **最后更新**: 2026-08-11
+
+
+
+
