@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Tue Aug 11 19:54:29 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Tue Aug 11 20:11:48 2026
 <BR><P>
 <H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1160,8 +1160,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[e4]"></a>app_fw_info_set_ota_request</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, app_fw_info.o(.text.app_fw_info_set_ota_request))
-<BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = app_fw_info_set_ota_request &rArr; HAL_FLASH_Program &rArr; FLASH_WaitForLastOperation
+<P><STRONG><a name="[e4]"></a>app_fw_info_set_ota_request</STRONG> (Thumb, 370 bytes, Stack size 40 bytes, app_fw_info.o(.text.app_fw_info_set_ota_request))
+<BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = app_fw_info_set_ota_request &rArr; HAL_FLASH_Program &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Unlock
 <LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Program
@@ -2160,7 +2160,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> menu_items.o(.rodata.item_reboot)
 </UL>
 <P><STRONG><a name="[8d]"></a>cb_update_firmware</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, menu_items.o(.text.cb_update_firmware))
-<BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = cb_update_firmware &rArr; app_fw_info_set_ota_request &rArr; HAL_FLASH_Program &rArr; FLASH_WaitForLastOperation
+<BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = cb_update_firmware &rArr; app_fw_info_set_ota_request &rArr; HAL_FLASH_Program &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_reset
 <LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request

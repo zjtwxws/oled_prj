@@ -509,12 +509,12 @@ static uint8_t text_width(const char *text)
     while (*p)
     {
         uint8_t first = (uint8_t)*p;
-        if ((first & 0x80) && (first & 0xF0) == 0xE0)
+        if ((first & 0x80) && ((first & 0xF0) == 0xE0))
         {
             w += FONT_CHINESE_W;
             p += 3;
         }
-        else if ((first & 0x80) && (first & 0xE0) == 0xC0)
+        else if ((first & 0x80) && ((first & 0xE0) == 0xC0))
         {
             p += 2;
         }
@@ -536,7 +536,7 @@ static void draw_text_at(uint8_t page, uint8_t x, const char *text)
     while (*p && x < OLED_WIDTH)
     {
         uint8_t first = (uint8_t)*p;
-        if ((first & 0x80) && (first & 0xF0) == 0xE0)
+        if ((first & 0x80) && ((first & 0xF0) == 0xE0))
         {
             if (x + FONT_CHINESE_W > OLED_WIDTH)
             {
@@ -545,7 +545,7 @@ static void draw_text_at(uint8_t page, uint8_t x, const char *text)
             x = draw_chinese(x, page, p);
             p += 3;
         }
-        else if ((first & 0x80) && (first & 0xE0) == 0xC0)
+        else if ((first & 0x80) && ((first & 0xE0) == 0xC0))
         {
             p += 2;
         }

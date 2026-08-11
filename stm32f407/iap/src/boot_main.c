@@ -626,6 +626,7 @@ int main(void)
     BOOT_LOG("STM32F407 Bootloader V3.0");
     BOOT_LOG("build: %s %s", __DATE__, __TIME__);
     BOOT_LOG("========================================");
+    BOOT_LOG("IAP: Slot A (0x08008000) / Slot B (0x08060000)");
 
     led_blink(2, LED_BLINK_SLOW_MS);
 
@@ -643,8 +644,8 @@ int main(void)
     }
 
     const fw_info_t *fi = fw_info_get();
-    BOOT_LOG("fw_info: active=0x%08X a_state=0x%02X a_ver=0x%08X b_state=0x%02X b_ver=0x%08X ota_req=%d",
-             get_slot_base(fi->active_slot), fi->slot_a_state, fi->slot_a_version,
+    BOOT_LOG("fw_info: active=slot%c (0x%08X) a_state=0x%02X a_ver=0x%08X b_state=0x%02X b_ver=0x%08X ota_req=%d",
+             (fi->active_slot == 0) ? 'A' : 'B', get_slot_base(fi->active_slot), fi->slot_a_state, fi->slot_a_version,
              fi->slot_b_state, fi->slot_b_version, fi->ota_request);
 
     /* 检查 ota_request */
@@ -662,26 +663,27 @@ int main(void)
         uint32_t size  = (active == 0) ? fi->slot_a_size : fi->slot_b_size;
         uint32_t crc   = (active == 0) ? fi->slot_a_crc  : fi->slot_b_crc;
 
-        BOOT_LOG("active slot 0x%08X: state=0x%02X size=%u crc=0x%08X", get_slot_base(active), state, size, crc);
+        BOOT_LOG("IAP: trying Slot %c (0x%08X) state=0x%02X size=%u crc=0x%08X",
+                 (active == 0) ? 'A' : 'B', get_slot_base(active), state, size, crc);
 
         if (state == SLOT_STATE_VALID && size > 0)
         {
             uint32_t calc_crc = boot_crc32_slot(active, size);
             if (calc_crc == crc)
             {
-                BOOT_LOG("active slot 0x%08X CRC OK, jumping...", get_slot_base(active));
+                BOOT_LOG("IAP: Slot %c CRC OK, jumping...", (active == 0) ? 'A' : 'B');
                 led_blink(1, LED_BLINK_SLOW_MS);
                 boot_jump_to_app(get_slot_base(active));
             }
             else
             {
-                BOOT_LOG("active slot 0x%08X CRC FAIL: expected=0x%08X got=0x%08X",
-                         get_slot_base(active), crc, calc_crc);
+                BOOT_LOG("IAP: Slot %c CRC FAIL: expected=0x%08X got=0x%08X",
+                         (active == 0) ? 'A' : 'B', crc, calc_crc);
             }
         }
         else
         {
-            BOOT_LOG("active slot 0x%08X invalid", get_slot_base(active));
+            BOOT_LOG("IAP: Slot %c invalid", (active == 0) ? 'A' : 'B');
         }
     }
 
@@ -692,28 +694,28 @@ int main(void)
         uint32_t size  = (alt == 0) ? fi->slot_a_size : fi->slot_b_size;
         uint32_t crc   = (alt == 0) ? fi->slot_a_crc  : fi->slot_b_crc;
 
-        BOOT_LOG("trying alternate slot 0x%08X: state=0x%02X size=%u crc=0x%08X",
-                 get_slot_base(alt), state, size, crc);
+        BOOT_LOG("IAP: trying Slot %c (0x%08X) state=0x%02X size=%u crc=0x%08X",
+                 (alt == 0) ? 'A' : 'B', get_slot_base(alt), state, size, crc);
 
         if (state == SLOT_STATE_VALID && size > 0)
         {
             uint32_t calc_crc = boot_crc32_slot(alt, size);
             if (calc_crc == crc)
             {
-                BOOT_LOG("alternate slot 0x%08X CRC OK, switching and jumping...", get_slot_base(alt));
+                BOOT_LOG("IAP: Slot %c CRC OK, switching and jumping...", (alt == 0) ? 'A' : 'B');
                 fw_info_set_active_slot(alt);
                 led_blink(2, LED_BLINK_SLOW_MS);
                 boot_jump_to_app(get_slot_base(alt));
             }
             else
             {
-                BOOT_LOG("alternate slot 0x%08X CRC FAIL", get_slot_base(alt));
+                BOOT_LOG("IAP: Slot %c CRC FAIL", (alt == 0) ? 'A' : 'B');
             }
         }
     }
 
     /* 两槽均无效 -> 进入更新模式等待固件 */
-    BOOT_LOG("no valid firmware found, entering update mode");
+    BOOT_LOG("IAP: no valid firmware found, entering update mode");
     led_blink(4, LED_BLINK_SLOW_MS);
     enter_update_mode();
 
