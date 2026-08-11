@@ -64,4 +64,5 @@ Desktop.ini
 # ==================== 项目特定 ====================
 .venv/
 tmp_screenshot.png
-stm32f407/bootloader/build_output.txt
+*.txt
+*.log
