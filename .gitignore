@@ -21,7 +21,9 @@ x64/
 
 ## Keil MDK
 *.uvoptx
+!stm32f407/bootloader/bootloader.uvoptx
 *.uvprojx
+!stm32f407/bootloader/bootloader.uvprojx
 *.crf
 *.dep
 *.axf
