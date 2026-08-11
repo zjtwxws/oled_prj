@@ -502,6 +502,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\usart.c</FilePath>
             </File>
+            <File>
+              <FileName>boot_oled.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\boot_oled.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

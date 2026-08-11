@@ -692,7 +692,7 @@ static const menu_item_t item_update_firmware =
 {
     .text = "升级固件",
     .type = MENU_TYPE_CONFIRM,
-    .confirm = { .prompt_text = "进入固件升级模式？",
+    .confirm = { .prompt_text = "确认进入升级？",
                  .on_confirm = cb_update_firmware },
 };
 

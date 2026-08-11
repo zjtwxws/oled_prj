@@ -21,6 +21,7 @@
 #include "boot_fw_info.h"
 #include "boot_flash.h"
 #include "boot_proto.h"
+#include "boot_oled.h"
 #include <string.h>
 #include <stdarg.h>
 
@@ -28,7 +29,6 @@
 #define BOOT_DEBUG_ENABLE
 
 /* ---- 常量 ---- */
-#define KEY_LONG_PRESS_MS  3000
 #define LED_BLINK_FAST_MS  150
 #define LED_BLINK_SLOW_MS  500
 #define UART_RX_TIMEOUT_MS 1
@@ -43,7 +43,6 @@ static int  uart_recv_byte(uint8_t *ch);
 static void delay_ms(uint32_t ms);
 static void led_set(uint8_t on);
 static void led_blink(int count, uint32_t period_ms);
-static int  check_key12_long_press(void);
 static void boot_jump_to_app(uint32_t app_base);
 static void enter_update_mode(void);
 static uint32_t get_slot_base(uint8_t slot);
@@ -316,35 +315,7 @@ static void led_blink(int count, uint32_t period_ms)
     }
 }
 
-/* ---- 启动决策 ---- */
 
-static int check_key12_long_press(void)
-{
-    uint32_t press_ms = 0;
-    const uint32_t poll_interval = 10;
-
-    BOOT_LOG("KEY1+KEY2 detected, checking long press (%d ms)...", KEY_LONG_PRESS_MS);
-
-    while (press_ms < KEY_LONG_PRESS_MS)
-    {
-        uint8_t k1 = (HAL_GPIO_ReadPin(USER_KEY1_GPIO_Port, USER_KEY1_Pin) == GPIO_PIN_RESET) ? 1 : 0;
-        uint8_t k2 = (HAL_GPIO_ReadPin(USER_KEY2_GPIO_Port, USER_KEY2_Pin) == GPIO_PIN_RESET) ? 1 : 0;
-
-        if (k1 && k2)
-        {
-            press_ms += poll_interval;
-            delay_ms(poll_interval);
-        }
-        else
-        {
-            BOOT_LOG("KEY1+KEY2 released before threshold (%d ms)", press_ms);
-            return 0;
-        }
-    }
-
-    BOOT_LOG("KEY1+KEY2 long press confirmed, entering update mode");
-    return 1;
-}
 
 static uint32_t get_slot_base(uint8_t slot)
 {
@@ -410,6 +381,7 @@ static void enter_update_mode(void)
     uint32_t     bytes_written;
 
     BOOT_LOG("=== UPDATE MODE ENTERED ===");
+    boot_oled_status("进入升级模式");
     led_blink(3, LED_BLINK_FAST_MS);
 
     while (1)
@@ -453,24 +425,25 @@ static void enter_update_mode(void)
                 fw_version  = data[9] | ((uint32_t)data[10] << 8)
                             | ((uint32_t)data[11] << 16) | ((uint32_t)data[12] << 24);
 
-                BOOT_LOG("CMD_OTA_START: slot=%d size=%u crc=0x%08X ver=0x%08X",
-                         target_slot, fw_size, fw_crc32, fw_version);
+                BOOT_LOG("CMD_OTA_START: slot=0x%08X size=%u crc=0x%08X ver=0x%08X",
+                         get_slot_base(target_slot), fw_size, fw_crc32, fw_version);
 
                 if (target_slot > 1)
                 {
-                    BOOT_LOG("CMD_OTA_START: invalid slot %d", target_slot);
+                    BOOT_LOG("CMD_OTA_START: invalid slot 0x%08X", get_slot_base(target_slot));
                     nak_code = NAK_PARAM_ERROR;
                     break;
                 }
 
-                BOOT_LOG("erasing slot %d...", target_slot);
+                BOOT_LOG("erasing slot 0x%08X...", get_slot_base(target_slot));
+                boot_oled_status("擦除中...");
                 if (boot_erase_slot(target_slot) != 0)
                 {
-                    BOOT_LOG("erase slot %d FAILED", target_slot);
+                    BOOT_LOG("erase slot 0x%08X FAILED", get_slot_base(target_slot));
                     nak_code = NAK_OTA_ERASE;
                     break;
                 }
-                BOOT_LOG("erase slot %d OK", target_slot);
+                BOOT_LOG("erase slot 0x%08X OK", get_slot_base(target_slot));
 
                 bytes_written = 0;
                 state = UPD_RECEIVING;
@@ -551,12 +524,9 @@ static void enter_update_mode(void)
 
                 bytes_written += plen;
 
-                if (bytes_written % (64 * 1024) < plen + 100)
+if (bytes_written % (64 * 1024) < plen + 100)
                 {
-                    BOOT_LOG("OTA progress: %u / %u bytes (%u%%)",
-                             bytes_written, fw_size,
-                             (bytes_written * 100) / fw_size);
-                    led_blink(1, 30);
+                    boot_oled_progress(bytes_written, fw_size);
                 }
 
                 goto send_ack;
@@ -564,6 +534,7 @@ static void enter_update_mode(void)
             else if (cmd == CMD_OTA_FINISH)
             {
                 BOOT_LOG("CMD_OTA_FINISH: verifying CRC32...");
+                boot_oled_status("校验中...");
                 uint32_t calc_crc = boot_crc32_slot(target_slot, fw_size);
                 BOOT_LOG("CRC32: expected=0x%08X calculated=0x%08X", fw_crc32, calc_crc);
 
@@ -575,7 +546,7 @@ static void enter_update_mode(void)
                     break;
                 }
 
-                BOOT_LOG("CRC32 OK, activating slot %d", target_slot);
+                BOOT_LOG("CRC32 OK, activating slot 0x%08X", get_slot_base(target_slot));
                 fw_info_set_slot_info(target_slot, fw_size, fw_crc32, fw_version);
                 fw_info_set_slot_state(target_slot, SLOT_STATE_VALID);
                 fw_info_set_active_slot(target_slot);
@@ -583,12 +554,16 @@ static void enter_update_mode(void)
 
                 state = UPD_DONE;
 
+                boot_oled_status("升级完成");
                 led_set(1);
                 delay_ms(1000);
                 led_set(0);
 
-               BOOT_LOG("update complete, jumping to slot %d (0x%08X)",
-                        target_slot, get_slot_base(target_slot));
+                boot_oled_status("启动APP");
+                delay_ms(500);
+
+               BOOT_LOG("update complete, jumping to slot 0x%08X",
+                        get_slot_base(target_slot));
                 tx_len = boot_proto_build(CMD_ACK, NULL, 0);
                 uart_send(boot_proto_tx_buf(), tx_len);
                 delay_ms(20);
@@ -642,6 +617,9 @@ int main(void)
     MX_GPIO_Init();
     MX_USART2_UART_Init();
 
+    /* ---- OLED 初始化 ---- */
+    boot_oled_init();
+
     MX_USART1_UART_Init();
     /* ---- Bootloader 启动 ---- */
     BOOT_LOG("========================================");
@@ -651,20 +629,10 @@ int main(void)
 
     led_blink(2, LED_BLINK_SLOW_MS);
 
-    /* 检查 KEY1 + KEY2 同时按下 */
+    if (HAL_GPIO_ReadPin(USER_KEY1_GPIO_Port, USER_KEY1_Pin) == GPIO_PIN_RESET)
     {
-        uint8_t k1 = (HAL_GPIO_ReadPin(USER_KEY1_GPIO_Port, USER_KEY1_Pin) == GPIO_PIN_RESET) ? 1 : 0;
-        uint8_t k2 = (HAL_GPIO_ReadPin(USER_KEY2_GPIO_Port, USER_KEY2_Pin) == GPIO_PIN_RESET) ? 1 : 0;
-        BOOT_LOG("key check: KEY1=%d KEY2=%d", k1, k2);
-
-        if (k1 && k2)
-        {
-            if (check_key12_long_press())
-            {
-                led_blink(3, 50);
-                enter_update_mode();
-            }
-        }
+        BOOT_LOG("KEY1 pressed, entering update mode");
+        enter_update_mode();
     }
 
     /* 加载固件信息 */
@@ -675,8 +643,8 @@ int main(void)
     }
 
     const fw_info_t *fi = fw_info_get();
-    BOOT_LOG("fw_info: active=%d a_state=0x%02X a_ver=0x%08X b_state=0x%02X b_ver=0x%08X ota_req=%d",
-             fi->active_slot, fi->slot_a_state, fi->slot_a_version,
+    BOOT_LOG("fw_info: active=0x%08X a_state=0x%02X a_ver=0x%08X b_state=0x%02X b_ver=0x%08X ota_req=%d",
+             get_slot_base(fi->active_slot), fi->slot_a_state, fi->slot_a_version,
              fi->slot_b_state, fi->slot_b_version, fi->ota_request);
 
     /* 检查 ota_request */
@@ -694,26 +662,26 @@ int main(void)
         uint32_t size  = (active == 0) ? fi->slot_a_size : fi->slot_b_size;
         uint32_t crc   = (active == 0) ? fi->slot_a_crc  : fi->slot_b_crc;
 
-        BOOT_LOG("active slot %d: state=0x%02X size=%u crc=0x%08X", active, state, size, crc);
+        BOOT_LOG("active slot 0x%08X: state=0x%02X size=%u crc=0x%08X", get_slot_base(active), state, size, crc);
 
         if (state == SLOT_STATE_VALID && size > 0)
         {
             uint32_t calc_crc = boot_crc32_slot(active, size);
             if (calc_crc == crc)
             {
-                BOOT_LOG("active slot %d CRC OK, jumping...", active);
+                BOOT_LOG("active slot 0x%08X CRC OK, jumping...", get_slot_base(active));
                 led_blink(1, LED_BLINK_SLOW_MS);
                 boot_jump_to_app(get_slot_base(active));
             }
             else
             {
-                BOOT_LOG("active slot %d CRC FAIL: expected=0x%08X got=0x%08X",
-                         active, crc, calc_crc);
+                BOOT_LOG("active slot 0x%08X CRC FAIL: expected=0x%08X got=0x%08X",
+                         get_slot_base(active), crc, calc_crc);
             }
         }
         else
         {
-            BOOT_LOG("active slot %d invalid", active);
+            BOOT_LOG("active slot 0x%08X invalid", get_slot_base(active));
         }
     }
 
@@ -724,22 +692,22 @@ int main(void)
         uint32_t size  = (alt == 0) ? fi->slot_a_size : fi->slot_b_size;
         uint32_t crc   = (alt == 0) ? fi->slot_a_crc  : fi->slot_b_crc;
 
-        BOOT_LOG("trying alternate slot %d: state=0x%02X size=%u crc=0x%08X",
-                 alt, state, size, crc);
+        BOOT_LOG("trying alternate slot 0x%08X: state=0x%02X size=%u crc=0x%08X",
+                 get_slot_base(alt), state, size, crc);
 
         if (state == SLOT_STATE_VALID && size > 0)
         {
             uint32_t calc_crc = boot_crc32_slot(alt, size);
             if (calc_crc == crc)
             {
-                BOOT_LOG("alternate slot %d CRC OK, switching and jumping...", alt);
+                BOOT_LOG("alternate slot 0x%08X CRC OK, switching and jumping...", get_slot_base(alt));
                 fw_info_set_active_slot(alt);
                 led_blink(2, LED_BLINK_SLOW_MS);
                 boot_jump_to_app(get_slot_base(alt));
             }
             else
             {
-                BOOT_LOG("alternate slot %d CRC FAIL", alt);
+                BOOT_LOG("alternate slot 0x%08X CRC FAIL", get_slot_base(alt));
             }
         }
     }

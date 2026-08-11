@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Tue Aug 11 17:06:55 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Tue Aug 11 19:43:31 2026
 <BR><P>
 <H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -807,10 +807,10 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[e6]"></a>HAL_FLASH_Lock</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, stm32f4xx_hal_flash.o(.text.HAL_FLASH_Lock))
-<BR><BR>[Called By]<UL><LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
-<LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
+<BR><BR>[Called By]<UL><LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
 <LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[128]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
+<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
 </UL>
 
 <P><STRONG><a name="[b9]"></a>HAL_FLASH_Program</STRONG> (Thumb, 268 bytes, Stack size 32 bytes, stm32f4xx_hal_flash.o(.text.HAL_FLASH_Program))
@@ -818,17 +818,17 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_WaitForLastOperation
 </UL>
-<BR>[Called By]<UL><LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
-<LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
+<BR>[Called By]<UL><LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
 <LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[128]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
+<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
 </UL>
 
 <P><STRONG><a name="[e5]"></a>HAL_FLASH_Unlock</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, stm32f4xx_hal_flash.o(.text.HAL_FLASH_Unlock))
-<BR><BR>[Called By]<UL><LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
-<LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
+<BR><BR>[Called By]<UL><LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
 <LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[128]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
+<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
 </UL>
 
 <P><STRONG><a name="[bf]"></a>HAL_GPIO_Init</STRONG> (Thumb, 444 bytes, Stack size 44 bytes, stm32f4xx_hal_gpio.o(.text.HAL_GPIO_Init))
@@ -1296,8 +1296,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[11e]"></a>display_mgr_set_menu_suppress</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_set_menu_suppress))
-<BR><BR>[Called By]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
-<LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<BR><BR>[Called By]<UL><LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
 <P><STRONG><a name="[ec]"></a>display_mgr_set_mode</STRONG> (Thumb, 116 bytes, Stack size 8 bytes, display_mgr.o(.text.display_mgr_set_mode))
@@ -1477,9 +1477,9 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
 <P><STRONG><a name="[11d]"></a>menu_items_get_root</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, menu_items.o(.text.menu_items_get_root))
-<BR><BR>[Called By]<UL><LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<BR><BR>[Called By]<UL><LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 <LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
-<LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
 </UL>
 
 <P><STRONG><a name="[11b]"></a>menu_items_init_state</STRONG> (Thumb, 24 bytes, Stack size 8 bytes, menu_items.o(.text.menu_items_init_state))
@@ -1488,8 +1488,8 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_poweron_type
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
 </UL>
-<BR>[Called By]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
-<LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<BR>[Called By]<UL><LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
 <P><STRONG><a name="[11c]"></a>menu_mgr_activate</STRONG> (Thumb, 82 bytes, Stack size 8 bytes, menu_mgr.o(.text.menu_mgr_activate))
@@ -1691,11 +1691,11 @@ Global Symbols
 <LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_rx_frame_seg
 <LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_redraw
 <LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
-<LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 <LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
 <LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_render_logo
 <LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_render_bigtext
 <LI><a href="#[121]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
 <P><STRONG><a name="[124]"></a>sys_config_get_boot_text</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, sys_config.o(.text.sys_config_get_boot_text))
@@ -1817,9 +1817,6 @@ Global Symbols
 <LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_get_status
 <LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
 <LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_poll
-<LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
-<LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
-<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
 <LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_send
 <LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_read_byte
 <LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_available
@@ -1840,6 +1837,9 @@ Global Symbols
 <LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 <LI><a href="#[121]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_is_active
+<LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
 </UL>
 <BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -2162,8 +2162,8 @@ Local Symbols
 <P><STRONG><a name="[8d]"></a>cb_update_firmware</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, menu_items.o(.text.cb_update_firmware))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = cb_update_firmware &rArr; app_fw_info_set_ota_request &rArr; HAL_FLASH_Program &rArr; FLASH_WaitForLastOperation
 </UL>
-<BR>[Calls]<UL><LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
-<LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_reset
+<BR>[Calls]<UL><LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_reset
+<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> menu_items.o(.rodata.item_update_firmware)
 </UL>
@@ -2298,9 +2298,9 @@ Local Symbols
 <P><STRONG><a name="[7]"></a>cmd_update</STRONG> (Thumb, 144 bytes, Stack size 8 bytes, cli_cmds.o(.text.cmd_update))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = cmd_update &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
-<LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_reset
+<BR>[Calls]<UL><LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_reset
 <LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_printf
+<LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> cli_cmds.o(.data.cmd_table)
 </UL>

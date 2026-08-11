@@ -118,7 +118,7 @@ int fw_info_load(void)
     FW_DBG("fw_info_load: scanning S10...");
     if (flash_info != NULL)
     {
-        FW_DBG("fw_info_load: found valid record at slot %u", last_idx);
+        FW_DBG("fw_info_load: found valid record at index %u", last_idx);
         memcpy(&g_fw_info, flash_info, sizeof(fw_info_t));
         FW_DBG("fw_info_load: loaded OK");
         return 0;
@@ -186,7 +186,7 @@ int fw_info_save(void)
     const fw_info_t *base = (const fw_info_t *)FW_INFO_ADDR;
     if (base[write_idx].magic != 0xFFFFFFFF)
     {
-        FW_DBG("fw_info_save: target slot %u not empty, trying next", write_idx);
+        FW_DBG("fw_info_save: target index %u not empty, trying next", write_idx);
         write_idx++;
         if (write_idx >= FW_INFO_SLOT_COUNT)
         {
@@ -216,7 +216,7 @@ int fw_info_save(void)
         src++;
     }
 
-    FW_DBG("fw_info_save: written to slot %u", write_idx);
+    FW_DBG("fw_info_save: written to index %u", write_idx);
     return 0;
 }
 
