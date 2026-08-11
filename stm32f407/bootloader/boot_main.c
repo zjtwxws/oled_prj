@@ -50,7 +50,7 @@ static uint32_t get_slot_base(uint8_t slot);
 
 #ifdef BOOT_DEBUG_ENABLE
 static void boot_printf(const char *fmt, ...);
-#define BOOT_LOG(fmt, ...)  boot_printf("[BOOT] " fmt "\r\n", ##__VA_ARGS__)
+#define BOOT_LOG(fmt, ...)  boot_log_impl(__func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
 #define BOOT_LOG(fmt, ...)  ((void)0)
 #endif
@@ -220,12 +220,12 @@ void Error_Handler(void)
 
 static void uart_send(const uint8_t *data, uint16_t len)
 {
-    HAL_UART_Transmit(&huart2, (uint8_t *)data, len, 100);
+    HAL_UART_Transmit(&huart1, (uint8_t *)data, len, 100);
 }
 
 static int uart_recv_byte(uint8_t *ch)
 {
-    return (HAL_UART_Receive(&huart2, ch, 1, UART_RX_TIMEOUT_MS) == HAL_OK);
+    return (HAL_UART_Receive(&huart1, ch, 1, UART_RX_TIMEOUT_MS) == HAL_OK);
 }
 
 #ifdef BOOT_DEBUG_ENABLE
@@ -242,6 +242,46 @@ static void boot_printf(const char *fmt, ...)
         HAL_UART_Transmit(&huart2, (uint8_t *)buf, (uint16_t)len, 100);
     }
 }
+
+/**
+ * @brief  BOOT 调试日志 — __func__ 和 __LINE__ 作为固定参数，避免 va_list 可变参数取值异常
+ */
+static void boot_log_impl(const char *func, int line, const char *fmt, ...)
+{
+    char buf[DEBUG_PRINTF_BUF];
+    int len = 0;
+    const char *p;
+
+    p = "[BOOT] ";
+    while (*p && len < DEBUG_PRINTF_BUF - 1) { buf[len++] = *p++; }
+    while (*func && len < DEBUG_PRINTF_BUF - 1) { buf[len++] = *func++; }
+    if (len < DEBUG_PRINTF_BUF - 1) { buf[len++] = ':'; }
+
+    {
+        char ln[8];
+        int v = line;
+        int i = 7;
+        ln[7] = '\0';
+        do { ln[--i] = (char)('0' + (v % 10)); v /= 10; } while (v > 0 && i > 0);
+        while (i < 7 && len < DEBUG_PRINTF_BUF - 1) { buf[len++] = ln[i++]; }
+    }
+
+    if (len < DEBUG_PRINTF_BUF - 1) { buf[len++] = ' '; }
+
+    va_list args;
+    va_start(args, fmt);
+    int remain = DEBUG_PRINTF_BUF - len - 3;
+    int msg_len = boot_vsnprintf(buf + len, (remain > 0) ? (size_t)remain : 0, fmt, args);
+    va_end(args);
+    if (msg_len > 0) { len += msg_len; }
+
+    if (len < DEBUG_PRINTF_BUF - 1) { buf[len++] = '\r'; }
+    if (len < DEBUG_PRINTF_BUF - 1) { buf[len++] = '\n'; }
+    buf[len] = '\0';
+
+    if (len > 0) { HAL_UART_Transmit(&huart2, (uint8_t *)buf, (uint16_t)len, 100); }
+}
+
 #endif
 
 /* ---- 延时 (基于指令循环, 168MHz 约 42000 循环 = 1ms) ---- */
@@ -340,10 +380,12 @@ static void boot_jump_to_app(uint32_t app_base)
 
     __HAL_RCC_USART2_CLK_DISABLE();
 
-    __set_MSP(app_sp);
-    SCB->VTOR = app_base;
+   __set_MSP(app_sp);
+   SCB->VTOR = app_base;
 
-    ((void (*)(void))app_pc)();
+    __enable_irq();
+
+   ((void (*)(void))app_pc)();
 
     while (1) {}
 }
@@ -545,8 +587,11 @@ static void enter_update_mode(void)
                 delay_ms(1000);
                 led_set(0);
 
-                BOOT_LOG("update complete, jumping to slot %d (0x%08X)",
-                         target_slot, get_slot_base(target_slot));
+               BOOT_LOG("update complete, jumping to slot %d (0x%08X)",
+                        target_slot, get_slot_base(target_slot));
+                tx_len = boot_proto_build(CMD_ACK, NULL, 0);
+                uart_send(boot_proto_tx_buf(), tx_len);
+                delay_ms(20);
                 boot_jump_to_app(get_slot_base(target_slot));
 
                 BOOT_LOG("jump failed, back to IDLE");
@@ -597,9 +642,10 @@ int main(void)
     MX_GPIO_Init();
     MX_USART2_UART_Init();
 
+    MX_USART1_UART_Init();
     /* ---- Bootloader 启动 ---- */
     BOOT_LOG("========================================");
-    BOOT_LOG("STM32F407 Bootloader V2.0");
+    BOOT_LOG("STM32F407 Bootloader V3.0");
     BOOT_LOG("build: %s %s", __DATE__, __TIME__);
     BOOT_LOG("========================================");
 

@@ -20,6 +20,7 @@
 #include "font.h"
 #include "led_mgr.h"
 #include "sys_config.h"
+#include "app_fw_info.h"
 #include "debug_console.h"
 #include "user_app.h"
 #include <string.h>
@@ -433,6 +434,17 @@ static void preview_confirm_bigtext(void)
     sys_config_set_poweron_type(SYS_CONFIG_POWERON_BIGTEXT);
 }
 
+/* --- 固件升级确认回调 --- */
+/**
+ * @brief  固件升级确认回调
+ * @date   2026-08-11
+ */
+static void cb_update_firmware(void)
+{
+    app_fw_info_set_ota_request();
+    sys_config_reset();
+}
+
 /* --- 系统重启确认回调 --- */
 /**
  * @brief  重启确认回调
@@ -675,6 +687,15 @@ static const menu_item_t item_contrast_menu =
     .submenu = { .items = menu_contrast_items, .count = 1 },
 };
 
+/* --- 固件升级 CONFIRM 项 (Level 2, 位于"设置"子菜单下) --- */
+static const menu_item_t item_update_firmware =
+{
+    .text = "升级固件",
+    .type = MENU_TYPE_CONFIRM,
+    .confirm = { .prompt_text = "进入固件升级模式？",
+                 .on_confirm = cb_update_firmware },
+};
+
 /* --- 重启 CONFIRM 项 (Level 2, 位于"设置"子菜单下) --- */
 static const menu_item_t item_reboot = 
 {
@@ -688,6 +709,7 @@ static const menu_item_t item_reboot =
 static const menu_item_t *menu_setting_items[] = 
 {
     &item_contrast_menu,
+    &item_update_firmware,
     &item_reboot,
 };
 
@@ -741,7 +763,7 @@ static const menu_item_t item_main_1 =
 {
     .text = "1.工作模式",  /* "1.工作模式" */
     .type = MENU_TYPE_SUBMENU,
-    .submenu = { .items = menu_mode_items, .count = 2 },
+    .submenu = { .items = menu_mode_items, .count = 3 },
 };
 static const menu_item_t item_main_2 = 
 {
@@ -760,7 +782,7 @@ static const menu_item_t item_main_4 =
 {
     .text = "4.设置",/* "4.设置" */
     .type = MENU_TYPE_SUBMENU,
-    .submenu = { .items = menu_setting_items, .count = 2 },
+    .submenu = { .items = menu_setting_items, .count = 3 },
 };
 
 static const menu_item_t item_main_5 = 

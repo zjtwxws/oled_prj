@@ -15,9 +15,9 @@
 #define APP_VTOR_ADDR  0x08000000UL     /* 独立运行 (无 bootloader) */
 #endif
 /** 固件版本号 */
-#define FW_VERSION  "V1.0.3"
+#define FW_VERSION  "V1.1.0"
 #define FW_AUTHOR  "赵四"
-#define FW_BUILD_TIME  "2026.08.07 16:02"
+#define FW_BUILD_TIME  "2026.08.11 15:12"
 #define FW_EMAIL  "429511192@qq.com"
 
 /** @brief 用户应用初始化 (外设+驱动+显示+菜单)，在 main() 中调用一次 */

@@ -11,8 +11,8 @@
 /* fw_info 在 S10 的地址 */
 #define APP_FW_INFO_ADDR    0x080C0000UL
 
-/* fw_info_t 内部 ota_request 字段偏移 (13 字节) */
-#define APP_FW_INFO_OTA_REQ_OFFSET  13
+/* fw_info_t 内部 ota_request 字段偏移 (7 字节) */
+#define APP_FW_INFO_OTA_REQ_OFFSET  7
 
 /* Slot 基地址 */
 #ifndef APP_SLOT_B

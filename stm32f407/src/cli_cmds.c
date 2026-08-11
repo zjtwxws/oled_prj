@@ -11,6 +11,7 @@
 #include "cli_cmds.h"
 #include "display_mgr.h"
 #include "led_mgr.h"
+#include "app_fw_info.h"
 #include "sys_config.h"
 #include "sys_tick.h"
 #include "user_app.h"
@@ -252,6 +253,24 @@ static int cmd_rd(uint8_t argc, char **argv)
 /* ---- 软件复位命令 ---- */
 
 /**
+ * @brief  update — 进入固件更新模式
+ */
+static int cmd_update(uint8_t argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+    shell_printf("Setting OTA request flag...\r\n");
+    if (app_fw_info_set_ota_request() != 0)
+    {
+        shell_printf("Failed to set OTA flag!\r\n");
+        return -1;
+    }
+    shell_printf("Rebooting to bootloader update mode...\r\n");
+    sys_config_reset();
+    return 0;
+}
+
+/**
  * @brief  reboot — 软件复位 MCU
  */
 static int cmd_reboot(uint8_t argc, char **argv)
@@ -310,6 +329,7 @@ struct cmd cmd_table[] =
     { .name = "rd",     .func = cmd_rd,     .desc = "读内存 (rd <addr> [size])" },
     { .name = "reboot", .func = cmd_reboot, .desc = "软件复位" },
     { .name = "mode",   .func = cmd_mode,   .desc = "显示模式 (mode [local|remote])" },
+    { .name = "update", .func = cmd_update, .desc = "进入固件更新模式" },
 };
 
 const uint16_t cmd_table_size = sizeof(cmd_table) / sizeof(cmd_table[0]);

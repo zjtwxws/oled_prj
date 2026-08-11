@@ -8,24 +8,30 @@
 
 /**
  * @brief  擦除单个扇区
+ * @note   使用 HAL 标准 API, 与 OLED 工程 sys_config.c 完全一致的方式.
+ *         不使用手动寄存器操作, 不用 __disable_irq, 不用 .ramfunc.
+ *         已验证 Sector 11 擦除正常, Sector 10 同为 128KB 扇区理应一致.
  */
-int boot_erase_sector(uint32_t sector)
+__RAM_FUNC int boot_erase_sector(uint32_t sector)
 {
-    FLASH_EraseInitTypeDef erase;
-    uint32_t err_sector;
+    FLASH_EraseInitTypeDef erase_init;
+    uint32_t               sector_error;
 
     HAL_FLASH_Unlock();
 
-    erase.TypeErase    = FLASH_TYPEERASE_SECTORS;
-    erase.Sector       = sector;
-    erase.NbSectors    = 1;
-    erase.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+    erase_init.TypeErase    = FLASH_TYPEERASE_SECTORS;
+    erase_init.Sector       = sector;
+    erase_init.NbSectors    = 1;
+    erase_init.VoltageRange = FLASH_VOLTAGE_RANGE_3;
 
-    HAL_StatusTypeDef status = HAL_FLASHEx_Erase(&erase, &err_sector);
+    if (HAL_FLASHEx_Erase(&erase_init, &sector_error) != HAL_OK)
+    {
+        HAL_FLASH_Lock();
+        return -1;
+    }
 
     HAL_FLASH_Lock();
-
-    return (status == HAL_OK) ? 0 : -1;
+    return 0;
 }
 
 /**
@@ -78,9 +84,6 @@ int boot_erase_slot(uint8_t slot)
 
 /* ---- CRC32 实现 ---- */
 
-/**
- * @brief  CRC32 查表 (IEEE 802.3, 反射多项式 0xEDB88320)
- */
 static const uint32_t crc32_table[256] = {
     0x00000000,0x77073096,0xEE0E612C,0x990951BA,0x076DC419,0x706AF48F,
     0xE963A535,0x9E6495A3,0x0EDB8832,0x79DCB8A4,0xE0D5E91E,0x97D2D988,
