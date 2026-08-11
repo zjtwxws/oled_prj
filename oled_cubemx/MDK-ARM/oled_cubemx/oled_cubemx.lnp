@@ -41,7 +41,7 @@
 "oled_cubemx\app_fw_info.o"
 "oled_cubemx\cli_cmds.o"
 "oled_cubemx\nr_micro_shell_core.o"
---library_type=microlib --strict --scatter "..\..\stm32f407\bootloader\oled_cubemx_slotb.sct"
+--library_type=microlib --strict --scatter "..\..\stm32f407\oled_cubemx_slota.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "oled_cubemx.map" -o oled_cubemx\oled_cubemx.axf

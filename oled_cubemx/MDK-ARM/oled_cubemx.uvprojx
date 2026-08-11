@@ -1038,7 +1038,7 @@
             <TextAddressRange></TextAddressRange>
             <DataAddressRange></DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile>..\..\stm32f407\bootloader\oled_cubemx_slota.sct</ScatterFile>
+            <ScatterFile>..\..\stm32f407\oled_cubemx_slota.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -1707,7 +1707,7 @@
             <TextAddressRange></TextAddressRange>
             <DataAddressRange></DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile>..\..\stm32f407\bootloader\oled_cubemx_slotb.sct</ScatterFile>
+            <ScatterFile>..\..\stm32f407\oled_cubemx_slotb.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
