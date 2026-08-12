@@ -653,6 +653,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\app_fw_info.c</FilePath>
             </File>
+            <File>
+              <FileName>ota_req.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\ota_req.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1322,6 +1327,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\app_fw_info.c</FilePath>
             </File>
+            <File>
+              <FileName>ota_req.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\ota_req.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1990,6 +2000,11 @@
               <FileName>app_fw_info.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\app_fw_info.c</FilePath>
+            </File>
+            <File>
+              <FileName>ota_req.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\ota_req.c</FilePath>
             </File>
           </Files>
         </Group>

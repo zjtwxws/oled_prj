@@ -259,6 +259,34 @@ void fw_info_set_slot_info(uint8_t slot, uint32_t size, uint32_t crc, uint32_t v
     fw_info_save();
 }
 
+/**
+ * @brief  激活槽位 — 一次性设置槽信息、状态和活跃槽，仅触发一次 flash 保存
+ * @param  slot    槽号 (0=A, 1=B)
+ * @param  size    固件大小
+ * @param  crc     固件 CRC32
+ * @param  version 固件版本号
+ * @date   2026-08-12
+ */
+void fw_info_activate_slot(uint8_t slot, uint32_t size, uint32_t crc, uint32_t version)
+{
+    if (slot == 0)
+    {
+        g_fw_info.slot_a_size = size;
+        g_fw_info.slot_a_crc = crc;
+        g_fw_info.slot_a_version = version;
+        g_fw_info.slot_a_state = SLOT_STATE_VALID;
+    }
+    else
+    {
+        g_fw_info.slot_b_size = size;
+        g_fw_info.slot_b_crc = crc;
+        g_fw_info.slot_b_version = version;
+        g_fw_info.slot_b_state = SLOT_STATE_VALID;
+    }
+    g_fw_info.active_slot = slot;
+    fw_info_save();
+}
+
 void fw_info_clear_ota_request(void)
 {
     g_fw_info.ota_request = 0;

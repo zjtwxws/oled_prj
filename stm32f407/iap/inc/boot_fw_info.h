@@ -78,6 +78,16 @@ void fw_info_set_slot_state(uint8_t slot, uint8_t state);
 void fw_info_set_slot_info(uint8_t slot, uint32_t size, uint32_t crc, uint32_t version);
 
 /**
+ * @brief  激活槽位 — 一次性设置槽信息、状态和活跃槽，仅触发一次 flash 保存
+ * @param  slot    槽号 (0=A, 1=B)
+ * @param  size    固件大小
+ * @param  crc     固件 CRC32
+ * @param  version 固件版本号
+ * @date   2026-08-12
+ */
+void fw_info_activate_slot(uint8_t slot, uint32_t size, uint32_t crc, uint32_t version);
+
+/**
  * @brief  清除 ota_request 标志并保存
  */
 void fw_info_clear_ota_request(void);

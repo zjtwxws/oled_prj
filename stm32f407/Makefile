@@ -21,7 +21,7 @@ INC_APP = -Iinc \
           -I$(CORE_DIR)/Drivers/CMSIS/Device/ST/STM32F4xx/Include \
           -I$(CORE_DIR)/Drivers/CMSIS/Include
 
-INC_BOOT = $(INC_APP) -Ibootloader
+INC_BOOT = $(INC_APP) -Iiap/inc
 
 # ---- APP 源文件 ----
 APP_SRC = src/ssd1306.c src/font.c src/display_mgr.c \
@@ -29,7 +29,7 @@ APP_SRC = src/ssd1306.c src/font.c src/display_mgr.c \
           src/led_mgr.c src/key_drv.c src/iwdg_drv.c src/sys_config.c \
           src/sys_tick.c src/user_app.c src/menu_mgr.c src/menu_items.c \
           src/debug_console.c src/nr_micro_shell_core.c src/cli_cmds.c \
-          src/app_fw_info.c
+          src/app_fw_info.c src/ota_req.c
 
 HAL_SRC = $(CORE_DIR)/Src/main.c $(CORE_DIR)/Src/stm32f4xx_it.c \
           $(CORE_DIR)/Src/stm32f4xx_hal_msp.c $(CORE_DIR)/Src/system_stm32f4xx.c
@@ -39,11 +39,11 @@ HAL_LIB = $(CORE_DIR)/Drivers/STM32F4xx_HAL_Driver/Src/*.c
 STARTUP = $(CORE_DIR)/MDK-ARM/startup_stm32f407xx.s
 
 # ---- Bootloader 源文件 ----
-BOOT_SRC = bootloader/boot_main.c bootloader/boot_fw_info.c \
-           bootloader/boot_flash.c bootloader/boot_proto.c \
-           bootloader/system_stm32f4xx.c
+BOOT_SRC = iap/src/boot_main.c iap/src/boot_fw_info.c \
+           iap/src/boot_flash.c iap/src/boot_proto.c \
+           iap/src/boot_oled.c iap/src/system_stm32f4xx.c
 
-BOOT_STARTUP = bootloader/startup_stm32f407xx.s
+BOOT_STARTUP = iap/startup/startup_stm32f407xx.s
 
 # ---- Default ----
 all: app_slot_a app_slot_b bootloader

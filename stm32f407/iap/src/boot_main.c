@@ -9,13 +9,14 @@
  *   HAL_Init → SystemClock_Config → MX_GPIO_Init → MX_USART2_UART_Init
  *
  * 进入固件更新模式的条件:
- *   1. KEY1(PE1) + KEY2(PE2) 同时长按 >= 3s
- *   2. APP 设置 ota_request 标志后复位
+ *   1. KEY1 按下 — 强制进入升级模式
+ *   2. SRAM NOINIT 区域检测到 OTA 请求 (APP 写入后复位)
  *   3. 两个 APP 槽均无效 (全新芯片或固件损坏)
  */
 
 #include "main.h"
 #include "gpio.h"
+#include "ota_req.h"
 #include "usart.h"
 #include "stm32f4xx_it.h"
 #include "boot_fw_info.h"
@@ -24,6 +25,22 @@
 #include "boot_oled.h"
 #include <string.h>
 #include <stdarg.h>
+
+/* ---- OTA NOINIT helpers (inline to avoid adding .c to Keil project) ---- */
+int ota_req_is_update(void)
+{
+    volatile ota_req_t *req = (volatile ota_req_t *)OTA_REQ_ADDR;
+    return (req->magic == OTA_REQ_MAGIC && req->request == OTA_REQ_UPDATE) ? 1 : 0;
+}
+
+void ota_req_clear(void)
+{
+    volatile ota_req_t *req = (volatile ota_req_t *)OTA_REQ_ADDR;
+    req->magic   = 0;
+    req->request = OTA_REQ_NONE;
+    req->slot    = 0;
+    req->reserved = 0;
+}
 
 /* ---- 调试串口开关 (生产版本注释此行) ---- */
 #define BOOT_DEBUG_ENABLE
@@ -150,6 +167,12 @@ do_unsigned:
             int pad_count = (width > num_digits) ? (width - num_digits) : 0;
             while (pad_count > 0 && dst < end) { *dst++ = pad; pad_count--; }
             while (tmp[pos] && dst < end) { *dst++ = tmp[pos++]; }
+            break;
+        }
+        case 'c':
+        {
+            char ch = (char)va_arg(args, int);
+            if (dst < end) { *dst++ = ch; }
             break;
         }
         case '%':
@@ -425,25 +448,25 @@ static void enter_update_mode(void)
                 fw_version  = data[9] | ((uint32_t)data[10] << 8)
                             | ((uint32_t)data[11] << 16) | ((uint32_t)data[12] << 24);
 
-                BOOT_LOG("CMD_OTA_START: slot=0x%08X size=%u crc=0x%08X ver=0x%08X",
-                         get_slot_base(target_slot), fw_size, fw_crc32, fw_version);
+                BOOT_LOG("CMD_OTA_START: slot%c (0x%08X) size=%u crc=0x%08X ver=0x%08X",
+                         (target_slot == 0) ? 'A' : 'B', get_slot_base(target_slot), fw_size, fw_crc32, fw_version);
 
                 if (target_slot > 1)
                 {
-                    BOOT_LOG("CMD_OTA_START: invalid slot 0x%08X", get_slot_base(target_slot));
+                    BOOT_LOG("CMD_OTA_START: invalid slot=%d, rejecting", target_slot);
                     nak_code = NAK_PARAM_ERROR;
                     break;
                 }
 
-                BOOT_LOG("erasing slot 0x%08X...", get_slot_base(target_slot));
+                BOOT_LOG("erasing slot%c (0x%08X)...", (target_slot == 0) ? 'A' : 'B', get_slot_base(target_slot));
                 boot_oled_status("擦除中...");
                 if (boot_erase_slot(target_slot) != 0)
                 {
-                    BOOT_LOG("erase slot 0x%08X FAILED", get_slot_base(target_slot));
+                    BOOT_LOG("erase slot%c (0x%08X) FAILED", (target_slot == 0) ? 'A' : 'B', get_slot_base(target_slot));
                     nak_code = NAK_OTA_ERASE;
                     break;
                 }
-                BOOT_LOG("erase slot 0x%08X OK", get_slot_base(target_slot));
+                BOOT_LOG("erase slot%c (0x%08X) OK", (target_slot == 0) ? 'A' : 'B', get_slot_base(target_slot));
 
                 bytes_written = 0;
                 state = UPD_RECEIVING;
@@ -546,11 +569,8 @@ if (bytes_written % (64 * 1024) < plen + 100)
                     break;
                 }
 
-                BOOT_LOG("CRC32 OK, activating slot 0x%08X", get_slot_base(target_slot));
-                fw_info_set_slot_info(target_slot, fw_size, fw_crc32, fw_version);
-                fw_info_set_slot_state(target_slot, SLOT_STATE_VALID);
-                fw_info_set_active_slot(target_slot);
-                fw_info_clear_ota_request();
+                BOOT_LOG("CRC32 OK, activating slot%c (0x%08X)", (target_slot == 0) ? 'A' : 'B', get_slot_base(target_slot));
+                fw_info_activate_slot(target_slot, fw_size, fw_crc32, fw_version);
 
                 state = UPD_DONE;
 
@@ -562,8 +582,8 @@ if (bytes_written % (64 * 1024) < plen + 100)
                 boot_oled_status("启动APP");
                 delay_ms(500);
 
-               BOOT_LOG("update complete, jumping to slot 0x%08X",
-                        get_slot_base(target_slot));
+               BOOT_LOG("update complete, jumping to slot%c (0x%08X)",
+                        (target_slot == 0) ? 'A' : 'B', get_slot_base(target_slot));
                 tx_len = boot_proto_build(CMD_ACK, NULL, 0);
                 uart_send(boot_proto_tx_buf(), tx_len);
                 delay_ms(20);
@@ -630,6 +650,14 @@ int main(void)
 
     led_blink(2, LED_BLINK_SLOW_MS);
 
+    /* SRAM NOINIT OTA upgrade request (APP writes, survives reset) */
+    if (ota_req_is_update())
+    {
+        BOOT_LOG("NOINIT ota_req detected, entering update mode");
+        ota_req_clear();
+        enter_update_mode();
+    }
+
     if (HAL_GPIO_ReadPin(USER_KEY1_GPIO_Port, USER_KEY1_Pin) == GPIO_PIN_RESET)
     {
         BOOT_LOG("KEY1 pressed, entering update mode");
@@ -644,17 +672,9 @@ int main(void)
     }
 
     const fw_info_t *fi = fw_info_get();
-    BOOT_LOG("fw_info: active=slot%c (0x%08X) a_state=0x%02X a_ver=0x%08X b_state=0x%02X b_ver=0x%08X ota_req=%d",
+    BOOT_LOG("fw_info: active=slot%c (0x%08X) a_state=0x%02X a_ver=0x%08X b_state=0x%02X b_ver=0x%08X",
              (fi->active_slot == 0) ? 'A' : 'B', get_slot_base(fi->active_slot), fi->slot_a_state, fi->slot_a_version,
-             fi->slot_b_state, fi->slot_b_version, fi->ota_request);
-
-    /* 检查 ota_request */
-    if (fi->ota_request == 1)
-    {
-        BOOT_LOG("ota_request=1, entering update mode");
-        fw_info_clear_ota_request();
-        enter_update_mode();
-    }
+             fi->slot_b_state, fi->slot_b_version);
 
     /* 尝试跳转 active_slot */
     {
@@ -671,19 +691,19 @@ int main(void)
             uint32_t calc_crc = boot_crc32_slot(active, size);
             if (calc_crc == crc)
             {
-                BOOT_LOG("IAP: Slot %c CRC OK, jumping...", (active == 0) ? 'A' : 'B');
+                BOOT_LOG("IAP: Slot %c (0x%08X) CRC OK, jumping...", (active == 0) ? 'A' : 'B', get_slot_base(active));
                 led_blink(1, LED_BLINK_SLOW_MS);
                 boot_jump_to_app(get_slot_base(active));
             }
             else
             {
-                BOOT_LOG("IAP: Slot %c CRC FAIL: expected=0x%08X got=0x%08X",
-                         (active == 0) ? 'A' : 'B', crc, calc_crc);
+                BOOT_LOG("IAP: Slot %c (0x%08X) CRC FAIL: expected=0x%08X got=0x%08X",
+                         (active == 0) ? 'A' : 'B', get_slot_base(active), crc, calc_crc);
             }
         }
         else
         {
-            BOOT_LOG("IAP: Slot %c invalid", (active == 0) ? 'A' : 'B');
+            BOOT_LOG("IAP: Slot %c (0x%08X) invalid", (active == 0) ? 'A' : 'B');
         }
     }
 
@@ -702,14 +722,14 @@ int main(void)
             uint32_t calc_crc = boot_crc32_slot(alt, size);
             if (calc_crc == crc)
             {
-                BOOT_LOG("IAP: Slot %c CRC OK, switching and jumping...", (alt == 0) ? 'A' : 'B');
+                BOOT_LOG("IAP: Slot %c (0x%08X) CRC OK, switching and jumping...", (alt == 0) ? 'A' : 'B', get_slot_base(alt));
                 fw_info_set_active_slot(alt);
                 led_blink(2, LED_BLINK_SLOW_MS);
                 boot_jump_to_app(get_slot_base(alt));
             }
             else
             {
-                BOOT_LOG("IAP: Slot %c CRC FAIL", (alt == 0) ? 'A' : 'B');
+                BOOT_LOG("IAP: Slot %c (0x%08X) CRC FAIL", (alt == 0) ? 'A' : 'B');
             }
         }
     }
