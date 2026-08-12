@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 STM32F407 OTA 固件升级工具 (A/B 双槽位)
 

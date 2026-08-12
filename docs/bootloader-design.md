@@ -1,8 +1,74 @@
 # STM32F407 A/B 双分区 Bootloader 详细设计与工程使用手册
 
-> 版本: V2.0 | 日期: 2026-08-10 | 最后更新: 2026-08-11 | 适用: oled_prj 项目
-
+> 版本: V2.2 | 日期: 2026-08-10 | 最后更新: 2026-08-12 | 适用: oled_prj 项目
 ---
+
+## 0. A/B 双槽位使用指南（必读）
+
+### 0.1 核心原理
+
+A/B 双槽位是**同一份代码编译出两个不同链接地址的固件**，用于实现容错升级：
+
+```
+Slot A (0x08008000) <- app_slot_a.bin  (编译时 -DAPP_SLOT_A, VTOR=0x08008000)
+Slot B (0x08060000) <- app_slot_b.bin  (编译时 -DAPP_SLOT_B, VTOR=0x08060000)
+```
+
+两个固件功能完全相同，仅链接地址不同。**不要把 app_slot_b.bin 写入 Slot A，反之亦然。**
+
+### 0.2 为什么需要 A/B？
+
+- 升级时**不覆盖正在运行的固件**，而是写入另一个槽
+- 下载过程断电、CRC 校验失败 -> 旧槽仍是 active，设备正常启动
+- 新固件有问题 -> KEY1 开机可强制进入 Bootloader 重刷
+- **永不"变砖"**
+
+### 0.3 Slot A vs Slot B 什么时候用？
+
+| 场景 | 当前 active | 升级目标 | 使用命令 |
+|------|------------|---------|---------|
+| 首次烧录 | 无 | Slot A | `make flash_slot_a` |
+| 日常升级 | Slot A | Slot B | `python ota_tool.py COM3 app_slot_b.bin` |
+| 下次升级 | Slot B | Slot A | `python ota_tool.py COM3 app_slot_a.bin` |
+| 再次升级 | Slot A | Slot B | `python ota_tool.py COM3 app_slot_b.bin` |
+
+**规律**：每次 OTA 的目标槽与当前运行槽相反，交替进行。
+
+### 0.4 正确升级流程
+
+**步骤 1：编译两个槽的固件**
+
+```bash
+cd stm32f407
+make app_slot_a    # -> build/app_slot_a.bin (链接 0x08008000)
+make app_slot_b    # -> build/app_slot_b.bin (链接 0x08060000)
+```
+
+**步骤 2：确定当前运行槽**
+
+查看 USART2 调试日志，如：`active=slotA` 或 `active=slotB`。
+
+**步骤 3：升级到非活跃槽**
+
+| 当前运行 | 升级命令 |
+|---------|---------|
+| Slot A | `python ota_tool.py COM3 build/app_slot_b.bin` |
+| Slot B | `python ota_tool.py COM3 build/app_slot_a.bin` |
+
+> **关键规则：工具自动从固件向量表检测槽位，只需用对应槽位的 .bin 文件即可。**
+> 若自动检测失败（如裸 .bin 不含向量表），可用 `--force-slot 0` 或 `--force-slot 1` 手动指定。
+
+### 0.5 常见错误
+
+| 错误操作 | 现象 | 原因 |
+|---------|------|------|
+| `ota_tool.py COM3 app_slot_a.bin --force-slot 1` | APP 启动卡死 | A 固件（VTOR=0x08008000）被强行写入 Slot B（0x08060000），中断向量不匹配 |
+| `ota_tool.py COM3 app_slot_b.bin --force-slot 0` | APP 启动卡死 | B 固件（VTOR=0x08060000）被强行写入 Slot A（0x08008000），中断向量不匹配 |
+
+> **V2.2 起工具已自动从固件向量表检测槽位，不再出现固件与槽位不匹配的情况。以上错误仅在 `--force-slot` 强行指定错误槽位时发生。**
+
+> **两种错误的本质是一样的：固件的链接地址与实际烧录地址不匹配，导致 VTOR 指向的位置没有有效中断向量表。**
+
 
 ## 1. 概述
 
@@ -10,6 +76,7 @@
 
 - 每次升级写入**非活跃槽**, 校验通过后切换活跃槽
 - 升级失败 (断电 / CRC 错误) 时自动保持旧版本运行, **永不"变砖"**
+- 固件二进制与槽位强绑定：A 固件（VTOR=0x08008000）只能写 Slot A，B 固件（VTOR=0x08060000）只能写 Slot B
 - Bootloader 与 APP 通过 USART1 (115200 8N1) 使用二进制帧协议通信
 
 **当前 APP 规模**: ROM 56.74 KB, SRAM 9.13 KB (含 ZI)。
@@ -108,6 +175,25 @@ enter_update_mode():
    │   └─ 失败 → NAK, 状态回到 UPD_IDLE, 等待重试
    └─ 收到 CMD_OTA_ABORT → 退出更新模式, 重新执行启动决策
 ```
+
+### 4.1 启动决策逻辑（择优启动）
+
+Bootloader 不是简单"记住上次用哪个槽"，而是**每次上电对两个槽独立校验，择优启动**：
+
+```
+1. active_slot 状态 = VALID 且全量 CRC32 通过 -> 直接跳转 active_slot
+2. active_slot 校验失败                  -> 尝试备用槽
+   a. 备用槽状态 = VALID 且 CRC32 通过   -> 自动切 active_slot 为备用槽 -> 跳转
+   b. 备用槽也失败                       -> 进入升级模式等固件
+```
+
+关键设计意图：
+- **"上次升级成功的槽就是 active_slot"** — OTA 完成时调用 `fw_info_activate_slot()` 同时标记 VALID 和设为 active
+- **"active_slot 不是铁饭碗"** — 每次上电全量 CRC32 校验，Flash 数据退化或意外改写时自动切到备用槽
+- **"两槽同坏才变砖"** — 只要有一个槽 CRC32 正确就能启动，只有两个都坏了才进入升级模式等待固件
+
+此逻辑在 `boot_main.c` 的 `main()` 函数中实现，对应的 OTA 完成后跳转也调用同样的校验流程。
+
 
 ---
 
@@ -307,7 +393,8 @@ void boot_oled_progress(uint32_t done, uint32_t total);  // 显示进度条 + �
 独立的上位机工具 `tools/ota_tool/`, 基于 Python + pySerial, 详见 [ota-tool-design.md](ota-tool-design.md)。
 
 ```bash
-python tools/ota_tool/ota_tool.py COM3 firmware.bin
+# 工具自动从固件向量表检测槽位
+python tools/ota_tool/ota_tool.py COM3 app_slot_b.bin
 ```
 
 ---
@@ -365,13 +452,21 @@ make flash_slot_b       # 烧录 APP 到 Slot B (0x08060000)
 
 ### 12.4 OTA 升级流程 (日常使用)
 
+> **V2.2：工具自动从固件向量表检测槽位，固件名对应的 .bin 直接使用即可。**
+> 详见 [0 A/B 双槽位使用指南](#0-ab-双槽位使用指南必读)。
+
 ```bash
+# === 从 Slot A 升级到 Slot B ===
 # 1. PC 连接设备串口, 设备正常运行中
-# 2. 执行 OTA 升级 (自动检测非活跃槽)
+# 2. 编译两个槽的固件
+make app_slot_a app_slot_b
+# 3. 发送 OTA 命令让设备进入 Bootloader 模式, 然后执行升级
 python tools/ota_tool/ota_tool.py COM3 build/app_slot_b.bin
 
-# 可选参数:
-python tools/ota_tool/ota_tool.py COM3 firmware.bin --force-slot 0   # 强制升级 Slot A
+# === 从 Slot B 升级到 Slot A (下次升级) ===
+python tools/ota_tool/ota_tool.py COM3 build/app_slot_a.bin
+
+# === 其他可选参数 ===
 python tools/ota_tool/ota_tool.py COM3 firmware.bin --baud 460800    # 非标波特率
 python tools/ota_tool/ota_tool.py COM3 firmware.bin --version 1.2.0  # 指定版本号
 ```
@@ -468,4 +563,4 @@ Bootloader 通过 USART2 (PA2/PA3, 115200 8N1) 输出调试日志。格式:
 
 ---
 
-**文档版本**: V2.0 | **创建日期**: 2026-08-10 | **最后更新**: 2026-08-11
+**文档版本**: V2.2 | **创建日期**: 2026-08-10 | **最后更新**: 2026-08-12

@@ -1,6 +1,6 @@
 # OTA 上位机工具设计说明书
 
-> 版本: V1.1 | 日期: 2026-08-10 | 最后更新: 2026-08-11
+> 版本: V1.3 | 日期: 2026-08-10 | 最后更新: 2026-08-12
 
 ---
 
@@ -51,7 +51,7 @@ positional arguments:
 
 optional arguments:
   --baud BAUD          波特率 (默认: 115200)
-  --force-slot {0,1}   强制指定目标槽 (0=A, 1=B, 默认: 自动选择非活跃槽)
+  --force-slot {0,1}   手动指定目标槽 (0=A, 1=B)。默认从固件向量表自动检测，无需手动指定
   --timeout TIMEOUT    帧超时(秒) (默认: 5)
   --retry RETRY        最大重试次数 (默认: 3)
 ```
@@ -59,10 +59,10 @@ optional arguments:
 ### 使用示例
 
 ```bash
-# 基础用法: 自动选择非活跃槽升级
-python ota_tool.py COM3 app_slot_b.bin
+# Slot A -> Slot B (当前运行 A，升级到 B)
+python ota_tool.py COM3 app_slot_b.bin --force-slot 1
 
-# 强制升级到 Slot A
+# Slot B -> Slot A (当前运行 B，升级到 A)
 python ota_tool.py COM3 app_slot_a.bin --force-slot 0
 
 # 非标准波特率
@@ -81,8 +81,9 @@ python ota_tool.py /dev/ttyUSB0 firmware.bin --baud 460800
 3. 打开串口 (115200 8N1, timeout=5s)
 4. 触发 Bootloader 进入更新模式:
    ├─ 方案A: 发送 CMD_OTA_RESERVED(0x07) → 等待 ACK → 等待 2s
-   └─ 方案B: 用户手动 KEY1 长按上电 (无需上位机操作)
-5. 发送 CMD_OTA_START(slot, size, crc32, version)
+   └─ 方案B: 用户手动 KEY1 上电进入 (无需上位机操作)
+5. 发送 CMD_OTA_START(slot, size, crc32, version)  —— slot 必须与固件匹配！
+   app_slot_a.bin → slot=0 (A),  app_slot_b.bin → slot=1 (B)
    → 等待 ACK (5s 超时) → 否则 NAK 错误退出
 6. 分块发送 CMD_OTA_DATA:
    chunk_size = 200 字节

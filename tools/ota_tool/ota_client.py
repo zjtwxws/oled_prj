@@ -2,6 +2,7 @@
 OTA 升级客户端 — 串口通信 + 升级流程控制
 """
 
+import os
 import time
 import struct
 import serial
@@ -14,6 +15,41 @@ from proto import (
 
 CHUNK_SIZE = 200  # 每块数据大小 (≤247)
 ACK_TIMEOUT = 5.0  # ACK 等待超时 (秒)
+
+
+SLOT_A_BASE = 0x08008000
+SLOT_A_END  = 0x0805FFFF
+SLOT_B_BASE = 0x08060000
+SLOT_B_END  = 0x080BFFFF
+
+
+def detect_slot_from_binary(firmware_path):
+    """
+    从 Cortex-M .bin 固件的向量表自动检测编译目标槽位。
+    偏移 0x04 处的 32-bit LE 值为 Reset_Handler 地址，反映链接基址。
+
+    :param firmware_path: .bin 文件路径
+    :return: (slot: int, reset_handler: int)
+             slot: 0=Slot A, 1=Slot B, None=无法判断
+    """
+    if not os.path.exists(firmware_path):
+        return None, 0
+
+    size = os.path.getsize(firmware_path)
+    if size < 8:
+        return None, 0
+
+    with open(firmware_path, "rb") as f:
+        f.read(4)                        # skip initial SP
+        reset_handler = struct.unpack("<I", f.read(4))[0]
+
+    if SLOT_A_BASE <= reset_handler <= SLOT_A_END:
+        return 0, reset_handler
+    elif SLOT_B_BASE <= reset_handler <= SLOT_B_END:
+        return 1, reset_handler
+    else:
+        return None, reset_handler
+
 
 
 class OtaClient:
@@ -134,7 +170,7 @@ class OtaClient:
         """
         执行 OTA 升级
         :param firmware_path: .bin 文件路径
-        :param slot:          目标槽 (0=A, 1=B, None=自动选非活跃槽)
+        :param slot:          目标槽 (0=A, 1=B, None=从固件向量表自动检测)
         :param version:       版本号
         :param progress_cb:   进度回调 callback(current, total)
         :return:              成功/失败
@@ -150,18 +186,31 @@ class OtaClient:
         fw_size = len(fw_data)
         fw_crc = crc32_ieee(fw_data)
 
+        # 从向量表自动检测槽位
+        detected_slot, reset_addr = detect_slot_from_binary(firmware_path)
+
         print(f"\n固件信息:")
         print(f"  文件: {firmware_path}")
         print(f"  大小: {fw_size} bytes ({fw_size/1024:.1f} KB)")
         print(f"  CRC32: 0x{fw_crc:08X}")
         print(f"  版本: 0x{version:08X}")
-        if slot is not None:
-            print(f"  目标槽: Slot {'B' if slot else 'A'} (强制)")
+        if detected_slot is not None:
+            print(f"  检测到: Slot {'B' if detected_slot else 'A'} (Reset_Handler=0x{reset_addr:08X})")
         else:
-            print(f"  目标槽: 自动选择 (非活跃槽)")
+            print(f"  检测到: 无法判断 (Reset_Handler=0x{reset_addr:08X})")
+
+        # 确定目标槽
+        if slot is not None:
+            target_slot = slot
+            print(f"  目标槽: Slot {'B' if target_slot else 'A'} (--force-slot 指定)")
+        elif detected_slot is not None:
+            target_slot = detected_slot
+            print(f"  目标槽: Slot {'B' if target_slot else 'A'} (自动检测)")
+        else:
+            print(f"[ERROR] 无法检测固件槽位，请用 --force-slot 0 或 --force-slot 1 指定")
+            return False
 
         # 1. 发送 OTA_START
-        target_slot = slot if slot is not None else 0  # 默认 Slot A, 实际由设备决定
         print(f"\n[1/3] 发送 OTA_START (slot={target_slot})...", end=" ")
         sys.stdout.flush()
 

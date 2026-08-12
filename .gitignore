@@ -68,3 +68,4 @@ tmp_screenshot.png
 *.log
 temp_fix2.py
 temp_fix_slots.py
+*.tmp
