@@ -1,6 +1,6 @@
 # STM32F407 A/B 双分区 Bootloader 详细设计与工程使用手册
 
-> 版本: V2.2 | 日期: 2026-08-10 | 最后更新: 2026-08-12 | 适用: oled_prj 项目
+> 版本: V3.0 | 日期: 2026-08-10 | 最后更新: 2026-08-12 | 适用: oled_prj 项目
 ---
 
 ## 0. A/B 双槽位使用指南（必读）
@@ -107,7 +107,7 @@ S11     0x080E0000 - 0x080FFFFF   128KB     sys_config (APP 使用, 不动)
 总计                            1024KB
 ```
 
-**容量验证**: APP 57KB, Slot A/B 均有 6x 以上余量。S10 整体划给 fw_info 仅因扇区是最小擦除单元, 实际仅用 ~64 字节。
+**容量验证**: APP 57KB, Slot A/B 均有 6x 以上余量。S10 整体划给 fw_info 仅因扇区是最小擦除单元, 实际仅用 ~64 字节/条记录。
 
 ---
 
@@ -119,21 +119,24 @@ typedef struct {
     uint8_t  active_slot;    // 0=A, 1=B
     uint8_t  slot_a_state;   // 0x01=有效, 0xFF=无效
     uint8_t  slot_b_state;
-    uint8_t  ota_request;    // APP 设 1 请求进入 Bootloader
+    uint8_t  ota_request;    // (V3.0: 不再用于启动决策, 保留兼容)
     uint32_t slot_a_size;    // A 槽固件大小
     uint32_t slot_a_crc;     // A 槽 CRC32 (IEEE 802.3)
     uint32_t slot_a_version; // A 槽版本号 (如 0x00010003 = V1.0.3)
     uint32_t slot_b_size;
     uint32_t slot_b_crc;
     uint32_t slot_b_version;
-    uint32_t crc32;          // 结构体自身 CRC32 (前 48 字节)
+    uint32_t crc32;          // 结构体自身 CRC32 (前 52 字节)
 } fw_info_t;
 ```
 
+> **注意**: `ota_request` 字段在当前 `fw_info_t` 结构体中保留，但 Bootloader
+> 启动决策的"进入升级模式"触发已迁移为 **SRAM NOINIT 方案**（见 §8.1）。
+> 该字段不再用于 Bootloader 的启动路径决策。
+
 **设计要点**:
 - `slot_x_state = 0xFF` (Flash 擦除后默认值) 表示无效, `0x01` 表示有效
-- `ota_request`: APP 在收到上位机 OTA 命令时写入 `1`, Bootloader 读取后清除
-- Bootloader 独占管理 S10, APP 仅能读和写 `ota_request` 单字节
+- Bootloader 独占管理 S10, APP 不应直接写入 S10 扇区
 - **日志结构存储**: S10 扇区采用追加写入方式, 每次 `fw_info_save()` 将新记录写入下一个空槽位, 避免整扇擦除。扇区写满后整体擦除并从头重新写入
 - `fw_info_load()` 扫描 S10 全部槽位, 取最后一条有效记录 (magic + crc32 均正确)
 
@@ -153,13 +156,13 @@ Bootloader (0x08000000)
    ├─ MX_USART1_UART_Init                         (与 PC 通信, 115200)
    ├─ LED 闪烁 2 次 (500ms 周期) 指示启动
    │
+   ├─ 检查 SRAM NOINIT 区域 OTA 升级请求? ──是──→ 清除请求标志 → enter_update_mode()
+   │
    ├─ KEY1 (PE1) 是否按下? ──是──→ enter_update_mode()
    │
    ├─ 读取 S10 fw_info
    │   ├─ magic 无效 → 初始化 fw_info, 两槽标记无效
    │   └─ magic 正确 → 继续
-   │
-   ├─ ota_request == 1? ──→ 清除标志 → enter_update_mode()
    │
    ├─ active_slot 状态有效且 CRC32 正确? ──→ 跳转 APP
    ├─ 备用槽有效且 CRC32 正确? ──→ 切换 active_slot → 跳转 APP
@@ -168,11 +171,11 @@ Bootloader (0x08000000)
 enter_update_mode():
    ├─ OLED 显示"进入升级模式", LED 快闪 3 次 (150ms)
    ├─ 等待 CMD_OTA_START → 擦除目标槽 → OLED 显示"擦除中..." → ACK
-   ├─ 循环接收 CMD_OTA_DATA → 写入 Flash → OLED 显示进度条 → ACK
+   ├─ 循环接收 CMD_OTA_DATA → 写入 Flash → OLED 显示进度条 (每 64KB 刷新) → ACK
    ├─ 收到 CMD_OTA_FINISH:
    │   ├─ CRC32 校验, OLED 显示"校验中..."
-   │   ├─ 通过 → 更新 fw_info, 切换 active → OLED"升级完成"→"启动APP"→ 跳转
-   │   └─ 失败 → NAK, 状态回到 UPD_IDLE, 等待重试
+   │   ├─ 通过 → fw_info_activate_slot() → OLED"升级完成"→"启动APP"→ 跳转
+   │   └─ 失败 → NAK(NAK_OTA_CRC), 状态回到 UPD_IDLE, 等待重试
    └─ 收到 CMD_OTA_ABORT → 退出更新模式, 重新执行启动决策
 ```
 
@@ -187,7 +190,6 @@ Bootloader 不是简单"记住上次用哪个槽"，而是**每次上电对两�
    b. 备用槽也失败                       -> 进入升级模式等固件
 ```
 
-关键设计意图：
 - **"上次升级成功的槽就是 active_slot"** — OTA 完成时调用 `fw_info_activate_slot()` 同时标记 VALID 和设为 active
 - **"active_slot 不是铁饭碗"** — 每次上电全量 CRC32 校验，Flash 数据退化或意外改写时自动切到备用槽
 - **"两槽同坏才变砖"** — 只要有一个槽 CRC32 正确就能启动，只有两个都坏了才进入升级模式等待固件
@@ -252,7 +254,7 @@ PC                               Bootloader
  ├─ OTA_DATA(offset=N, payload) ─────► 写 Flash → ACK
  │                                    │
  ├─ OTA_FINISH ──────────────────────► CRC32 校验
- │◄── ACK (成功)                      │ 更新 fw_info → 跳转
+ │◄── ACK (成功)                      │ fw_info_activate_slot() → 跳转
 ```
 
 ### 5.4 CRC32 算法
@@ -282,6 +284,7 @@ stm32f407/iap/
 │   ├── boot_flash.h        Flash 操作 API + 扇区宏
 │   ├── boot_proto.h        帧常量 + 命令码 + 错误码 + 帧结构 + API
 │   ├── boot_oled.h         OLED 显示 API (status / progress)
+│   ├── ota_req.h           SRAM NOINIT OTA 请求结构体 + API 声明
 │   └── main.h, gpio.h, usart.h, stm32f4xx_hal_conf.h, stm32f4xx_it.h
 ├── startup/
 │   └── startup_stm32f407xx.s   启动文件 (CubeMX 复制)
@@ -301,8 +304,14 @@ stm32f407/
 ├── Makefile                     GCC 编译 (含 bootloader, app_slot_a, app_slot_b)
 ├── oled_cubemx_slota.sct        Slot A Keil 散列文件 (ROM 0x08008000)
 ├── oled_cubemx_slotb.sct        Slot B Keil 散列文件 (ROM 0x08060000)
-├── src/app_fw_info.c            APP 侧 fw_info 操作 (写 ota_request 单字节)
-└── inc/app_fw_info.h            APP 侧 fw_info 头文件
+├── src/app_fw_info.c            APP 侧 OTA 请求入口 (→ ota_req_set_update)
+├── src/ota_req.c                APP 侧 SRAM NOINIT OTA 请求实现
+├── inc/app_fw_info.h            APP 侧 fw_info 头文件
+├── inc/ota_req.h                SRAM NOINIT OTA 请求公共头文件
+└── bootloader/
+    ├── STM32F407VGTx_FLASH_BOOT.ld   Bootloader 链接脚本 (RAM: 128K-16)
+    ├── STM32F407VGTx_FLASH_SLOTA.ld  APP Slot A 链接脚本 (RAM: 128K-16)
+    └── STM32F407VGTx_FLASH_SLOTB.ld  APP Slot B 链接脚本 (RAM: 128K-16)
 ```
 
 ---
@@ -313,8 +322,10 @@ stm32f407/
 |------|------|
 | `user_app.h` | 新增 `APP_VTOR_ADDR` 宏 (由 `APP_SLOT_A` / `APP_SLOT_B` 控制) |
 | `main.c` (USER CODE SysInit) | 新增 `SCB->VTOR = APP_VTOR_ADDR` |
-| `user_app.c` | 新增 `CMD_OTA_RESERVED` 处理 — 写 ota_request → ACK → 复位 |
-| `app_fw_info.h/c` | APP 侧 fw_info 操作 — 写 ota_request 单字节 |
+| `user_app.c` | 新增 `CMD_OTA_RESERVED` 处理 — 写 NOINIT ota_req → ACK → 复位 |
+| `app_fw_info.h/c` | APP 侧 OTA 请求入口，调用 `ota_req_set_update()` |
+| `ota_req.h` | SRAM NOINIT OTA 请求公共头文件 |
+| `ota_req.c` | APP 侧 OTA 请求实现 — 写入 SRAM 0x2001BFF0 |
 | `protocol.h` | 新增 `CMD_OTA_DATA/FINISH/ABORT` 和 `NAK_OTA_*` 常量 |
 | `Makefile` | 新增 `bootloader`, `app_slot_a`, `app_slot_b` 三个 target (见 §12) |
 
@@ -330,11 +341,44 @@ make               # 编译全部
 
 ## 8. 进入 Bootloader 的条件
 
+### 8.1 SRAM NOINIT OTA 请求机制 (V3.0 新增)
+
+V3.0 将 APP 到 Bootloader 的 OTA 升级请求从 Flash fw_info 区迁移到 **SRAM NOINIT 保留区域**：
+
+- **原理**: STM32F407 SRAM 在系统复位 (`NVIC_SystemReset`) 后内容保持，但上电复位 (POR) 后会丢失。
+  这与 OTA 请求语义完全匹配——断电后重新上电极应正常启动 APP，不进入升级模式。
+- **地址**: `0x2001BFF0`，位于 SRAM1 末端 16 字节，已从链接脚本的 RAM 范围中排除。
+- **结构体** (16 字节, 4 字节对齐):
+
+```c
+typedef struct {
+    uint32_t magic;    // 魔数 0x4F544152 ("OTAR") — 防误触发
+    uint32_t request;  // 请求类型: 0=无请求, 1=请求升级
+    uint32_t slot;     // 目标槽位 (预留)
+    uint32_t reserved; // 保留扩展
+} ota_req_t;
+```
+
+- **APP 侧流程**: 上位机通过 USART1 发送 `CMD_OTA_RESERVED (0x07)` →
+  APP `user_app.c` 收到后调用 `app_fw_info_set_ota_request()` →
+  `ota_req_set_update()` 写入魔数和请求 →
+  `sys_config_reset()` 触发系统复位
+- **Bootloader 侧流程**: `main()` 在 `fw_info_load()` 之前调用
+  `ota_req_is_update()` 检查 SRAM 0x2001BFF0 地址 → 若魔数 & 请求均合法 →
+  `ota_req_clear()` 清除标志 → 直接进入升级模式。
+  Bootloader 侧的 `ota_req_is_update()` / `ota_req_clear()` 为内联实现
+  （`boot_main.c` 内），避免 Keil 工程额外添加 `.c` 文件
+- **链接脚本**: 三个链接脚本 (BOOT / SLOTA / SLOTB) 的 RAM 均缩小 16 字节
+  (`LENGTH = 128K - 16`)，确保 0x2001BFF0~0x2001BFFF 不被栈/堆/全局变量覆盖
+- **参考方案**: MCUBoot / OpenBLT / Zephyr 等开源 Bootloader 均采用 retained memory 传递复位标志
+
+### 8.2 触发条件与优先级
+
 | 优先级 | 条件 | 实现 |
 |--------|------|------|
-| 1 | **KEY1 (PE1) 上电时按下** (低电平) | Bootloader 在初始化后立即检测 GPIO, **不需要长按**, 开机时按住即可 |
-| 2 | APP 收到 `CMD_OTA_RESERVED (0x07)` | APP 写 S10 `ota_request=1` → 通过 `sys_config_reset()` 复位 |
-| 3 | 两槽均无效 | Bootloader 自动进入更新模式 (LED 快闪 4 次, 等待固件下发) |
+| 1 | **SRAM NOINIT OTA 请求** | APP 写 `ota_req_set_update()` → `sys_config_reset()` → Bootloader 检测合法请求 → 进入升级模式 |
+| 2 | **KEY1 (PE1) 上电时按下** (低电平) | Bootloader 初始化后检测 GPIO, 不需要长按, 开机时按住即可 |
+| 3 | **两槽均无效** | Bootloader 自动进入更新模式 (LED 快闪 4 次, 等待固件下发) |
 
 > **注意**: 原设计文档中的 "KEY1+KEY2 同时长按 3s" 已简化为单一 KEY1 开机检测。
 
@@ -363,13 +407,13 @@ void boot_oled_progress(uint32_t done, uint32_t total);  // 显示进度条 + �
 
 ### 9.3 升级过程 OLED 显示
 
-| 阶段 | OLED 显示 | LED |
-|------|-----------|-----|
-| 进入升级模式 | "进入升级模式" (居中) | 快闪 3 次 (150ms) |
-| 擦除目标槽 | "擦除中..." | — |
-| 数据下载 | "正在下载" + 进度条 + 百分比 | — |
-| 完成校验 | "校验中..." | — |
-| 升级成功 | "升级完成" → "启动APP" (500ms 后) | 亮 1s → 灭 → 跳转 |
+| 阶段 | 说明 |
+|------|------|
+| 进入升级模式 | OLED 居中显示"进入升级模式", LED 快闪 3 次 (150ms) |
+| 擦除目标槽 | OLED 显示"擦除中..." |
+| 数据下载 | OLED 显示"正在下载" + 进度条 + 百分比 (每 64KB 刷新一次) |
+| 完成校验 | OLED 显示"校验中..." |
+| 升级成功 | OLED 显示"升级完成" (LED 亮 1s) → "启动APP" (500ms) → LED 灭 → 跳转 APP |
 
 ---
 
@@ -377,8 +421,8 @@ void boot_oled_progress(uint32_t done, uint32_t total);  // 显示进度条 + �
 
 | 场景 | 行为 |
 |------|------|
-| OTA 写入途中断电 | 旧槽不变, 下次上电自动启动旧版本 |
-| OTA CRC32 校验失败 | NAK → fw_info 不变 → 旧槽仍是 active → 等待重试 |
+| OTA 写入途中断电 | 旧槽不变, 下次上电自动启动旧版本 (NOINIT 数据在 POR 后丢失) |
+| OTA CRC32 校验失败 | NAK → fw_info 不变 → 状态回到 UPD_IDLE → 等待重试 |
 | 新固件可启动但有逻辑 bug | 可通过 KEY1 上电进入 Bootloader 重刷 |
 | S10 fw_info 损坏 (CRC32 错) | Bootloader 初始化默认值 → 两槽标记无效 → 进入更新模式 |
 | APP 跳转前: SP 不在 SRAM 范围 | 放弃跳转, 继续尝试备用槽 |
@@ -479,17 +523,28 @@ python tools/ota_tool/ota_tool.py COM3 firmware.bin --version 1.2.0  # 指定版
 |------|------|------|------|
 | T01 | 全新芯片首次上电 | 烧录 Bootloader 后上电 | 初始化 fw_info → 两槽无效 → 进入更新模式 |
 | T02 | 正常 OTA Slot A→B | OTA 升级到 Slot B | 擦除 B → 写入 → CRC 通过 → active=B → 跳转 B |
-| T03 | OTA 写入途中断电 | OTA 中拔电再上电 | A 槽仍有效 → 跳转 A 正常 |
-| T04 | OTA FINISH 后 CRC 错 | 固件损坏 | fw_info 不变 → A 仍是 active → 重上电跳转 A |
-| T05 | KEY1 上电进入 | 按住 KEY1 上电 | 强制进入更新模式, OLED 显示"进入升级模式" |
-| T06 | APP 收到 OTA 命令 | PC 发 CMD_OTA_RESERVED | 写 ota_request → 复位 → Bootloader 识别 → 更新模式 |
-| T07 | 两槽均无效 | 擦除 S2-S9 后上电 | Bootloader 等待固件, LED 快闪 |
-| T08 | 活跃槽 CRC 损坏 | 手动破坏部分 Flash | 自动切换到备用槽 |
-| T09 | SP 非法跳过 | 人为损坏向量表 | 跳过该槽, 尝试备用槽 |
+| T03 | OTA 写入途中断电 | OTA 中拔电再上电 | A 槽仍有效 → 跳转 A 正常（NOINIT 数据在 POR 后丢失, 不进入升级模式） |
+| T04 | OTA FINISH 后 CRC 错 | 固件 CRC 不匹配 | fw_info 不变 → 状态回到 UPD_IDLE → 可重试 |
+| T05 | KEY1 上电进入 | 按住 KEY1 上电 | 强制进入更新模式（NOINIT 检查优先但此时无请求） |
+| T06 | APP 收到 OTA 命令 | PC 发 CMD_OTA_RESERVED | APP 写 NOINIT ota_req (0x2001BFF0) → 复位 → Bootloader 识别 → 进入升级模式 |
+| T07 | 两槽均无效 | 擦除 S2~S9 后上电 | Bootloader 等待固件, LED 快闪 4 次 |
+| T08 | 活跃槽 CRC 损坏 | 手动破坏部分 Flash | 活跃槽 CRC 校验失败 → 自动切换到备用槽 |
+| T09 | SP 非法跳过 | 人为损坏向量表 | 拒绝跳转, 尝试备用槽 |
 
 ---
 
 ## 14. 设计亮点与实现细节
+
+### 14.0 SRAM NOINIT OTA 请求 (V3.0)
+
+V3.0 将 OTA 请求通道从 Flash 迁移到 SRAM NOINIT 区域，解决了 Flash 方案的两个致命缺陷：
+
+1. **Flash 编程方向违规**: Flash 只能从 1→0 编程，擦除后为 0xFF。`ota_request` 字段从 0x00→0x01 需要先擦除扇区，而 APP 不应擦除 Bootloader 管理的 S10。SRAM 无此约束，任意写入。
+2. **CRC 破坏**: 写入 `ota_request` 单字节会破坏 `fw_info_t` 的 CRC32，需要重新计算整结构体 CRC 并写入，在 APP 侧实现复杂且易出错。SRAM 结构体独立于 fw_info，完全解耦。
+
+另外，复位后 NOINIT 数据会在上电复位 (POR) 时自动丢失——这意味着断电重开不会误进入升级模式，符合预期行为。
+
+参考方案: MCUBoot / OpenBLT / Zephyr 等开源项目均采用 retained memory / .noinit section 在复位间传递标志。
 
 ### 14.1 日志结构 fw_info 存储
 
@@ -501,7 +556,7 @@ python tools/ota_tool/ota_tool.py COM3 firmware.bin --version 1.2.0  # 指定版
 ### 14.2 自定义 vsnprintf
 
 ARMCC semihosting 在无调试器连接时, `printf` 会挂死 MCU。Bootloader 实现了轻量
-`boot_vsnprintf`, 支持 `%s %d %u %x %X %02X %08X %%`, 避免依赖标准库的 I/O 实现。
+`boot_vsnprintf`, 支持 `%s %d %u %x %X %02X %08X %% %c`, 避免依赖标准库的 I/O 实现。
 
 ### 14.3 OLED 位控 I2C
 
@@ -529,6 +584,12 @@ if (app_pc < 0x08000000UL || app_pc > 0x080FFFFFUL) return;  // PC 不在 Flash
 
 Flash 擦除使用标准 HAL API (`HAL_FLASH_Unlock` → `HAL_FLASHEx_Erase` → `HAL_FLASH_Lock`), 并标记为 `__RAM_FUNC` 将函数放入 RAM 执行。已验证对相同规格的 128KB Sector 10/11 擦除正常。
 
+### 14.7 fw_info_activate_slot — 原子激活
+
+`fw_info_activate_slot()` 是 V3.0 新增的合并 API，将 `fw_info_set_slot_info()` +
+`fw_info_set_slot_state()` + `fw_info_set_active_slot()` 三步操作合并为一次 Flash 保存，
+减少 Flash 写入次数并保证原子性。
+
 ---
 
 ## 15. 调试
@@ -538,15 +599,7 @@ Bootloader 通过 USART2 (PA2/PA3, 115200 8N1) 输出调试日志。格式:
 
 在 `boot_main.c` 中定义 `BOOT_DEBUG_ENABLE` 启用调试输出。生产版本注释此行。
 
-硬件连接:
-
-| STM32F407 | USB-TTL 模块 |
-|-----------|-------------|
-| PA2 (USART2 TX) | RXD |
-| PA3 (USART2 RX) | TXD |
-| GND | GND |
-
-使用 MobaXterm / SecureCRT 等终端软件, 波特率 115200 8N1 查看输出。
+使用终端软件 (MobaXterm / SecureCRT), 波特率 115200 8N1, 连接 PA2(TX)/PA3(RX)/GND。
 
 **示例输出**:
 ```
@@ -554,13 +607,14 @@ Bootloader 通过 USART2 (PA2/PA3, 115200 8N1) 输出调试日志。格式:
 [BOOT] main:114 STM32F407 Bootloader V3.0
 [BOOT] main:115 build: Aug 11 2026 10:30:00
 [BOOT] main:116 ========================================
-[BOOT] main:127 loading fw_info from S10 (0x080C0000)...
+[BOOT] main:124 IAP: Slot A (0x08008000) / Slot B (0x08060000)
+[BOOT] main:128 loading fw_info from S10 (0x080C0000)...
 [BOOT] main:130 fw_info_load: loaded OK
-[BOOT] main:134 fw_info: active=0x08008000 a_state=0x01 a_ver=0x00010003 ...
-[BOOT] main:155 active slot 0x08008000 CRC OK, jumping...
-[BOOT] boot_jump_to_app:162 jumping to APP at 0x08008000 ...
+[BOOT] main:134 fw_info: active=slotA (0x08008000) a_state=0x01 a_ver=0x00010003 ...
+[BOOT] main:155 IAP: Slot A (0x08008000) CRC OK, jumping...
+[BOOT] boot_jump_to_app:250 jumping to APP at 0x08008000 (SP=0x20001000, PC=0x08008004)
 ```
 
 ---
 
-**文档版本**: V2.2 | **创建日期**: 2026-08-10 | **最后更新**: 2026-08-12
+**文档版本**: V3.0 | **创建日期**: 2026-08-10 | **最后更新**: 2026-08-12
