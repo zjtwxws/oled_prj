@@ -387,6 +387,7 @@ static void enter_update_mode(void)
     uint32_t     fw_crc32;
     uint32_t     fw_version;
     uint32_t     bytes_written;
+    uint32_t     last_pct_done;
 
     BOOT_LOG("=== UPDATE MODE ENTERED ===");
     boot_oled_status("进入升级模式");
@@ -454,6 +455,7 @@ static void enter_update_mode(void)
                 BOOT_LOG("erase slot%c (0x%08X) OK", (target_slot == 0) ? 'A' : 'B', get_slot_base(target_slot));
 
                 bytes_written = 0;
+                last_pct_done = 0;
                 state = UPD_RECEIVING;
 
                 led_blink(1, 50);
@@ -532,9 +534,10 @@ static void enter_update_mode(void)
 
                 bytes_written += plen;
 
-if (bytes_written % (64 * 1024) < plen + 100)
+                if (bytes_written - last_pct_done >= fw_size / 20 + 1)
                 {
                     boot_oled_progress(bytes_written, fw_size);
+                    last_pct_done = bytes_written;
                 }
 
                 goto send_ack;

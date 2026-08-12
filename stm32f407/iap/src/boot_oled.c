@@ -493,8 +493,8 @@ static uint8_t draw_chinese(uint8_t x, uint8_t page, const char *utf8)
 
     for (uint8_t col = 0; col < FONT_CHINESE_W; col++)
     {
-        oled_buf[page * OLED_WIDTH + x + col] = glyph[col];
-        oled_buf[(page + 1) * OLED_WIDTH + x + col] = glyph[col + 16];
+        oled_buf[page * OLED_WIDTH + x + col] = glyph[col * 2];
+        oled_buf[(page + 1) * OLED_WIDTH + x + col] = glyph[col * 2 + 1];
     }
     return x + FONT_CHINESE_W;
 }
