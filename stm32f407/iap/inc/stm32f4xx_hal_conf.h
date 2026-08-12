@@ -1,4 +1,4 @@
-/* USER CODE BEGIN Header */
+﻿/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file    stm32f4xx_hal_conf_template.h
@@ -37,13 +37,14 @@
   */
 #define HAL_MODULE_ENABLED
 
-  /* #define HAL_CRYP_MODULE_ENABLED */
+/* #define HAL_CRYP_MODULE_ENABLED */
 /* #define HAL_ADC_MODULE_ENABLED */
 /* #define HAL_CAN_MODULE_ENABLED */
 /* #define HAL_CRC_MODULE_ENABLED */
 /* #define HAL_CAN_LEGACY_MODULE_ENABLED */
 /* #define HAL_DAC_MODULE_ENABLED */
 /* #define HAL_DCMI_MODULE_ENABLED */
+#define HAL_DMA_MODULE_ENABLED
 /* #define HAL_DMA2D_MODULE_ENABLED */
 /* #define HAL_ETH_MODULE_ENABLED */
 /* #define HAL_ETH_LEGACY_MODULE_ENABLED */
@@ -53,7 +54,7 @@
 /* #define HAL_SRAM_MODULE_ENABLED */
 /* #define HAL_SDRAM_MODULE_ENABLED */
 /* #define HAL_HASH_MODULE_ENABLED */
-#define HAL_I2C_MODULE_ENABLED
+/* #define HAL_I2C_MODULE_ENABLED */
 /* #define HAL_I2S_MODULE_ENABLED */
 /* #define HAL_IWDG_MODULE_ENABLED */
 /* #define HAL_LTDC_MODULE_ENABLED */
@@ -82,8 +83,7 @@
 /* #define HAL_DFSDM_MODULE_ENABLED */
 /* #define HAL_LPTIM_MODULE_ENABLED */
 #define HAL_GPIO_MODULE_ENABLED
-#define HAL_EXTI_MODULE_ENABLED
-#define HAL_DMA_MODULE_ENABLED
+/* #define HAL_EXTI_MODULE_ENABLED */
 #define HAL_RCC_MODULE_ENABLED
 #define HAL_FLASH_MODULE_ENABLED
 #define HAL_PWR_MODULE_ENABLED

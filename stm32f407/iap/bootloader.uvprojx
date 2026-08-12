@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx,BOOTLOADER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\inc;.\driver\inc;..\inc;..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Inc</IncludePath>
+              <IncludePath>.\inc;.\driver\inc;..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy;..\..\oled_cubemx\Drivers\STM32F4xx_HAL_Driver\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -442,6 +442,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\boot_oled.c</FilePath>
             </File>
+            <File>
+              <FileName>boot_ota_req.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\boot_ota_req.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -456,16 +461,6 @@
               <FileName>stm32f4xx_hal_cortex.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\driver\src\stm32f4xx_hal_cortex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\driver\src\stm32f4xx_hal_dma.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_dma_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\driver\src\stm32f4xx_hal_dma_ex.c</FilePath>
             </File>
             <File>
               <FileName>stm32f4xx_hal_flash.c</FileName>
@@ -506,6 +501,11 @@
               <FileName>stm32f4xx_hal_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\driver\src\stm32f4xx_hal_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\driver\src\stm32f4xx_hal_dma.c</FilePath>
             </File>
           </Files>
         </Group>

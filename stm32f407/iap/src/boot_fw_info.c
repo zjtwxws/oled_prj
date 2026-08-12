@@ -4,79 +4,14 @@
  */
 #include "boot_fw_info.h"
 #include "boot_flash.h"
-#include "usart.h"
-#define FW_DEBUG_ENABLE
+#include "boot_debug.h"
 #include <string.h>
-#include <stdarg.h>
 
-
-static void fw_dbg_impl(const char *func, int line, const char *fmt, ...)
-{
-    char buf[128];
-    int len = 0;
-    const char *p;
-    va_list args;
-    va_start(args, fmt);
-    p = "[FW] "; while (*p && len < 126) buf[len++] = *p++;
-    while (*func && len < 126) buf[len++] = *func++;
-    if (len < 126) buf[len++] = ':';
-    {
-        char ln[7]; int l = line, i = 6;
-        do { ln[--i] = (char)('0' + (l % 10)); l /= 10; } while (l > 0);
-        while (i < 6 && len < 126) buf[len++] = ln[i++];
-    }
-    if (len < 126) buf[len++] = ' ';
-    {
-        char tmp[80]; char *dst = tmp; char *end = tmp + 79;
-        const char *s = fmt;
-        while (*s && dst < end) {
-            if (*s != '%') { *dst++ = *s++; continue; }
-            s++;
-            if (*s == 'u') {
-                unsigned int val = va_arg(args, unsigned int);
-                char rev[12]; int ri = 0;
-                do { rev[ri++] = (char)('0' + (val % 10)); val /= 10; } while (val && ri < 11);
-                if (ri == 0) rev[ri++] = '0';
-                while (ri > 0 && dst < end) *dst++ = rev[--ri];
-                s++;
-            } else if (*s == 's') {
-                const char *str = va_arg(args, const char *);
-                while (str && *str && dst < end) *dst++ = *str++;
-                s++;
-            } else if (*s == 'd') {
-                int val = va_arg(args, int);
-                if (val < 0) { if (dst < end) *dst++ = '-'; val = -val; }
-                char rev[12]; int ri = 0;
-                do { rev[ri++] = (char)('0' + (val % 10)); val /= 10; } while (val && ri < 11);
-                if (ri == 0) rev[ri++] = '0';
-                while (ri > 0 && dst < end) *dst++ = rev[--ri];
-                s++;
-            } else if (*s == '%') { if (dst < end) *dst++ = '%'; s++; }
-            else if (*s == 'x' || *s == 'X') {
-                unsigned int val = va_arg(args, unsigned int);
-                char hex[9];
-                for (int k = 0; k < 8; k++) {
-                    unsigned int d = (val >> (28 - k * 4)) & 0xF;
-                    hex[k] = (char)(d < 10 ? '0' + d : (*s == 'X' ? 'A' : 'a') + d - 10);
-                }
-                hex[8] = 0;
-                for (int k = 0; k < 8 && dst < end; k++) *dst++ = hex[k];
-                s++;
-            } else { s++; }
-        }
-        *dst = 0;
-        p = tmp; while (*p && len < 126) buf[len++] = *p++;
-    }
-    va_end(args);
-    p = "\r\n"; while (*p && len < 126) buf[len++] = *p++;
-    HAL_UART_Transmit(&huart2, (uint8_t *)buf, (uint16_t)len, 100);
-}
-#ifdef FW_DEBUG_ENABLE
-#define FW_DBG(fmt, ...) fw_dbg_impl(__func__, __LINE__, fmt, ##__VA_ARGS__)
-#else
-#define FW_DBG(fmt, ...) ((void)0)
-#endif
-
+/** @brief FW 模块调试日志 — 复用 boot_main.c 的 boot_printf，保持 [FW] 前缀 */
+#define FW_DBG(fmt, ...) \
+    do { \
+        boot_printf("[FW] %s:%d " fmt "\r\n", __func__, __LINE__, ##__VA_ARGS__); \
+    } while (0)
 
 #define FW_INFO_SLOT_COUNT   (FW_INFO_SECTOR_SIZE / sizeof(fw_info_t))
 

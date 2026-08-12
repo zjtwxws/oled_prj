@@ -23,24 +23,9 @@
 #include "boot_flash.h"
 #include "boot_proto.h"
 #include "boot_oled.h"
+#include "boot_debug.h"
 #include <string.h>
 #include <stdarg.h>
-
-/* ---- OTA NOINIT helpers (inline to avoid adding .c to Keil project) ---- */
-int ota_req_is_update(void)
-{
-    volatile ota_req_t *req = (volatile ota_req_t *)OTA_REQ_ADDR;
-    return (req->magic == OTA_REQ_MAGIC && req->request == OTA_REQ_UPDATE) ? 1 : 0;
-}
-
-void ota_req_clear(void)
-{
-    volatile ota_req_t *req = (volatile ota_req_t *)OTA_REQ_ADDR;
-    req->magic   = 0;
-    req->request = OTA_REQ_NONE;
-    req->slot    = 0;
-    req->reserved = 0;
-}
 
 /* ---- 调试串口开关 (生产版本注释此行) ---- */
 #define BOOT_DEBUG_ENABLE
@@ -65,7 +50,7 @@ static void enter_update_mode(void);
 static uint32_t get_slot_base(uint8_t slot);
 
 #ifdef BOOT_DEBUG_ENABLE
-static void boot_printf(const char *fmt, ...);
+void boot_printf(const char *fmt, ...);
 #define BOOT_LOG(fmt, ...)  boot_log_impl(__func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
 #define BOOT_LOG(fmt, ...)  ((void)0)
@@ -251,7 +236,7 @@ static int uart_recv_byte(uint8_t *ch)
 }
 
 #ifdef BOOT_DEBUG_ENABLE
-static void boot_printf(const char *fmt, ...)
+void boot_printf(const char *fmt, ...)
 {
     char buf[DEBUG_PRINTF_BUF];
     va_list args;
@@ -268,7 +253,7 @@ static void boot_printf(const char *fmt, ...)
 /**
  * @brief  BOOT 调试日志 — __func__ 和 __LINE__ 作为固定参数，避免 va_list 可变参数取值异常
  */
-static void boot_log_impl(const char *func, int line, const char *fmt, ...)
+void boot_log_impl(const char *func, int line, const char *fmt, ...)
 {
     char buf[DEBUG_PRINTF_BUF];
     int len = 0;
