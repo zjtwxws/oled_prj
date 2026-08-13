@@ -1,6 +1,6 @@
 # STM32F407 A/B 双分区 Bootloader 详细设计与工程使用手册
 
-> 版本: V3.0 | 日期: 2026-08-10 | 最后更新: 2026-08-12 | 适用: oled_prj 项目
+> 版本: V3.0 | 日期: 2026-08-10 | 最后更新: 2026-08-13 | 适用: oled_prj 项目
 ---
 
 ## 0. A/B 双槽位使用指南（必读）
@@ -107,7 +107,7 @@ S11     0x080E0000 - 0x080FFFFF   128KB     sys_config (APP 使用, 不动)
 总计                            1024KB
 ```
 
-**容量验证**: APP 57KB, Slot A/B 均有 6x 以上余量。S10 整体划给 fw_info 仅因扇区是最小擦除单元, 实际仅用 ~64 字节/条记录。
+**容量验证**: APP 57KB, Slot A/B 均有 6x 以上余量。S10 整体划给 fw_info 仅因扇区是最小擦除单元, 实际仅用 `sizeof(fw_info_t)` 字节。
 
 ---
 
@@ -126,7 +126,7 @@ typedef struct {
     uint32_t slot_b_size;
     uint32_t slot_b_crc;
     uint32_t slot_b_version;
-    uint32_t crc32;          // 结构体自身 CRC32 (前 52 字节)
+    uint32_t crc32;          // 结构体自身 CRC32 (sizeof(fw_info_t) - 4 字节)
 } fw_info_t;
 ```
 
@@ -137,8 +137,8 @@ typedef struct {
 **设计要点**:
 - `slot_x_state = 0xFF` (Flash 擦除后默认值) 表示无效, `0x01` 表示有效
 - Bootloader 独占管理 S10, APP 不应直接写入 S10 扇区
-- **日志结构存储**: S10 扇区采用追加写入方式, 每次 `fw_info_save()` 将新记录写入下一个空槽位, 避免整扇擦除。扇区写满后整体擦除并从头重新写入
-- `fw_info_load()` 扫描 S10 全部槽位, 取最后一条有效记录 (magic + crc32 均正确)
+- **当前写入策略**: `fw_info_save()` 每次先擦除 S10，再写入 Slot 0，并逐字读回校验
+- `fw_info_load()` 扫描 S10，取 magic + crc32 均正确的记录。为兼容旧数据，扫描逻辑仍保留，但正常保存路径只写 Slot 0
 
 ---
 
@@ -156,13 +156,13 @@ Bootloader (0x08000000)
    ├─ MX_USART1_UART_Init                         (与 PC 通信, 115200)
    ├─ LED 闪烁 2 次 (500ms 周期) 指示启动
    │
+   ├─ 读取 S10 fw_info
+   │   ├─ magic 无效 → 先擦除 S10 → 初始化 fw_info → 两槽标记无效
+   │   └─ magic 正确 → 加载到 RAM
+   │
    ├─ 检查 SRAM NOINIT 区域 OTA 升级请求? ──是──→ 清除请求标志 → enter_update_mode()
    │
    ├─ KEY1 (PE1) 是否按下? ──是──→ enter_update_mode()
-   │
-   ├─ 读取 S10 fw_info
-   │   ├─ magic 无效 → 初始化 fw_info, 两槽标记无效
-   │   └─ magic 正确 → 继续
    │
    ├─ active_slot 状态有效且 CRC32 正确? ──→ 跳转 APP
    ├─ 备用槽有效且 CRC32 正确? ──→ 切换 active_slot → 跳转 APP
@@ -174,7 +174,7 @@ enter_update_mode():
    ├─ 循环接收 CMD_OTA_DATA → 写入 Flash → OLED 显示进度条 (每 64KB 刷新) → ACK
    ├─ 收到 CMD_OTA_FINISH:
    │   ├─ CRC32 校验, OLED 显示"校验中..."
-   │   ├─ 通过 → fw_info_activate_slot() → OLED"升级完成"→"启动APP"→ 跳转
+   │   ├─ 通过 → fw_info_activate_slot() 写入有效 magic/槽信息 → OLED"升级完成"→"启动APP"→ 跳转
    │   └─ 失败 → NAK(NAK_OTA_CRC), 状态回到 UPD_IDLE, 等待重试
    └─ 收到 CMD_OTA_ABORT → 退出更新模式, 重新执行启动决策
 ```
@@ -270,7 +270,7 @@ IEEE 802.3, 多项式 0xEDB88320 (反射), 初始值 0xFFFFFFFF, 结果取反。
 stm32f407/iap/
 ├── src/
 │   ├── boot_main.c         主入口, 启动决策, OTA 状态机, APP 跳转, boot_vsnprintf
-│   ├── boot_fw_info.c      S10 fw_info 管理 (日志结构读写/CRC)
+│   ├── boot_fw_info.c      S10 fw_info 管理 (整扇擦除/写入/CRC)
 │   ├── boot_flash.c        Flash 擦写 + CRC32 计算 (IEEE 802.3)
 │   ├── boot_proto.c        简化协议帧解析/构建 (6 状态机, 无 SEQ)
 │   ├── boot_oled.c         GPIO 位控 I2C SSD1306 驱动 + 精简字库 + 进度条
@@ -363,8 +363,8 @@ typedef struct {
   APP `user_app.c` 收到后调用 `app_fw_info_set_ota_request()` →
   `ota_req_set_update()` 写入魔数和请求 →
   `sys_config_reset()` 触发系统复位
-- **Bootloader 侧流程**: `main()` 在 `fw_info_load()` 之前调用
-  `ota_req_is_update()` 检查 SRAM 0x2001BFF0 地址 → 若魔数 & 请求均合法 →
+- **Bootloader 侧流程**: `main()` 先调用 `fw_info_load()` 初始化 RAM 中的 fw_info，
+  再调用 `ota_req_is_update()` 检查 SRAM 0x2001BFF0 地址 → 若魔数 & 请求均合法 →
   `ota_req_clear()` 清除标志 → 直接进入升级模式。
   Bootloader 侧的 `ota_req_is_update()` / `ota_req_clear()` 为内联实现
   （`boot_main.c` 内），避免 Keil 工程额外添加 `.c` 文件
@@ -546,12 +546,18 @@ V3.0 将 OTA 请求通道从 Flash 迁移到 SRAM NOINIT 区域，解决了 Flas
 
 参考方案: MCUBoot / OpenBLT / Zephyr 等开源项目均采用 retained memory / .noinit section 在复位间传递标志。
 
-### 14.1 日志结构 fw_info 存储
+### 14.1 fw_info 存储与首次初始化
 
-传统方案: 每次保存 fw_info 都用 sector erase → write, 增加 Flash 磨损且慢。
+当前版本采用**单记录 + 整扇擦除**策略：
 
-本方案: S10 (128KB) 可容纳 `128KB / 64B = 2048` 条记录。`fw_info_save()` 追加写入下一空槽,
-`fw_info_load()` 扫描取最后一条有效记录。扇区写满后才整体擦除回绕, 大幅减少擦除次数。
+- `fw_info_save()` 先擦除 S10，再写入 Slot 0，并逐字读回校验
+- `fw_info_load()` 仍扫描 S10 内可能存在的有效记录，以兼容历史数据；正常保存路径只写 Slot 0
+- `fw_info_load()` 检测到 S10 无有效记录时，先擦除 S10，再写入默认 fw_info，避免在非空扇区直接编程导致失败
+
+早期曾采用日志结构追加写入以减少擦除次数。后续 OTA 掉电排查中发现：
+进入升级模式时若 RAM 中的 fw_info 尚未初始化，`fw_info_activate_slot()` 会保存
+`magic == 0` 的记录，重启后 `fw_info_load()` 无法识别。为降低复杂度并保证启动一致性，
+现改为每次保存都整扇擦除后写 Slot 0。
 
 ### 14.2 自定义 vsnprintf
 
@@ -582,13 +588,38 @@ if (app_pc < 0x08000000UL || app_pc > 0x080FFFFFUL) return;  // PC 不在 Flash
 
 ### 14.6 HAL 擦除 API 的使用
 
-Flash 擦除使用标准 HAL API (`HAL_FLASH_Unlock` → `HAL_FLASHEx_Erase` → `HAL_FLASH_Lock`), 并标记为 `__RAM_FUNC` 将函数放入 RAM 执行。已验证对相同规格的 128KB Sector 10/11 擦除正常。
+Flash 擦除使用标准 HAL API (`HAL_FLASH_Unlock` → `HAL_FLASHEx_Erase` → `HAL_FLASH_Lock`)。
+当前 Keil AC6 工程中 `__RAM_FUNC` 实际为空宏，链接结果中 Flash 操作函数仍位于内部 Flash，
+但 OTA 对 Slot A/Slot B 的擦写已验证可用。
 
 ### 14.7 fw_info_activate_slot — 原子激活
 
 `fw_info_activate_slot()` 是 V3.0 新增的合并 API，将 `fw_info_set_slot_info()` +
 `fw_info_set_slot_state()` + `fw_info_set_active_slot()` 三步操作合并为一次 Flash 保存，
 减少 Flash 写入次数并保证原子性。
+
+该函数会在保存前显式设置 `g_fw_info.magic = FW_INFO_MAGIC`。调用前必须先完成
+`fw_info_load()`，确保 RAM 中的 fw_info 已初始化；当前启动流程已把 `fw_info_load()`
+提前到 NOINIT/KEY1 检查之前。
+
+### 14.8 OTA 后掉电无法启动的修复记录
+
+问题现象：OTA 完成时 `fw_info_save()` 日志显示擦除和读回成功，APP 能运行，但 reboot 后
+Bootloader 扫描 S10 显示 `no valid record`，随后首次初始化打印 `write FAILED`。
+
+根因：
+
+1. 通过 SRAM NOINIT 或 KEY1 进入升级模式时，`fw_info_load()` 尚未执行，
+   `g_fw_info` 还是零初始化的 BSS。
+2. 旧 `fw_info_activate_slot()` 未设置 `magic`，因此 OTA 完成时保存的是 `magic == 0` 的无效记录。
+3. 重启后扫描只接受 `FW_INFO_MAGIC`，因此拒绝该记录。
+4. 首次初始化在未擦除的 S10 上直接编程，旧数据中已有 0 位，无法按新数据改写，导致写失败。
+
+修复内容：
+
+- `main()` 先调用 `fw_info_load()`，再检查 NOINIT/KEY1
+- `fw_info_activate_slot()` 显式设置 `magic`
+- `fw_info_load()` 首次初始化前先擦除 S10
 
 ---
 
@@ -617,4 +648,4 @@ Bootloader 通过 USART2 (PA2/PA3, 115200 8N1) 输出调试日志。格式:
 
 ---
 
-**文档版本**: V3.0 | **创建日期**: 2026-08-10 | **最后更新**: 2026-08-12
+**文档版本**: V3.0 | **创建日期**: 2026-08-10 | **最后更新**: 2026-08-13
