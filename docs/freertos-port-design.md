@@ -717,3 +717,211 @@ FREERTOS_SRC = ThirdParty/FreeRTOS-Kernel/list.c \
 4. 为什么 SysTick 让给 FreeRTOS 后，HAL 需要改用 TIM6。
 5. `xTaskCreate` 的栈单位是 word 而不是 byte，栈高水位是必须实测的数据。
 6. CubeMX 只负责硬件初始化，FreeRTOS 是独立中间件；手动集成后，CubeMX 重新生成时必须核对用户代码边界。
+
+---
+
+## 十四、附加项：OS 抽象层（OSAL）备用方案
+
+> 本节为可选备用方案，不影响前十三节 FreeRTOS 最小移植步骤。当前项目先按单 FreeRTOS
+> backend 实施；若后续明确需要适配 uC/OS、ThreadX、RT-Thread 等其它 RTOS，再启用本节方案。
+
+### 14.1 目标
+
+在不修改业务模块的前提下，把应用层与具体 RTOS API 隔离开。应用层只依赖项目内稳定接口
+`os_adapter.h`，具体 RTOS 类型和 API 只出现在对应 backend 源文件中。
+
+### 14.2 分层结构
+
+```text
+应用模块
+   |
+   v
+os_adapter.h             项目统一 RTOS 接口
+   |
+   +-- os_adapter_freertos.c   当前后端
+   |
+   +-- os_adapter_ucos.c       未来后端
+```
+
+建议文件位置：
+
+```text
+stm32f407/inc/os_adapter.h
+stm32f407/src/os_adapter_freertos.c
+stm32f407/src/os_adapter_ucos.c       # 未来启用时再添加
+```
+
+构建时只编译当前选择的 backend，不在应用层 include FreeRTOS 头文件。
+
+### 14.3 当前单任务阶段最小接口
+
+```c
+typedef void *osa_task_handle_t;
+
+typedef void (*osa_task_func_t)(void *argument);
+
+void              osa_scheduler_start(void);
+osa_task_handle_t osa_task_create(const char *name,
+                                  osa_task_func_t entry,
+                                  void *argument,
+                                  uint32_t stack_words,
+                                  uint8_t priority);
+void              osa_delay_ms(uint32_t delay_ms);
+uint32_t          osa_task_get_stack_high_water_mark(osa_task_handle_t task);
+```
+
+接口说明：
+
+- `stack_words` 统一使用 32 位 word，backend 内部转换到对应 RTOS 的栈参数。
+- `priority` 不直接暴露 FreeRTOS 或 uC/OS 原始数值。建议后续增加项目内逻辑优先级定义，
+  例如 `OSA_PRIORITY_LOW`、`OSA_PRIORITY_NORMAL`。
+- 当前阶段不封装 semaphore、event flags、critical section 和 FromISR API，等项目中出现
+  明确共享资源或中断到任务的通信场景后再增加。
+
+### 14.4 FreeRTOS backend 示例
+
+```c
+/**
+ * @file    os_adapter_freertos.c
+ * @brief   FreeRTOS OSAL backend
+ */
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "os_adapter.h"
+
+/**
+ * @brief  启动 FreeRTOS 调度器
+ */
+void osa_scheduler_start(void)
+{
+    vTaskStartScheduler();
+}
+
+/**
+ * @brief  创建任务
+ */
+osa_task_handle_t osa_task_create(const char *name,
+                                  osa_task_func_t entry,
+                                  void *argument,
+                                  uint32_t stack_words,
+                                  uint8_t priority)
+{
+    TaskHandle_t task = NULL;
+
+    if (xTaskCreate((TaskFunction_t)entry,
+                    name,
+                    (configSTACK_DEPTH_TYPE)stack_words,
+                    argument,
+                    (UBaseType_t)priority,
+                    &task) != pdPASS)
+    {
+        task = NULL;
+    }
+
+    return (osa_task_handle_t)task;
+}
+
+/**
+ * @brief  毫秒级任务阻塞延时
+ */
+void osa_delay_ms(uint32_t delay_ms)
+{
+    vTaskDelay(pdMS_TO_TICKS(delay_ms));
+}
+
+/**
+ * @brief  获取任务栈高水位，单位 word
+ */
+uint32_t osa_task_get_stack_high_water_mark(osa_task_handle_t task)
+{
+    return (uint32_t)uxTaskGetStackHighWaterMark((TaskHandle_t)task);
+}
+```
+
+### 14.5 启用 OSAL 后的集成调整
+
+启用本节方案后，只修改 FreeRTOS 集成层和应用任务代码，不改变原有协议、菜单、显示、
+按键、LED、串口、OTA 和看门狗逻辑。
+
+`main.c` 改为：
+
+```c
+osa_scheduler_start();
+```
+
+不再直接调用 `vTaskStartScheduler()`。
+
+应用任务改为：
+
+```c
+static void app_task(void *argument)
+{
+    (void)argument;
+
+    for (;;)
+    {
+        user_app_handle();
+        osa_delay_ms(1U);
+    }
+}
+```
+
+任务创建改为：
+
+```c
+app_task_handle = osa_task_create("app_task",
+                                  app_task,
+                                  NULL,
+                                  APP_TASK_STACK_WORDS,
+                                  OSA_PRIORITY_APP);
+```
+
+其中 `OSA_PRIORITY_APP` 是后续统一优先级策略的一部分；当前只有一个应用任务时，可由
+backend 映射到 FreeRTOS 的 `tskIDLE_PRIORITY + 1U`。
+
+### 14.6 未来多任务阶段的扩展接口
+
+后续拆出串口任务、CLI 任务、显示任务或日志任务时，再增加以下接口：
+
+```c
+typedef void *osa_mutex_handle_t;
+typedef void *osa_queue_handle_t;
+
+typedef enum
+{
+    OSA_OK = 0,
+    OSA_ERROR,
+    OSA_TIMEOUT
+} osa_status_t;
+
+osa_mutex_handle_t osa_mutex_create(void);
+osa_status_t       osa_mutex_lock(osa_mutex_handle_t mutex, uint32_t timeout_ms);
+osa_status_t       osa_mutex_unlock(osa_mutex_handle_t mutex);
+
+osa_queue_handle_t osa_queue_create(uint32_t item_count, uint32_t item_size);
+osa_status_t       osa_queue_send(osa_queue_handle_t queue, const void *item, uint32_t timeout_ms);
+osa_status_t       osa_queue_receive(osa_queue_handle_t queue, void *item, uint32_t timeout_ms);
+```
+
+扩展时同样遵守以下原则：
+
+- 返回值统一为 `OSA_OK`、`OSA_ERROR`、`OSA_TIMEOUT`，不暴露 `pdPASS`、`OS_ERR_NONE` 等
+  RTOS 专属返回值。
+- 超时统一使用毫秒，backend 负责转换为 ticks。
+- 对象句柄使用不透明指针，应用层不依赖 `TaskHandle_t`、`OS_TCB` 等具体类型。
+- 优先保证“当前项目真实用到的接口”稳定，不追求一次性封装所有 RTOS 能力。
+
+### 14.7 适配其它 RTOS 时的检查项
+
+| 差异项 | 处理方式 |
+|--------|----------|
+| tick 换算 | 在 backend 内完成，应用层只使用毫秒 |
+| 栈单位 | OSAL 接口统一使用 word，backend 按目标 RTOS 转换 |
+| 优先级编号 | 不暴露原始数值，使用项目逻辑优先级并由 backend 映射 |
+| 返回值 | 统一为 `OSA_OK`、`OSA_ERROR`、`OSA_TIMEOUT` |
+| 对象类型 | 统一使用不透明句柄 |
+| FromISR 接口 | 差异较大，不放入当前最小 OSAL，后续按实际需求单独设计 |
+| 调度器启动 | backend 封装为 `osa_scheduler_start()` |
+
+该附加项确认启用后，再将 `freertos_app.c` 逐步切换为通过 `os_adapter.h` 调用 RTOS 能力。
