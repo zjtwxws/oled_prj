@@ -28,6 +28,8 @@ extern void draw_bigtext_zhaosi(void);
 #define FADE_STEPS          32              /* 淡入淡出总步数 (32 步完成一次渐变) */
 
 #define FRAME_BUF_SIZE      (SSD1306_WIDTH * SSD1306_PAGES)  /* 远程模式帧缓冲大小 = OLED 全屏字节数 (1024) */  /* 1024 */
+#define FRAME_SEG_SIZE      200U
+#define FRAME_SEG_COUNT     ((FRAME_BUF_SIZE + FRAME_SEG_SIZE - 1U) / FRAME_SEG_SIZE)
 
 /* --- 静态变量 --- */
 
@@ -53,6 +55,8 @@ static display_status_t status = {0};  /* 时间/天气数据副本 (仅存储�
 static uint8_t  frame_buf[FRAME_BUF_SIZE] = {0};  /* 远程模式帧缓冲拼装区: 接收 PC 分段帧数据，拼装完整后复制到 OLED buffer */
 static uint8_t  frame_seg_received = 0;  /* 已接收的分段数 */
 static uint8_t  frame_seg_total = 0;    /* 本次帧的总分段数 */
+static uint8_t  frame_seg_mask = 0;      /* 已接收分段位图 */
+static uint8_t  frame_rx_active = 0;     /* 是否已由 seg=0 开启新帧 */
 
 /* 远程模式串口断开提示状态 */
 static bool     disconnect_msg_shown = false;  /* 串口断开提示是否已显示 (防重复触发) */
@@ -376,6 +380,8 @@ void display_mgr_init(const char *boot_text_str)
     memset(frame_buf, 0, FRAME_BUF_SIZE);
     frame_seg_received = 0;
     frame_seg_total = 0;
+    frame_seg_mask = 0;
+    frame_rx_active = 0;
 
     /* 根据 Flash 中记录的上电显示类型渲染启动画面 */
     uint8_t ptype = sys_config_get_poweron_type();
@@ -418,6 +424,8 @@ void display_mgr_set_remote(bool remote)
         memset(frame_buf, 0, FRAME_BUF_SIZE);
         frame_seg_received = 0;
         frame_seg_total = 0;
+        frame_seg_mask = 0;
+        frame_rx_active = 0;
     }
     else
     {
@@ -477,23 +485,12 @@ uint8_t display_mgr_get_sub_mode(void)
  */
 void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, uint8_t len)
 {
-    if (!is_remote)
+    uint16_t offset;
+    uint16_t copy_len;
+
+    if (!is_remote || total == 0 || total > FRAME_SEG_COUNT)
     {
         return;
-    }
-    if (total == 0)
-    {
-        return;
-    }
-
-    uint16_t offset = (uint16_t)seg * 200;
-    uint16_t copy_len = (offset + len > FRAME_BUF_SIZE) ? (FRAME_BUF_SIZE - offset) : len;
-
-    if (seg == 0)
-    {
-        memset(frame_buf, 0, FRAME_BUF_SIZE);
-        frame_seg_received = 0;
-        frame_seg_total = total;
     }
 
     if (seg >= total)
@@ -501,7 +498,34 @@ void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, u
         return;
     }
 
+    offset = (uint16_t)seg * FRAME_SEG_SIZE;
+    if (offset >= FRAME_BUF_SIZE)
+    {
+        return;
+    }
+
+    if (seg == 0)
+    {
+        memset(frame_buf, 0, FRAME_BUF_SIZE);
+        frame_seg_received = 0;
+        frame_seg_total = total;
+        frame_seg_mask = 0;
+        frame_rx_active = 1;
+    }
+
+    if (!frame_rx_active || frame_seg_total != total)
+    {
+        return;
+    }
+
+    if ((frame_seg_mask & (1U << seg)) != 0U)
+    {
+        return;
+    }
+
+    copy_len = (offset + len > FRAME_BUF_SIZE) ? (FRAME_BUF_SIZE - offset) : len;
     memcpy(&frame_buf[offset], data, copy_len);
+    frame_seg_mask |= (1U << seg);
     frame_seg_received++;
 
     if (frame_seg_received >= frame_seg_total)
@@ -514,6 +538,8 @@ void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, u
             ssd1306_update_screen();
         }
         frame_seg_received = 0;
+        frame_seg_mask = 0;
+        frame_rx_active = 0;
     }
 }
 

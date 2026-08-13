@@ -45,6 +45,7 @@ static int  uart_recv_byte(uint8_t *ch);
 static void delay_ms(uint32_t ms);
 static void led_set(uint8_t on);
 static void led_blink(int count, uint32_t period_ms);
+static int  boot_jump_validate(uint32_t app_base);
 static void boot_jump_to_app(uint32_t app_base);
 static void enter_update_mode(void);
 static uint32_t get_slot_base(uint8_t slot);
@@ -330,22 +331,49 @@ static uint32_t get_slot_base(uint8_t slot)
     return (slot == 0) ? SLOT_A_BASE : SLOT_B_BASE;
 }
 
+static uint32_t get_slot_size(uint8_t slot)
+{
+    return (slot == 0) ? SLOT_A_SIZE : SLOT_B_SIZE;
+}
+
 /* ---- APP 跳转 ---- */
+
+static int boot_jump_validate(uint32_t app_base)
+{
+    uint32_t app_sp = *((volatile uint32_t *)app_base);
+    uint32_t app_pc = *((volatile uint32_t *)(app_base + 4));
+    uint32_t slot_end;
+
+    if (app_base != SLOT_A_BASE && app_base != SLOT_B_BASE)
+    {
+        BOOT_LOG("jump aborted: invalid slot=0x%08X", app_base);
+        return -1;
+    }
+
+    slot_end = app_base + ((app_base == SLOT_A_BASE) ? SLOT_A_SIZE : SLOT_B_SIZE);
+
+    if (app_sp < 0x20000000UL || app_sp > 0x2001C000UL || (app_sp & 3UL) != 0UL)
+    {
+        BOOT_LOG("jump aborted: invalid SP=0x%08X (slot=0x%08X)", app_sp, app_base);
+        return -1;
+    }
+
+    if ((app_pc & ~1UL) < app_base || (app_pc & ~1UL) >= slot_end)
+    {
+        BOOT_LOG("jump aborted: invalid PC=0x%08X (slot=0x%08X)", app_pc, app_base);
+        return -1;
+    }
+
+    return 0;
+}
 
 static void boot_jump_to_app(uint32_t app_base)
 {
     uint32_t app_sp = *((volatile uint32_t *)app_base);
     uint32_t app_pc = *((volatile uint32_t *)(app_base + 4));
 
-    if (app_sp < 0x20000000UL || app_sp > 0x2001C000UL)
+    if (boot_jump_validate(app_base) != 0)
     {
-        BOOT_LOG("jump aborted: invalid SP=0x%08X (slot=0x%08X)", app_sp, app_base);
-        return;
-    }
-
-    if (app_pc < 0x08000000UL || app_pc > 0x080FFFFFUL)
-    {
-        BOOT_LOG("jump aborted: invalid PC=0x%08X (slot=0x%08X)", app_pc, app_base);
         return;
     }
 
@@ -444,6 +472,13 @@ static void enter_update_mode(void)
                     break;
                 }
 
+                if (fw_size == 0 || fw_size > get_slot_size(target_slot))
+                {
+                    BOOT_LOG("CMD_OTA_START: invalid size=%u for slot=%d, rejecting", fw_size, target_slot);
+                    nak_code = NAK_PARAM_ERROR;
+                    break;
+                }
+
                 BOOT_LOG("erasing slot%c (0x%08X)...", (target_slot == 0) ? 'A' : 'B', get_slot_base(target_slot));
                 boot_oled_status("擦除中...");
                 if (boot_erase_slot(target_slot) != 0)
@@ -488,6 +523,13 @@ static void enter_update_mode(void)
                 const uint8_t *payload = data + 4;
 
                 uint32_t slot_base = get_slot_base(target_slot);
+
+                if ((offset & 3UL) != 0UL)
+                {
+                    BOOT_LOG("CMD_OTA_DATA: offset %u is not 4-byte aligned", offset);
+                    nak_code = NAK_OTA_OFFSET;
+                    break;
+                }
 
                 if (offset + plen > fw_size)
                 {
@@ -554,6 +596,14 @@ static void enter_update_mode(void)
                     BOOT_LOG("CRC32 MISMATCH, update aborted");
                     nak_code = NAK_OTA_CRC;
                     state = UPD_IDLE;
+                    break;
+                }
+
+                if (boot_jump_validate(get_slot_base(target_slot)) != 0)
+                {
+                    BOOT_LOG("OTA jump validation failed, update rejected");
+                    state = UPD_IDLE;
+                    nak_code = NAK_PARAM_ERROR;
                     break;
                 }
 
@@ -725,7 +775,8 @@ int main(void)
     /* 两槽均无效 -> 进入更新模式等待固件 */
     BOOT_LOG("IAP: no valid firmware found, entering update mode");
     led_blink(4, LED_BLINK_SLOW_MS);
-    enter_update_mode();
-
-    /* unreachable */
+    for (;;)
+    {
+        enter_update_mode();
+    }
 }

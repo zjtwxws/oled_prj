@@ -113,7 +113,18 @@ int sys_config_save(void)
 
     for (uint32_t i = 0; i < words; i++)
     {
-        HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, addr, src[i]);
+        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, addr, src[i]) != HAL_OK)
+        {
+            HAL_FLASH_Lock();
+            return -1;
+        }
+
+        if (*((volatile uint32_t *)addr) != src[i])
+        {
+            HAL_FLASH_Lock();
+            return -1;
+        }
+
         addr += 4;
     }
 

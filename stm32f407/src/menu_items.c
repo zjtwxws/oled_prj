@@ -763,7 +763,7 @@ static const menu_item_t item_main_1 =
 {
     .text = "1.工作模式",  /* "1.工作模式" */
     .type = MENU_TYPE_SUBMENU,
-    .submenu = { .items = menu_mode_items, .count = 3 },
+    .submenu = { .items = menu_mode_items, .count = 2 },
 };
 static const menu_item_t item_main_2 = 
 {
