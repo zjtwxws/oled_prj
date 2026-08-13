@@ -65,6 +65,27 @@ int boot_flash_write_word(uint32_t addr, uint32_t data)
 }
 
 /**
+ * @brief  按字写入 Flash 并读回校验
+ * @param  addr  目标地址
+ * @param  data  32位数据
+ * @return 0=成功且读回一致, 非0=失败
+ */
+int boot_flash_write_word_checked(uint32_t addr, uint32_t data)
+{
+    if (boot_flash_write_word(addr, data) != 0)
+    {
+        return -1;
+    }
+
+    if (boot_flash_read_word(addr) != data)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
+/**
  * @brief  擦除目标槽
  */
 int boot_erase_slot(uint8_t slot)

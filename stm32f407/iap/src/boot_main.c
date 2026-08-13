@@ -638,6 +638,13 @@ int main(void)
 
     led_blink(2, LED_BLINK_SLOW_MS);
 
+    /* 先加载 fw_info，确保后续通过 NOINIT/按键进入升级模式前 RAM 缓存已初始化 */
+    BOOT_LOG("loading fw_info from S10 (0x%08X)...", FW_INFO_ADDR);
+    {
+        int ret = fw_info_load();
+        BOOT_LOG("fw_info_load: %s", (ret == 0) ? "loaded OK" : "initialized (first boot)");
+    }
+
     /* SRAM NOINIT OTA upgrade request (APP writes, survives reset) */
     if (ota_req_is_update())
     {
@@ -650,13 +657,6 @@ int main(void)
     {
         BOOT_LOG("KEY1 pressed, entering update mode");
         enter_update_mode();
-    }
-
-    /* 加载固件信息 */
-    BOOT_LOG("loading fw_info from S10 (0x%08X)...", FW_INFO_ADDR);
-    {
-        int ret = fw_info_load();
-        BOOT_LOG("fw_info_load: %s", (ret == 0) ? "loaded OK" : "initialized (first boot)");
     }
 
     const fw_info_t *fi = fw_info_get();

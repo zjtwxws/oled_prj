@@ -13,8 +13,8 @@
 
 /* S10 扇区 = 128KB */
 #define FW_INFO_SECTOR_SIZE 0x00020000UL
-/* S10 扇区号 = 0x00000050U (与 HAL 的 FLASH_SECTOR_10 等值, 此处避免引入 HAL 头文件) */
-#define FW_INFO_SECTOR      ((uint32_t)0x00000050U)
+/* S10 扇区号 = FLASH_SECTOR_10 */
+#define FW_INFO_SECTOR      10U
 #define FW_INFO_MAGIC       0x4657494EUL  /* "FWIN" */
 
 #define SLOT_A_ADDR         0x08008000UL

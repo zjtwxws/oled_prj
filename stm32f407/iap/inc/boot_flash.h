@@ -41,6 +41,14 @@ int boot_erase_sectors(const uint32_t *sectors, uint8_t count);
 int boot_flash_write_word(uint32_t addr, uint32_t data);
 
 /**
+ * @brief  按字写入 Flash 并读回校验
+ * @param  addr  目标地址 (必须 4 字节对齐)
+ * @param  data  32位数据
+ * @return 0=成功且读回一致, 非0=失败
+ */
+int boot_flash_write_word_checked(uint32_t addr, uint32_t data);
+
+/**
  * @brief  擦除目标槽全部扇区
  * @param  slot  0=Slot A, 1=Slot B
  * @return 0=成功, 非0=失败

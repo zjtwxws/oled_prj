@@ -77,13 +77,20 @@ int fw_info_load(void)
     g_fw_info.crc32 = boot_crc32((const uint8_t *)&g_fw_info,
                                   sizeof(fw_info_t) - 4);
 
+    FW_DBG("fw_info_load: erasing S10 before first record...");
+    if (boot_erase_sector(FW_INFO_SECTOR) != 0)
+    {
+        FW_DBG("fw_info_load: erase S10 FAILED");
+        return 1;
+    }
+
     FW_DBG("fw_info_load: writing first record to slot 0...");
 
     uint32_t *src = (uint32_t *)&g_fw_info;
     uint32_t addr = FW_INFO_ADDR;
     for (uint32_t i = 0; i < sizeof(fw_info_t) / 4; i++)
     {
-        if (boot_flash_write_word(addr, *src) != 0)
+        if (boot_flash_write_word_checked(addr, *src) != 0)
         {
             FW_DBG("fw_info_load: write FAILED");
             return 1;
@@ -103,55 +110,30 @@ const fw_info_t* fw_info_get(void)
 
 int fw_info_save(void)
 {
-    uint32_t last_idx;
-    fw_info_scan_last(&last_idx);
-
-    uint32_t write_idx = last_idx + 1;
-    if (write_idx >= FW_INFO_SLOT_COUNT)
+    FW_DBG("fw_info_save: erasing S10...");
+    if (boot_erase_sector(FW_INFO_SECTOR) != 0)
     {
-        FW_DBG("fw_info_save: sector full, erasing and wrapping to 0");
-        if (boot_erase_sector(FW_INFO_SECTOR) != 0)
-        {
-            FW_DBG("fw_info_save: erase FAILED");
-            return -1;
-        }
-        write_idx = 0;
-    }
-
-    const fw_info_t *base = (const fw_info_t *)FW_INFO_ADDR;
-    if (base[write_idx].magic != 0xFFFFFFFF)
-    {
-        FW_DBG("fw_info_save: target index %u not empty, trying next", write_idx);
-        write_idx++;
-        if (write_idx >= FW_INFO_SLOT_COUNT)
-        {
-            FW_DBG("fw_info_save: sector full, erasing");
-            if (boot_erase_sector(FW_INFO_SECTOR) != 0)
-            {
-                FW_DBG("fw_info_save: erase FAILED");
-                return -1;
-            }
-            write_idx = 0;
-        }
+        FW_DBG("fw_info_save: erase S10 FAILED");
+        return -1;
     }
 
     g_fw_info.crc32 = boot_crc32((const uint8_t *)&g_fw_info,
                                   sizeof(fw_info_t) - 4);
 
     uint32_t *src = (uint32_t *)&g_fw_info;
-    uint32_t addr = FW_INFO_ADDR + write_idx * sizeof(fw_info_t);
+    uint32_t addr = FW_INFO_ADDR;
     for (uint32_t i = 0; i < sizeof(fw_info_t) / 4; i++)
     {
-        if (boot_flash_write_word(addr, *src) != 0)
+        if (boot_flash_write_word_checked(addr, *src) != 0)
         {
-            FW_DBG("fw_info_save: write FAILED at slot %u", write_idx);
+            FW_DBG("fw_info_save: write/verify FAILED at 0x%08X", addr);
             return -1;
         }
         addr += 4;
         src++;
     }
 
-    FW_DBG("fw_info_save: written to index %u", write_idx);
+    FW_DBG("fw_info_save: written and verified to S10 slot 0");
     return 0;
 }
 
@@ -204,6 +186,8 @@ void fw_info_set_slot_info(uint8_t slot, uint32_t size, uint32_t crc, uint32_t v
  */
 void fw_info_activate_slot(uint8_t slot, uint32_t size, uint32_t crc, uint32_t version)
 {
+    g_fw_info.magic = FW_INFO_MAGIC;
+
     if (slot == 0)
     {
         g_fw_info.slot_a_size = size;
