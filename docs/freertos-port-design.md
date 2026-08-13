@@ -78,20 +78,22 @@ main()
   ├─ MX_I2C2_Init()
   ├─ MX_USART1_UART_Init()
   ├─ MX_USART2_UART_Init()
-  ├─ MX_NVIC_Init()
   ├─ user_app_init()
   ├─ freertos_app_init()      // 创建 AppTask
   └─ vTaskStartScheduler()    // 不返回
 
 AppTask
   └─ for (;;)
-       └─ user_app_handle()
+       ├─ user_app_handle()
+       └─ vTaskDelay(pdMS_TO_TICKS(1U))
 
 USART1_IRQHandler ──► uart_drv 512B 环形缓冲 ──► AppTask 取走喂协议
 USART2_IRQHandler ──► debug_console 环形缓冲 ──► AppTask 取走做 CLI
 TIM6_DAC_IRQHandler ──► HAL_TIM_IRQHandler ──► HAL_IncTick()
 SysTick_Handler ──► xPortSysTickHandler ──► FreeRTOS tick
 ```
+
+说明：当前 `main.c` 不存在 `MX_NVIC_Init()`，移植时不要照旧图补一个当前不存在的函数；外设初始化以 CubeMX 实际生成的 `MX_*_Init()` 为准。
 
 ### 2.2 FreeRTOS 源码布局
 
@@ -212,10 +214,11 @@ configMAX_SYSCALL_INTERRUPT_PRIORITY          = 5 << 4 = 80
 
 ### 3.3 生成后检查
 
-1. 确认 `oled_cubemx/Src/stm32f4xx_hal_timebase_tim.c` 已生成。
+1. 确认 `oled_cubemx/Src/stm32f4xx_hal_timebase_tim.c` 已生成，并且已经加入 `oled_cubemx`、`oled_cubemx_slota`、`oled_cubemx_slotb` 三个 Keil target 的编译源文件分组。
 2. 确认 [stm32f4xx_it.c](/E:/BaiduNetdiskDownload/code/oled_prj/oled_cubemx/Src/stm32f4xx_it.c:184) 中不再在 `SysTick_Handler` 里调用 `HAL_IncTick()`。
 3. 确认 `oled_cubemx/Src/stm32f4xx_it.c` 中没有重复定义 `TIM6_DAC_IRQHandler`。
-4. 确认 Keil HAL 分组中已加入 `stm32f4xx_hal_tim.c`；如果 CubeMX 未自动加入，则手动加入。
+4. 确认三个 Keil target 的 HAL 分组中均已加入 `stm32f4xx_hal_tim.c`；如果 CubeMX 未自动加入，则手动加入。
+5. 确认 `HAL_TIM_MODULE_ENABLED` 已取消注释，且 `USE_RTOS` 仍为 `0U`、`TICK_INT_PRIORITY` 仍为 `15U`。
 
 ---
 
@@ -273,6 +276,7 @@ stm32f407/inc/FreeRTOSConfig.h
 | `configSUPPORT_DYNAMIC_ALLOCATION` | `1` | heap_4 / `xTaskCreate` 依赖动态分配（V11 默认即为 1，保持开启） |
 | `configUSE_MUTEXES` | `1` | 预留互斥锁能力 |
 | `configCHECK_FOR_STACK_OVERFLOW` | `2` | 调试阶段开启 |
+| `INCLUDE_uxTaskGetStackHighWaterMark` | `1` | 启用 `uxTaskGetStackHighWaterMark`，§10.3 依赖该 API |
 | `configUSE_TIMERS` | `0` | 本期不用软件定时器 |
 | `configTICK_TYPE_WIDTH_IN_BITS` | `TICK_TYPE_WIDTH_32_BITS` | 使用 32 位 tick（V11 已用此宏取代 `configUSE_16_BIT_TICKS`） |
 | `configIDLE_SHOULD_YIELD` | `1` | 常规配置 |
@@ -368,7 +372,7 @@ stm32f407/src/freertos_app.c
 #define APP_TASK_STACK_WORDS      1024U
 #define APP_TASK_PRIORITY         (tskIDLE_PRIORITY + 1U)
 
-static TaskHandle_t g_app_task_handle = NULL;
+static TaskHandle_t app_task_handle = NULL;
 
 /**
  * @brief  APP 主任务，承载原有 user_app_handle 逻辑
@@ -382,6 +386,7 @@ static void app_task(void *argument)
     for (;;)
     {
         user_app_handle();
+        vTaskDelay(pdMS_TO_TICKS(1U));
     }
 }
 
@@ -399,13 +404,15 @@ void freertos_app_init(void)
                       APP_TASK_STACK_WORDS,
                       NULL,
                       APP_TASK_PRIORITY,
-                      &g_app_task_handle);
+                      &app_task_handle);
 
     configASSERT(ret == pdPASS);
 }
 ```
 
 该文件位于 `stm32f407/src/`，必须遵守 `AGENTS.md` 中 Allman 大括号、4 空格缩进和中文 UTF-8 规范。
+
+`vTaskDelay(pdMS_TO_TICKS(1U))` 让 `app_task` 每轮至少阻塞 1 ms，使 IDLE 任务和后续低优先级任务有机会运行；当前仍保持单任务最小改造模型。
 
 ### 6.3 原 USART 路径保持现状
 
@@ -466,6 +473,8 @@ void vApplicationMallocFailedHook(void)
 ```c
 /* USER CODE BEGIN Includes */
 #include "user_app.h"
+#include "FreeRTOS.h"
+#include "task.h"
 #include "freertos_app.h"
 /* USER CODE END Includes */
 
@@ -478,17 +487,18 @@ Error_Handler();
 
 while (1)
 {
-    /* vTaskStartScheduler() 正常不返回；Error_Handler() 亦不返回，此循环仅作防御性死循环 */
+    /* 应用主循环已迁移到 app_task；vTaskStartScheduler() 正常不返回 */
 }
 ```
 
 注意：
 
 - `user_app_init()` 仍然放在 `vTaskStartScheduler()` 之前，因为其内部包含启动画面延时等 HAL 延时依赖。
+- `main.c` 直接调用 `vTaskStartScheduler()`，因此必须显式包含 `FreeRTOS.h` 和 `task.h`。
 - `user_app_handle()` 不再放在 `main()` 的 `while (1)` 中，改由 `app_task` 调用。
 - 如果 `vTaskStartScheduler()` 因堆不足等原因返回，应进入 `Error_Handler()`，而不是继续运行裸机逻辑。
 
-### 7.2 stm32f4xx_it.c
+### 7.2 stm32f4xx_it.c / stm32f4xx_it.h
 
 由于 `FreeRTOSConfig.h` 已经做了中断向量映射，[stm32f4xx_it.c](/E:/BaiduNetdiskDownload/code/oled_prj/oled_cubemx/Src/stm32f4xx_it.c:145) 中应删除或清空以下重复定义：
 
@@ -499,6 +509,8 @@ void SysTick_Handler(void)
 ```
 
 FreeRTOS 的 `port.c` 会通过宏映射提供 `SVC_Handler`、`PendSV_Handler`、`SysTick_Handler` 符号。
+
+同时删除 [stm32f4xx_it.h](/E:/BaiduNetdiskDownload/code/oled_prj/oled_cubemx/Inc/stm32f4xx_it.h:54) 中的 `SVC_Handler`、`PendSV_Handler`、`SysTick_Handler` 原型，避免 CubeMX 重新生成后把错误路径带回。
 
 保留：
 
@@ -555,15 +567,16 @@ TIM6 的 `TIM6_DAC_IRQHandler` 由 CubeMX 生成的 `stm32f4xx_hal_timebase_tim.
 ..\..\stm32f407\src\freertos_app.c
 ```
 
-如果 CubeMX 没有自动加入 TIM HAL 源文件，还需在 HAL 分组中加入：
+TIM6 HAL 时基文件和 TIM 驱动源文件必须加入三个 target。如果 CubeMX 没有自动加入，则在对应分组中手动加入：
 
 ```text
+..\Src\stm32f4xx_hal_timebase_tim.c
 ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim.c
 ```
 
 ### 8.3 三个 target 同步
 
-CubeMX 通常只维护第一个 target。`oled_cubemx_slota` 和 `oled_cubemx_slotb` 必须手动补齐相同的 include path 和 FreeRTOS 源文件分组。
+CubeMX 通常只维护第一个 target。`oled_cubemx_slota` 和 `oled_cubemx_slotb` 必须手动补齐相同的 include path、FreeRTOS 源文件分组，以及 `stm32f4xx_hal_timebase_tim.c`、`stm32f4xx_hal_tim.c`。
 
 同步时不要改动两个槽位 target 的：
 
@@ -609,7 +622,7 @@ FREERTOS_SRC = ThirdParty/FreeRTOS-Kernel/list.c \
    - `HAL_TIM_MODULE_ENABLED` 已启用。
    - `USE_RTOS` 仍为 `0U`。
    - `TICK_INT_PRIORITY` 仍为 `15U`。
-   - `stm32f4xx_hal_timebase_tim.c` 已参与编译。
+   - `stm32f4xx_hal_timebase_tim.c` 和 `stm32f4xx_hal_tim.c` 均已参与三个 target 编译。
    - `portable/GCC/ARM_CM4F/port.c` 被 AC6 成功编译。
 4. 打开 `.map` 文件，确认出现 `xTaskCreate`、`vTaskStartScheduler`、`SVC_Handler`、`PendSV_Handler`、`SysTick_Handler`、`TIM6_DAC_IRQHandler`。
 
@@ -641,7 +654,7 @@ FREERTOS_SRC = ThirdParty/FreeRTOS-Kernel/list.c \
 | AC6 与 port 层汇编不兼容 | 编译失败 | 优先使用官方 V11.3.0 的 `portable/GCC/ARM_CM4F`；官方 ARMClang 目录已说明使用 GCC port |
 | CubeMX 重新生成覆盖 `stm32f4xx_it.c` / `main.c` | 重复定义或丢失调度器启动 | 重新生成后重新核对 7.1、7.2 节的手工修改 |
 | `SVC_Handler` / `PendSV_Handler` / `SysTick_Handler` 重复定义 | 链接错误 | 只保留 port.c 通过宏映射后的符号，删除 `stm32f4xx_it.c` 中的同名函数 |
-| TIM6 时基未生效 | HAL_Delay / 启动画面异常 | 确认 `stm32f4xx_hal_timebase_tim.c` 已生成，`HAL_TIM_MODULE_ENABLED` 已启用 |
+| TIM6 时基未生效 | HAL_Delay / 启动画面异常 | 确认 `stm32f4xx_hal_timebase_tim.c` 已生成并参与三个 target 编译，同时 `stm32f4xx_hal_tim.c` 已加入且 `HAL_TIM_MODULE_ENABLED` 已启用 |
 | TIM6 与未来外设冲突 | 移植后续功能受影响 | 当前工程未使用 TIM6；若未来冲突，改用 TIM7 |
 | USART 环形缓冲溢出 | 极端突发丢字节 | 本期保持 512B 静态环形缓冲，后续拆任务再评估 RTOS 队列 |
 | 栈溢出 | 任务崩溃 | 1024 words 起步，开启 `CHECK_FOR_STACK_OVERFLOW=2` 并记录高水位 |
@@ -676,7 +689,7 @@ FREERTOS_SRC = ThirdParty/FreeRTOS-Kernel/list.c \
 2. 按第五节配置关键宏，并加入中断向量映射。
 3. 创建 `stm32f407/inc/freertos_app.h`。
 4. 创建 `stm32f407/src/freertos_app.c`。
-5. 按第七节修改 `main.c` 和 `stm32f4xx_it.c`。
+5. 按第七节修改 `main.c`、`stm32f4xx_it.c` 和 `stm32f4xx_it.h`。
 
 ### 12.5 配置 Keil 三个 target
 
