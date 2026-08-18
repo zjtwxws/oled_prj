@@ -26,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include "user_app.h"
 #include "freertos_app.h"
+#include "sys_config.h"
 /* USER CODE END Includes */
 
 /* USER CODE END Includes */
@@ -88,7 +89,7 @@ int main(void)
   /* USER CODE BEGIN SysInit */
 
   /* 设置中断向量表偏移 (A/B 槽位，由 APP_SLOT_B 宏控制) */
-  SCB->VTOR = APP_VTOR_ADDR;
+  sys_config_set_vector_table(APP_VTOR_ADDR);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */

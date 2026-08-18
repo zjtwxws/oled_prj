@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Tue Aug 18 19:00:49 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Tue Aug 18 19:12:34 2026
 <BR><P>
 <H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -190,7 +190,7 @@ Global Symbols
 <P><STRONG><a name="[65]"></a>__main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry.o(.ARM.Collect$$$$00000000))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(.text)
 </UL>
-<P><STRONG><a name="[16f]"></a>_main_stk</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry2.o(.ARM.Collect$$$$00000001))
+<P><STRONG><a name="[170]"></a>_main_stk</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry2.o(.ARM.Collect$$$$00000001))
 
 <P><STRONG><a name="[9c]"></a>_main_scatterload</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry5.o(.ARM.Collect$$$$00000004))
 <BR><BR>[Calls]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
@@ -200,15 +200,15 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
 </UL>
 
-<P><STRONG><a name="[170]"></a>_main_clock</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry7b.o(.ARM.Collect$$$$00000008))
+<P><STRONG><a name="[171]"></a>_main_clock</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry7b.o(.ARM.Collect$$$$00000008))
 
-<P><STRONG><a name="[171]"></a>_main_cpp_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry8b.o(.ARM.Collect$$$$0000000A))
+<P><STRONG><a name="[172]"></a>_main_cpp_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry8b.o(.ARM.Collect$$$$0000000A))
 
-<P><STRONG><a name="[172]"></a>_main_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry9a.o(.ARM.Collect$$$$0000000B))
+<P><STRONG><a name="[173]"></a>_main_init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry9a.o(.ARM.Collect$$$$0000000B))
 
-<P><STRONG><a name="[173]"></a>__rt_final_cpp</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry10a.o(.ARM.Collect$$$$0000000D))
+<P><STRONG><a name="[174]"></a>__rt_final_cpp</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry10a.o(.ARM.Collect$$$$0000000D))
 
-<P><STRONG><a name="[174]"></a>__rt_final_exit</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry11a.o(.ARM.Collect$$$$0000000F))
+<P><STRONG><a name="[175]"></a>__rt_final_exit</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, entry11a.o(.ARM.Collect$$$$0000000F))
 
 <P><STRONG><a name="[8]"></a>Reset_Handler</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, startup_stm32f407xx.o(.text))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
@@ -454,16 +454,16 @@ Global Symbols
 <P><STRONG><a name="[9e]"></a>__aeabi_uldivmod</STRONG> (Thumb, 98 bytes, Stack size 40 bytes, uldiv.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = __aeabi_uldivmod
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
-<LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsr
+<BR>[Calls]<UL><LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsr
+<LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCC_GetSysClockFreq
 <LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_SetConfig
-<LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
-<LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
+<LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
-<P><STRONG><a name="[175]"></a>___aeabi_memcpy8$move</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text), UNUSED)
+<P><STRONG><a name="[176]"></a>___aeabi_memcpy8$move</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text), UNUSED)
 
 <P><STRONG><a name="[113]"></a>__aeabi_memcpy</STRONG> (Thumb, 64 bytes, Stack size 8 bytes, memmovea.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __aeabi_memcpy
@@ -473,16 +473,16 @@ Global Symbols
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
 <LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_up
 <LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_down
-<LI><a href="#[13a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<LI><a href="#[13b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tab_key_func
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_render_logo
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[148]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text))
+<P><STRONG><a name="[149]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __aeabi_memcpy4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
+<BR>[Called By]<UL><LI><a href="#[148]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
 </UL>
 
 <P><STRONG><a name="[125]"></a>__aeabi_memmove</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text))
@@ -493,21 +493,21 @@ Global Symbols
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tab_key_func
 </UL>
 
-<P><STRONG><a name="[176]"></a>__aeabi_memmove4</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text), UNUSED)
+<P><STRONG><a name="[177]"></a>__aeabi_memmove4</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text), UNUSED)
 
-<P><STRONG><a name="[177]"></a>__aeabi_memmove8</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text), UNUSED)
+<P><STRONG><a name="[178]"></a>__aeabi_memmove8</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, memmovea.o(.text), UNUSED)
 
 <P><STRONG><a name="[a2]"></a>__aeabi_memset</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, memseta.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_memset$wrapper
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 </UL>
 
-<P><STRONG><a name="[165]"></a>__aeabi_memset4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text))
+<P><STRONG><a name="[166]"></a>__aeabi_memset4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
-<LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
+<LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
 </UL>
 
-<P><STRONG><a name="[178]"></a>__aeabi_memset8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
+<P><STRONG><a name="[179]"></a>__aeabi_memset8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 
 <P><STRONG><a name="[a1]"></a>__aeabi_memclr</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, memseta.o(.text))
 <BR><BR>[Calls]<UL><LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
@@ -519,21 +519,21 @@ Global Symbols
 <LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;effect_scroll_down
 <LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
-<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
-<LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
-<LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
+<LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
+<LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
 </UL>
 
 <P><STRONG><a name="[110]"></a>__aeabi_memclr4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_remote
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_rx_frame_seg
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
-<LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
-<LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
-<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[148]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
+<LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
+<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
 </UL>
 
-<P><STRONG><a name="[179]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
+<P><STRONG><a name="[17a]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memseta.o(.text), UNUSED)
 
 <P><STRONG><a name="[a3]"></a>_memset$wrapper</STRONG> (Thumb, 18 bytes, Stack size 8 bytes, memseta.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
@@ -545,7 +545,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_text
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_boot_text
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
-<LI><a href="#[14d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<LI><a href="#[14e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enter_key_func
 </UL>
 
@@ -569,10 +569,10 @@ Global Symbols
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;down_key_func
 </UL>
 
-<P><STRONG><a name="[14e]"></a>strncmp</STRONG> (Thumb, 30 bytes, Stack size 12 bytes, strncmp.o(.text))
+<P><STRONG><a name="[14f]"></a>strncmp</STRONG> (Thumb, 30 bytes, Stack size 12 bytes, strncmp.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = strncmp
 </UL>
-<BR>[Called By]<UL><LI><a href="#[14d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<BR>[Called By]<UL><LI><a href="#[14e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tab_key_func
 </UL>
 
@@ -595,16 +595,16 @@ Global Symbols
 <P><STRONG><a name="[a8]"></a>atoi</STRONG> (Thumb, 26 bytes, Stack size 16 bytes, atoi.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = atoi &rArr; strtol &rArr; _strtoul
 </UL>
-<BR>[Calls]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtol
-<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
+<BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
+<LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtol
 </UL>
 <BR>[Called By]<UL><LI><a href="#[3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_led
 </UL>
 
-<P><STRONG><a name="[17a]"></a>__aeabi_uidiv</STRONG> (Thumb, 0 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
+<P><STRONG><a name="[17b]"></a>__aeabi_uidiv</STRONG> (Thumb, 0 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
 
-<P><STRONG><a name="[16e]"></a>__aeabi_uidivmod</STRONG> (Thumb, 44 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
-<BR><BR>[Called By]<UL><LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
+<P><STRONG><a name="[16f]"></a>__aeabi_uidivmod</STRONG> (Thumb, 44 bytes, Stack size 12 bytes, uidiv.o(.text), UNUSED)
+<BR><BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
 <P><STRONG><a name="[a0]"></a>__aeabi_llsl</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, llshl.o(.text))
@@ -614,7 +614,7 @@ Global Symbols
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
 
-<P><STRONG><a name="[17b]"></a>_ll_shift_l</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llshl.o(.text), UNUSED)
+<P><STRONG><a name="[17c]"></a>_ll_shift_l</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llshl.o(.text), UNUSED)
 
 <P><STRONG><a name="[9f]"></a>__aeabi_llsr</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, llushr.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
@@ -622,7 +622,7 @@ Global Symbols
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
 
-<P><STRONG><a name="[17c]"></a>_ll_ushift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llushr.o(.text), UNUSED)
+<P><STRONG><a name="[17d]"></a>_ll_ushift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llushr.o(.text), UNUSED)
 
 <P><STRONG><a name="[a7]"></a>_chval</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, _chval.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_scanf_int
@@ -646,14 +646,14 @@ Global Symbols
 <P><STRONG><a name="[aa]"></a>strtol</STRONG> (Thumb, 112 bytes, Stack size 32 bytes, strtol.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = strtol &rArr; _strtoul
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_strtoul
+<BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
+<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_strtoul
 <LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_ctype_table
-<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
 </UL>
 <BR>[Called By]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;atoi
 </UL>
 
-<P><STRONG><a name="[17d]"></a>__I$use$fp</STRONG> (Thumb, 0 bytes, Stack size 48 bytes, iusefp.o(.text), UNUSED)
+<P><STRONG><a name="[17e]"></a>__I$use$fp</STRONG> (Thumb, 0 bytes, Stack size 48 bytes, iusefp.o(.text), UNUSED)
 
 <P><STRONG><a name="[ae]"></a>__aeabi_dadd</STRONG> (Thumb, 322 bytes, Stack size 48 bytes, dadd.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
@@ -661,7 +661,7 @@ Global Symbols
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_round
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
-<BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<BR>[Called By]<UL><LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
 </UL>
@@ -677,24 +677,24 @@ Global Symbols
 <P><STRONG><a name="[b4]"></a>__aeabi_dmul</STRONG> (Thumb, 228 bytes, Stack size 48 bytes, dmul.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_epilogue
 </UL>
-<BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<BR>[Called By]<UL><LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
 <P><STRONG><a name="[b5]"></a>__aeabi_ddiv</STRONG> (Thumb, 222 bytes, Stack size 32 bytes, ddiv.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_round
 </UL>
-<BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<BR>[Called By]<UL><LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
 <P><STRONG><a name="[b6]"></a>__aeabi_d2ulz</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, dfixul.o(.text), UNUSED)
-<BR><BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
-<LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsr
+<BR><BR>[Calls]<UL><LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsr
+<LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
 </UL>
-<BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<BR>[Called By]<UL><LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
-<P><STRONG><a name="[16b]"></a>__aeabi_cdrcmple</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, cdrcmple.o(.text), UNUSED)
-<BR><BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<P><STRONG><a name="[16c]"></a>__aeabi_cdrcmple</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, cdrcmple.o(.text), UNUSED)
+<BR><BR>[Called By]<UL><LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 </UL>
 
 <P><STRONG><a name="[9d]"></a>__scatterload</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, init.o(.text))
@@ -703,13 +703,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_main_scatterload
 </UL>
 
-<P><STRONG><a name="[17e]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
+<P><STRONG><a name="[17f]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
 
 <P><STRONG><a name="[af]"></a>__aeabi_lasr</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, llsshr.o(.text), UNUSED)
 <BR><BR>[Called By]<UL><LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 </UL>
 
-<P><STRONG><a name="[17f]"></a>_ll_sshift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llsshr.o(.text), UNUSED)
+<P><STRONG><a name="[180]"></a>_ll_sshift_r</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, llsshr.o(.text), UNUSED)
 
 <P><STRONG><a name="[ac]"></a>__rt_ctype_table</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, ctype_o.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isspace
@@ -734,8 +734,8 @@ Global Symbols
 <P><STRONG><a name="[ad]"></a>_strtoul</STRONG> (Thumb, 158 bytes, Stack size 40 bytes, _strtoul.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = _strtoul
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_chval
-<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
+<BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_errno_addr
+<LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_chval
 </UL>
 <BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtol
 </UL>
@@ -747,17 +747,17 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[b0]"></a>_double_epilogue</STRONG> (Thumb, 156 bytes, Stack size 32 bytes, depilogue.o(.text), UNUSED)
-<BR><BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
+<BR><BR>[Calls]<UL><LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsr
+<LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsl
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_double_round
-<LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_llsr
 </UL>
 <BR>[Called By]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 </UL>
 
-<P><STRONG><a name="[180]"></a>__decompress</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
+<P><STRONG><a name="[181]"></a>__decompress</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
 
-<P><STRONG><a name="[181]"></a>__decompress1</STRONG> (Thumb, 86 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
+<P><STRONG><a name="[182]"></a>__decompress1</STRONG> (Thumb, 86 bytes, Stack size unknown bytes, __dczerorl2.o(.text), UNUSED)
 
 <P><STRONG><a name="[c]"></a>BusFault_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_it.o(.text.BusFault_Handler))
 <BR><BR>[Calls]<UL><LI><a href="#[c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BusFault_Handler
@@ -801,8 +801,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[14f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_delay_ms
-<LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
+<BR>[Called By]<UL><LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_delay_ms
+<LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
 </UL>
 
 <P><STRONG><a name="[bc]"></a>HAL_FLASHEx_Erase</STRONG> (Thumb, 366 bytes, Stack size 32 bytes, stm32f4xx_hal_flash_ex.o(.text.HAL_FLASHEx_Erase))
@@ -810,11 +810,11 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_WaitForLastOperation
 </UL>
-<BR>[Called By]<UL><LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
+<BR>[Called By]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
 </UL>
 
-<P><STRONG><a name="[14c]"></a>HAL_FLASH_Lock</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, stm32f4xx_hal_flash.o(.text.HAL_FLASH_Lock))
-<BR><BR>[Called By]<UL><LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
+<P><STRONG><a name="[14d]"></a>HAL_FLASH_Lock</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, stm32f4xx_hal_flash.o(.text.HAL_FLASH_Lock))
+<BR><BR>[Called By]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
 </UL>
 
 <P><STRONG><a name="[bd]"></a>HAL_FLASH_Program</STRONG> (Thumb, 268 bytes, Stack size 32 bytes, stm32f4xx_hal_flash.o(.text.HAL_FLASH_Program))
@@ -822,11 +822,11 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FLASH_WaitForLastOperation
 </UL>
-<BR>[Called By]<UL><LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
+<BR>[Called By]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
 </UL>
 
-<P><STRONG><a name="[14b]"></a>HAL_FLASH_Unlock</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, stm32f4xx_hal_flash.o(.text.HAL_FLASH_Unlock))
-<BR><BR>[Called By]<UL><LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
+<P><STRONG><a name="[14c]"></a>HAL_FLASH_Unlock</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, stm32f4xx_hal_flash.o(.text.HAL_FLASH_Unlock))
+<BR><BR>[Called By]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
 </UL>
 
 <P><STRONG><a name="[c3]"></a>HAL_GPIO_Init</STRONG> (Thumb, 444 bytes, Stack size 44 bytes, stm32f4xx_hal_gpio.o(.text.HAL_GPIO_Init))
@@ -859,7 +859,7 @@ Global Symbols
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
 <LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_ms
-<LI><a href="#[13b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_feed_byte
+<LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_feed_byte
 <LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
 </UL>
 
@@ -1093,7 +1093,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_console_rx_callback
 <LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_init
-<LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_init
+<LI><a href="#[151]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_init
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 
@@ -1112,10 +1112,10 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Called By]<UL><LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_putc
+<BR>[Called By]<UL><LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_putc
 <LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
 <LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_console_init
-<LI><a href="#[151]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_send
+<LI><a href="#[152]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_send
 </UL>
 
 <P><STRONG><a name="[f4]"></a>HAL_UART_TxCpltCallback</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_hal_uart.o(.text.HAL_UART_TxCpltCallback))
@@ -1262,7 +1262,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_init
 <LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[104]"></a>cli_poll</STRONG> (Thumb, 70 bytes, Stack size 16 bytes, debug_console.o(.text.cli_poll))
@@ -1278,7 +1278,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[e9]"></a>debug_console_rx_callback</STRONG> (Thumb, 120 bytes, Stack size 8 bytes, debug_console.o(.text.debug_console_rx_callback))
@@ -1295,16 +1295,16 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 <LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
 <LI><a href="#[7d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_c
 <LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_b
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cb_demo_a
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
-<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
-<P><STRONG><a name="[159]"></a>display_mgr_get_status</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_get_status))
+<P><STRONG><a name="[15a]"></a>display_mgr_get_status</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_get_status))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
@@ -1314,7 +1314,7 @@ Global Symbols
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[15b]"></a>display_mgr_hide_disconnect</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_hide_disconnect))
+<P><STRONG><a name="[15c]"></a>display_mgr_hide_disconnect</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_hide_disconnect))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
@@ -1330,13 +1330,13 @@ Global Symbols
 <LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 <LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[10a]"></a>display_mgr_is_remote</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_is_remote))
 <BR><BR>[Called By]<UL><LI><a href="#[6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_mode
 <LI><a href="#[2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_info
-<LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
+<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
@@ -1356,7 +1356,7 @@ Global Symbols
 <LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<BR>[Called By]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
 <P><STRONG><a name="[119]"></a>display_mgr_rx_frame_seg</STRONG> (Thumb, 308 bytes, Stack size 32 bytes, display_mgr.o(.text.display_mgr_rx_frame_seg))
@@ -1379,9 +1379,9 @@ Global Symbols
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[133]"></a>display_mgr_set_menu_suppress</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_set_menu_suppress))
-<BR><BR>[Called By]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
-<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<P><STRONG><a name="[134]"></a>display_mgr_set_menu_suppress</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_set_menu_suppress))
+<BR><BR>[Called By]<UL><LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
 <P><STRONG><a name="[ff]"></a>display_mgr_set_mode</STRONG> (Thumb, 116 bytes, Stack size 8 bytes, display_mgr.o(.text.display_mgr_set_mode))
@@ -1460,7 +1460,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[15a]"></a>display_mgr_update_status</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_update_status))
+<P><STRONG><a name="[15b]"></a>display_mgr_update_status</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, display_mgr.o(.text.display_mgr_update_status))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
@@ -1477,7 +1477,7 @@ Global Symbols
 <P><STRONG><a name="[124]"></a>font_get_ascii</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, font.o(.text.font_get_ascii))
 <BR><BR>[Called By]<UL><LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
-<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
 <P><STRONG><a name="[11e]"></a>font_get_chinese_utf8</STRONG> (Thumb, 540 bytes, Stack size 24 bytes, font.o(.text.font_get_chinese_utf8))
@@ -1486,7 +1486,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[11d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_show_disconnect
 <LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
-<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
 <P><STRONG><a name="[126]"></a>freertos_app_init</STRONG> (Thumb, 80 bytes, Stack size 16 bytes, freertos_app.o(.text.freertos_app_init))
@@ -1505,8 +1505,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[15c]"></a>i2c_drv_init</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, i2c_drv.o(.text.i2c_drv_init))
-<BR><BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<P><STRONG><a name="[15d]"></a>i2c_drv_init</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, i2c_drv.o(.text.i2c_drv_init))
+<BR><BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[12a]"></a>i2c_drv_write_reg</STRONG> (Thumb, 72 bytes, Stack size 24 bytes, i2c_drv.o(.text.i2c_drv_write_reg))
@@ -1517,11 +1517,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
 <LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_set_contrast
 <LI><a href="#[11b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_scroll_stop
-<LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
+<LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
 </UL>
 
-<P><STRONG><a name="[15d]"></a>key_drv_init</STRONG> (Thumb, 118 bytes, Stack size 0 bytes, key_drv.o(.text.key_drv_init))
-<BR><BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<P><STRONG><a name="[15e]"></a>key_drv_init</STRONG> (Thumb, 118 bytes, Stack size 0 bytes, key_drv.o(.text.key_drv_init))
+<BR><BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[12b]"></a>key_drv_scan</STRONG> (Thumb, 500 bytes, Stack size 40 bytes, key_drv.o(.text.key_drv_scan))
@@ -1534,14 +1534,14 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[158]"></a>led_mgr_get_state</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, led_mgr.o(.text.led_mgr_get_state))
+<P><STRONG><a name="[159]"></a>led_mgr_get_state</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, led_mgr.o(.text.led_mgr_get_state))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
 <P><STRONG><a name="[12d]"></a>led_mgr_init</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, led_mgr.o(.text.led_mgr_init))
 <BR><BR>[Calls]<UL><LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[100]"></a>led_mgr_set_state</STRONG> (Thumb, 72 bytes, Stack size 0 bytes, led_mgr.o(.text.led_mgr_set_state))
@@ -1560,10 +1560,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[63]"></a>main</STRONG> (Thumb, 58 bytes, Stack size 0 bytes, main.o(.text.main))
+<P><STRONG><a name="[63]"></a>main</STRONG> (Thumb, 54 bytes, Stack size 0 bytes, main.o(.text.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 344<LI>Call Chain = main &rArr; user_app_init &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Calls]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_vector_table
 <LI><a href="#[128]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;freertos_task_start
 <LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;freertos_app_init
 <LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
@@ -1575,51 +1576,51 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> entry9a.o(.ARM.Collect$$$$0000000B)
 </UL>
-<P><STRONG><a name="[132]"></a>menu_items_get_root</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, menu_items.o(.text.menu_items_get_root))
-<BR><BR>[Called By]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
-<LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
-<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<P><STRONG><a name="[133]"></a>menu_items_get_root</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, menu_items.o(.text.menu_items_get_root))
+<BR><BR>[Called By]<UL><LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
-<P><STRONG><a name="[130]"></a>menu_items_init_state</STRONG> (Thumb, 24 bytes, Stack size 8 bytes, menu_items.o(.text.menu_items_init_state))
+<P><STRONG><a name="[131]"></a>menu_items_init_state</STRONG> (Thumb, 24 bytes, Stack size 8 bytes, menu_items.o(.text.menu_items_init_state))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = menu_items_init_state
 </UL>
 <BR>[Calls]<UL><LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_poweron_type
 <LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
 </UL>
-<BR>[Called By]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
-<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<BR>[Called By]<UL><LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 </UL>
 
-<P><STRONG><a name="[131]"></a>menu_mgr_activate</STRONG> (Thumb, 82 bytes, Stack size 8 bytes, menu_mgr.o(.text.menu_mgr_activate))
+<P><STRONG><a name="[132]"></a>menu_mgr_activate</STRONG> (Thumb, 82 bytes, Stack size 8 bytes, menu_mgr.o(.text.menu_mgr_activate))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = menu_mgr_activate &rArr; menu_items_init_state
 </UL>
-<BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_menu_suppress
-<LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
-<LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
+<BR>[Calls]<UL><LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_menu_suppress
+<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
+<LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[134]"></a>menu_mgr_handle_key</STRONG> (Thumb, 1164 bytes, Stack size 24 bytes, menu_mgr.o(.text.menu_mgr_handle_key))
+<P><STRONG><a name="[135]"></a>menu_mgr_handle_key</STRONG> (Thumb, 1164 bytes, Stack size 24 bytes, menu_mgr.o(.text.menu_mgr_handle_key))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = menu_mgr_handle_key &rArr; display_mgr_redraw &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite
 </UL>
 <BR>[Calls]<UL><LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_redraw
-<LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
+<LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[135]"></a>menu_mgr_init</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, menu_mgr.o(.text.menu_mgr_init))
+<P><STRONG><a name="[136]"></a>menu_mgr_init</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, menu_mgr.o(.text.menu_mgr_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = menu_mgr_init &rArr; menu_items_init_state
 </UL>
-<BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_menu_suppress
-<LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
-<LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
+<BR>[Calls]<UL><LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_menu_suppress
+<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
+<LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_get_root
 <LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[108]"></a>menu_mgr_is_active</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, menu_mgr.o(.text.menu_mgr_is_active))
@@ -1627,7 +1628,7 @@ Global Symbols
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[136]"></a>menu_mgr_tick</STRONG> (Thumb, 1936 bytes, Stack size 40 bytes, menu_mgr.o(.text.menu_mgr_tick))
+<P><STRONG><a name="[137]"></a>menu_mgr_tick</STRONG> (Thumb, 1936 bytes, Stack size 40 bytes, menu_mgr.o(.text.menu_mgr_tick))
 <BR><BR>[Stack]<UL><LI>Max Depth = 376<LI>Call Chain = menu_mgr_tick &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_update_screen
@@ -1646,7 +1647,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
 </UL>
 
-<P><STRONG><a name="[13a]"></a>proto_build_frame</STRONG> (Thumb, 212 bytes, Stack size 24 bytes, protocol.o(.text.proto_build_frame))
+<P><STRONG><a name="[13b]"></a>proto_build_frame</STRONG> (Thumb, 212 bytes, Stack size 24 bytes, protocol.o(.text.proto_build_frame))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = proto_build_frame &rArr; __aeabi_memcpy
 </UL>
 <BR>[Calls]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
@@ -1654,7 +1655,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[13b]"></a>proto_feed_byte</STRONG> (Thumb, 344 bytes, Stack size 8 bytes, protocol.o(.text.proto_feed_byte))
+<P><STRONG><a name="[13c]"></a>proto_feed_byte</STRONG> (Thumb, 344 bytes, Stack size 8 bytes, protocol.o(.text.proto_feed_byte))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = proto_feed_byte
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
@@ -1662,34 +1663,34 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[157]"></a>proto_get_frame</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, protocol.o(.text.proto_get_frame))
+<P><STRONG><a name="[158]"></a>proto_get_frame</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, protocol.o(.text.proto_get_frame))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[152]"></a>proto_get_last_byte_tick</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, protocol.o(.text.proto_get_last_byte_tick))
+<P><STRONG><a name="[153]"></a>proto_get_last_byte_tick</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, protocol.o(.text.proto_get_last_byte_tick))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[155]"></a>proto_get_tx_buf</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, protocol.o(.text.proto_get_tx_buf))
+<P><STRONG><a name="[156]"></a>proto_get_tx_buf</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, protocol.o(.text.proto_get_tx_buf))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[153]"></a>proto_reset_rx</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, protocol.o(.text.proto_reset_rx))
+<P><STRONG><a name="[154]"></a>proto_reset_rx</STRONG> (Thumb, 14 bytes, Stack size 0 bytes, protocol.o(.text.proto_reset_rx))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[143]"></a>pvPortMalloc</STRONG> (Thumb, 556 bytes, Stack size 24 bytes, heap_4.o(.text.pvPortMalloc))
+<P><STRONG><a name="[144]"></a>pvPortMalloc</STRONG> (Thumb, 556 bytes, Stack size 24 bytes, heap_4.o(.text.pvPortMalloc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 100<LI>Call Chain = pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
-<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskSuspendAll
+<BR>[Calls]<UL><LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
+<LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskSuspendAll
 </UL>
 <BR>[Called By]<UL><LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
 </UL>
 
-<P><STRONG><a name="[167]"></a>pxPortInitialiseStack</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, port_1.o(.text.pxPortInitialiseStack))
+<P><STRONG><a name="[168]"></a>pxPortInitialiseStack</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, port_1.o(.text.pxPortInitialiseStack))
 <BR><BR>[Called By]<UL><LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
-<LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
+<LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
 </UL>
 
 <P><STRONG><a name="[105]"></a>shell</STRONG> (Thumb, 260 bytes, Stack size 8 bytes, nr_micro_shell_core.o(.text.shell))
@@ -1709,7 +1710,7 @@ Global Symbols
 <P><STRONG><a name="[fa]"></a>shell_printf</STRONG> (Thumb, 72 bytes, Stack size 112 bytes, nr_micro_shell_core.o(.text.shell_printf))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_putc
+<BR>[Calls]<UL><LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_putc
 <LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_init
@@ -1732,7 +1733,7 @@ Global Symbols
 <LI><a href="#[1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_clear
 </UL>
 
-<P><STRONG><a name="[137]"></a>shell_putc</STRONG> (Thumb, 40 bytes, Stack size 16 bytes, debug_console.o(.text.shell_putc))
+<P><STRONG><a name="[138]"></a>shell_putc</STRONG> (Thumb, 40 bytes, Stack size 16 bytes, debug_console.o(.text.shell_putc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
@@ -1763,10 +1764,10 @@ Global Symbols
 <LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text_fullscreen
 <LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_render_logo
-<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
-<P><STRONG><a name="[146]"></a>ssd1306_init</STRONG> (Thumb, 100 bytes, Stack size 24 bytes, ssd1306.o(.text.ssd1306_init))
+<P><STRONG><a name="[147]"></a>ssd1306_init</STRONG> (Thumb, 100 bytes, Stack size 24 bytes, ssd1306.o(.text.ssd1306_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = ssd1306_init &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
@@ -1774,7 +1775,7 @@ Global Symbols
 <LI><a href="#[12a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_write_reg
 <LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[11b]"></a>ssd1306_scroll_stop</STRONG> (Thumb, 28 bytes, Stack size 16 bytes, ssd1306.o(.text.ssd1306_scroll_stop))
@@ -1808,36 +1809,36 @@ Global Symbols
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_rx_frame_seg
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_redraw
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
-<LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
+<LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_render_logo
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_render_bigtext
-<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
-<LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
 </UL>
 
-<P><STRONG><a name="[139]"></a>sys_config_get_boot_text</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, sys_config.o(.text.sys_config_get_boot_text))
-<BR><BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<P><STRONG><a name="[13a]"></a>sys_config_get_boot_text</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, sys_config.o(.text.sys_config_get_boot_text))
+<BR><BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 <LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_render_welcome
 <LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_confirm_welcome
 </UL>
 
 <P><STRONG><a name="[111]"></a>sys_config_get_poweron_type</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, sys_config.o(.text.sys_config_get_poweron_type))
 <BR><BR>[Called By]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
-<LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
+<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_items_init_state
 </UL>
 
-<P><STRONG><a name="[147]"></a>sys_config_init</STRONG> (Thumb, 580 bytes, Stack size 16 bytes, sys_config.o(.text.sys_config_init))
+<P><STRONG><a name="[148]"></a>sys_config_init</STRONG> (Thumb, 580 bytes, Stack size 16 bytes, sys_config.o(.text.sys_config_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = sys_config_init &rArr; sys_config_save &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
 </UL>
-<BR>[Calls]<UL><LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
+<BR>[Calls]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
 <LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
-<LI><a href="#[148]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+<LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
 <P><STRONG><a name="[101]"></a>sys_config_reset</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, sys_config.o(.text.sys_config_reset))
-<BR><BR>[Calls]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__NVIC_SystemReset
+<BR><BR>[Calls]<UL><LI><a href="#[14b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__NVIC_SystemReset
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_update
 <LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_reboot
@@ -1846,45 +1847,49 @@ Global Symbols
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[149]"></a>sys_config_save</STRONG> (Thumb, 108 bytes, Stack size 40 bytes, sys_config.o(.text.sys_config_save))
+<P><STRONG><a name="[14a]"></a>sys_config_save</STRONG> (Thumb, 108 bytes, Stack size 40 bytes, sys_config.o(.text.sys_config_save))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = sys_config_save &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASHEx_Erase
-<LI><a href="#[14b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Unlock
+<LI><a href="#[14c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Unlock
 <LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Program
-<LI><a href="#[14c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Lock
+<LI><a href="#[14d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Lock
 </UL>
-<BR>[Called By]<UL><LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
-<LI><a href="#[14d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
-<LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
+<BR>[Called By]<UL><LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
+<LI><a href="#[14e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<LI><a href="#[148]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
 </UL>
 
-<P><STRONG><a name="[14d]"></a>sys_config_set_boot_text</STRONG> (Thumb, 300 bytes, Stack size 24 bytes, sys_config.o(.text.sys_config_set_boot_text))
+<P><STRONG><a name="[14e]"></a>sys_config_set_boot_text</STRONG> (Thumb, 300 bytes, Stack size 24 bytes, sys_config.o(.text.sys_config_set_boot_text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = sys_config_set_boot_text &rArr; sys_config_save &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
 </UL>
-<BR>[Calls]<UL><LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
-<LI><a href="#[14e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncmp
+<BR>[Calls]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
+<LI><a href="#[14f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncmp
 <LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[138]"></a>sys_config_set_poweron_type</STRONG> (Thumb, 306 bytes, Stack size 8 bytes, sys_config.o(.text.sys_config_set_poweron_type))
+<P><STRONG><a name="[139]"></a>sys_config_set_poweron_type</STRONG> (Thumb, 306 bytes, Stack size 8 bytes, sys_config.o(.text.sys_config_set_poweron_type))
 <BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = sys_config_set_poweron_type &rArr; sys_config_save &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
 </UL>
-<BR>[Calls]<UL><LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
+<BR>[Calls]<UL><LI><a href="#[14a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_save
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_confirm_welcome
 <LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_confirm_logo
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;preview_confirm_bigtext
 </UL>
 
-<P><STRONG><a name="[14f]"></a>sys_tick_delay_ms</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, sys_tick.o(.text.sys_tick_delay_ms))
+<P><STRONG><a name="[12f]"></a>sys_config_set_vector_table</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, sys_config.o(.text.sys_config_set_vector_table))
+<BR><BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+</UL>
+
+<P><STRONG><a name="[150]"></a>sys_tick_delay_ms</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, sys_tick.o(.text.sys_tick_delay_ms))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = sys_tick_delay_ms &rArr; HAL_Delay
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
@@ -1895,23 +1900,23 @@ Global Symbols
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[154]"></a>uart_drv_available</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, uart_drv.o(.text.uart_drv_available))
+<P><STRONG><a name="[155]"></a>uart_drv_available</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, uart_drv.o(.text.uart_drv_available))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[150]"></a>uart_drv_init</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, uart_drv.o(.text.uart_drv_init))
+<P><STRONG><a name="[151]"></a>uart_drv_init</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, uart_drv.o(.text.uart_drv_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = uart_drv_init &rArr; HAL_UART_Receive_IT
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 </UL>
-<BR>[Called By]<UL><LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[130]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
 </UL>
 
-<P><STRONG><a name="[156]"></a>uart_drv_read_byte</STRONG> (Thumb, 56 bytes, Stack size 0 bytes, uart_drv.o(.text.uart_drv_read_byte))
+<P><STRONG><a name="[157]"></a>uart_drv_read_byte</STRONG> (Thumb, 56 bytes, Stack size 0 bytes, uart_drv.o(.text.uart_drv_read_byte))
 <BR><BR>[Called By]<UL><LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_handle
 </UL>
 
-<P><STRONG><a name="[151]"></a>uart_drv_send</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, uart_drv.o(.text.uart_drv_send))
+<P><STRONG><a name="[152]"></a>uart_drv_send</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, uart_drv.o(.text.uart_drv_send))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = uart_drv_send &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
@@ -1922,7 +1927,7 @@ Global Symbols
 <P><STRONG><a name="[f8]"></a>user_app_handle</STRONG> (Thumb, 1720 bytes, Stack size 312 bytes, user_app.o(.text.user_app_handle))
 <BR><BR>[Stack]<UL><LI>Max Depth = 688<LI>Call Chain = user_app_handle &rArr; key_drv_scan &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[15a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_update_status
+<BR>[Calls]<UL><LI><a href="#[15b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_update_status
 <LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_tick
 <LI><a href="#[11d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_show_disconnect
 <LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_text
@@ -1933,115 +1938,115 @@ Global Symbols
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_rx_frame_seg
 <LI><a href="#[117]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_next_mode
 <LI><a href="#[10a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_is_remote
-<LI><a href="#[15b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_hide_disconnect
+<LI><a href="#[15c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_hide_disconnect
 <LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_get_sub_mode
-<LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_get_status
+<LI><a href="#[15a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_get_status
 <LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
 <LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_poll
-<LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_read_byte
-<LI><a href="#[154]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_available
+<LI><a href="#[152]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_send
+<LI><a href="#[157]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_read_byte
+<LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_available
 <LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_ms
-<LI><a href="#[14f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_delay_ms
-<LI><a href="#[14d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
+<LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_delay_ms
+<LI><a href="#[14e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_boot_text
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_reset
-<LI><a href="#[153]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_reset_rx
-<LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_tx_buf
-<LI><a href="#[152]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_last_byte_tick
-<LI><a href="#[157]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_frame
-<LI><a href="#[13b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_feed_byte
-<LI><a href="#[13a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
+<LI><a href="#[154]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_reset_rx
+<LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_tx_buf
+<LI><a href="#[153]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_last_byte_tick
+<LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_get_frame
+<LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_feed_byte
+<LI><a href="#[13b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proto_build_frame
 <LI><a href="#[12e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_tick
 <LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_set_state
-<LI><a href="#[158]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_get_state
+<LI><a href="#[159]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_get_state
 <LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_scan
-<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 <LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_is_active
-<LI><a href="#[134]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
-<LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
+<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_handle_key
+<LI><a href="#[132]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_activate
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_fw_info_set_ota_request
-<LI><a href="#[151]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_send
 <LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_task
 </UL>
 
-<P><STRONG><a name="[12f]"></a>user_app_init</STRONG> (Thumb, 168 bytes, Stack size 8 bytes, user_app.o(.text.user_app_init))
+<P><STRONG><a name="[130]"></a>user_app_init</STRONG> (Thumb, 168 bytes, Stack size 8 bytes, user_app.o(.text.user_app_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 344<LI>Call Chain = user_app_init &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
 <LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_printf
 <LI><a href="#[10c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;debug_console_init
 <LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_init
-<LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_init
-<LI><a href="#[14f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_delay_ms
-<LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
-<LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_boot_text
-<LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
+<LI><a href="#[151]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_drv_init
+<LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_tick_delay_ms
+<LI><a href="#[148]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_init
+<LI><a href="#[13a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_boot_text
+<LI><a href="#[147]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ssd1306_init
 <LI><a href="#[12d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;led_mgr_init
-<LI><a href="#[15d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
-<LI><a href="#[15c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_init
-<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
+<LI><a href="#[15e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
+<LI><a href="#[15d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_init
+<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[142]"></a>uxListRemove</STRONG> (Thumb, 34 bytes, Stack size 0 bytes, list.o(.text.uxListRemove))
+<P><STRONG><a name="[143]"></a>uxListRemove</STRONG> (Thumb, 34 bytes, Stack size 0 bytes, list.o(.text.uxListRemove))
 <BR><BR>[Called By]<UL><LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
-<LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
+<LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
 </UL>
 
-<P><STRONG><a name="[161]"></a>vApplicationStackOverflowHook</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, freertos_app.o(.text.vApplicationStackOverflowHook))
+<P><STRONG><a name="[162]"></a>vApplicationStackOverflowHook</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, freertos_app.o(.text.vApplicationStackOverflowHook))
 <BR><BR>[Called By]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskSwitchContext
 </UL>
 
-<P><STRONG><a name="[13e]"></a>vListInitialise</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, list.o(.text.vListInitialise))
-<BR><BR>[Called By]<UL><LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
+<P><STRONG><a name="[13f]"></a>vListInitialise</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, list.o(.text.vListInitialise))
+<BR><BR>[Called By]<UL><LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
 </UL>
 
-<P><STRONG><a name="[166]"></a>vListInitialiseItem</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, list.o(.text.vListInitialiseItem))
+<P><STRONG><a name="[167]"></a>vListInitialiseItem</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, list.o(.text.vListInitialiseItem))
 <BR><BR>[Called By]<UL><LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
-<LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
+<LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
 </UL>
 
-<P><STRONG><a name="[15e]"></a>vListInsert</STRONG> (Thumb, 96 bytes, Stack size 8 bytes, list.o(.text.vListInsert))
+<P><STRONG><a name="[15f]"></a>vListInsert</STRONG> (Thumb, 96 bytes, Stack size 8 bytes, list.o(.text.vListInsert))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = vListInsert
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
 </UL>
 
-<P><STRONG><a name="[13d]"></a>vPortEnterCritical</STRONG> (Thumb, 70 bytes, Stack size 0 bytes, port_1.o(.text.vPortEnterCritical))
-<BR><BR>[Called By]<UL><LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
-<LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
-<LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
+<P><STRONG><a name="[13e]"></a>vPortEnterCritical</STRONG> (Thumb, 70 bytes, Stack size 0 bytes, port_1.o(.text.vPortEnterCritical))
+<BR><BR>[Called By]<UL><LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
+<LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
+<LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
 </UL>
 
-<P><STRONG><a name="[13f]"></a>vPortExitCritical</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, port_1.o(.text.vPortExitCritical))
-<BR><BR>[Called By]<UL><LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
-<LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
-<LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
+<P><STRONG><a name="[140]"></a>vPortExitCritical</STRONG> (Thumb, 46 bytes, Stack size 0 bytes, port_1.o(.text.vPortExitCritical))
+<BR><BR>[Called By]<UL><LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
+<LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
+<LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
 </UL>
 
-<P><STRONG><a name="[141]"></a>vPortFree</STRONG> (Thumb, 312 bytes, Stack size 16 bytes, heap_4.o(.text.vPortFree))
+<P><STRONG><a name="[142]"></a>vPortFree</STRONG> (Thumb, 312 bytes, Stack size 16 bytes, heap_4.o(.text.vPortFree))
 <BR><BR>[Stack]<UL><LI>Max Depth = 92<LI>Call Chain = vPortFree &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
-<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskSuspendAll
+<BR>[Calls]<UL><LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
+<LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskSuspendAll
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 </UL>
 <BR>[Called By]<UL><LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
-<LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
+<LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
 </UL>
 
-<P><STRONG><a name="[162]"></a>vPortSetupTimerInterrupt</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, port_1.o(.text.vPortSetupTimerInterrupt))
-<BR><BR>[Called By]<UL><LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
+<P><STRONG><a name="[163]"></a>vPortSetupTimerInterrupt</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, port_1.o(.text.vPortSetupTimerInterrupt))
+<BR><BR>[Called By]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
 </UL>
 
 <P><STRONG><a name="[f9]"></a>vTaskDelay</STRONG> (Thumb, 178 bytes, Stack size 24 bytes, tasks.o(.text.vTaskDelay))
 <BR><BR>[Stack]<UL><LI>Max Depth = 100<LI>Call Chain = vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[15e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInsert
-<LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxListRemove
-<LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
+<BR>[Calls]<UL><LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInsert
+<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxListRemove
+<LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
 </UL>
 <BR>[Called By]<UL><LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_task
 </UL>
@@ -2049,33 +2054,33 @@ Global Symbols
 <P><STRONG><a name="[129]"></a>vTaskStartScheduler</STRONG> (Thumb, 142 bytes, Stack size 40 bytes, tasks.o(.text.vTaskStartScheduler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = vTaskStartScheduler &rArr; xTaskCreateStatic &rArr; prvAddNewTaskToReadyList
 </UL>
-<BR>[Calls]<UL><LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
-<LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
+<BR>[Calls]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
+<LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
 </UL>
 <BR>[Called By]<UL><LI><a href="#[128]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;freertos_task_start
 </UL>
 
-<P><STRONG><a name="[144]"></a>vTaskSuspendAll</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, tasks.o(.text.vTaskSuspendAll))
-<BR><BR>[Called By]<UL><LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
-<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
+<P><STRONG><a name="[145]"></a>vTaskSuspendAll</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, tasks.o(.text.vTaskSuspendAll))
+<BR><BR>[Called By]<UL><LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
+<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
 </UL>
 
 <P><STRONG><a name="[9b]"></a>vTaskSwitchContext</STRONG> (Thumb, 246 bytes, Stack size 16 bytes, tasks.o(.text.vTaskSwitchContext))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = vTaskSwitchContext
 </UL>
-<BR>[Calls]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vApplicationStackOverflowHook
+<BR>[Calls]<UL><LI><a href="#[162]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vApplicationStackOverflowHook
 </UL>
-<BR>[Called By]<UL><LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
+<BR>[Called By]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
 <LI><a href="#[10]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PendSV_Handler
 </UL>
 
-<P><STRONG><a name="[160]"></a>xPortStartScheduler</STRONG> (Thumb, 510 bytes, Stack size 32 bytes, port_1.o(.text.xPortStartScheduler))
+<P><STRONG><a name="[161]"></a>xPortStartScheduler</STRONG> (Thumb, 510 bytes, Stack size 32 bytes, port_1.o(.text.xPortStartScheduler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = xPortStartScheduler &rArr; vTaskSwitchContext
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskSwitchContext
-<LI><a href="#[162]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortSetupTimerInterrupt
-<LI><a href="#[163]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnableVFP
-<LI><a href="#[164]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvPortStartFirstTask
+<LI><a href="#[163]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortSetupTimerInterrupt
+<LI><a href="#[164]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnableVFP
+<LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvPortStartFirstTask
 </UL>
 <BR>[Called By]<UL><LI><a href="#[129]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskStartScheduler
 </UL>
@@ -2083,25 +2088,25 @@ Global Symbols
 <P><STRONG><a name="[127]"></a>xTaskCreate</STRONG> (Thumb, 250 bytes, Stack size 40 bytes, tasks.o(.text.xTaskCreate))
 <BR><BR>[Stack]<UL><LI>Max Depth = 140<LI>Call Chain = xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInitialiseItem
-<LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
-<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
-<LI><a href="#[167]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pxPortInitialiseStack
+<BR>[Calls]<UL><LI><a href="#[167]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInitialiseItem
+<LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
+<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
+<LI><a href="#[168]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pxPortInitialiseStack
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
-<LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset4
-<LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
+<LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset4
+<LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
 </UL>
 <BR>[Called By]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;freertos_app_init
 </UL>
 
-<P><STRONG><a name="[15f]"></a>xTaskCreateStatic</STRONG> (Thumb, 286 bytes, Stack size 40 bytes, tasks.o(.text.xTaskCreateStatic))
+<P><STRONG><a name="[160]"></a>xTaskCreateStatic</STRONG> (Thumb, 286 bytes, Stack size 40 bytes, tasks.o(.text.xTaskCreateStatic))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = xTaskCreateStatic &rArr; prvAddNewTaskToReadyList
 </UL>
-<BR>[Calls]<UL><LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInitialiseItem
-<LI><a href="#[167]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pxPortInitialiseStack
+<BR>[Calls]<UL><LI><a href="#[167]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInitialiseItem
+<LI><a href="#[168]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pxPortInitialiseStack
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
-<LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset4
-<LI><a href="#[13c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
+<LI><a href="#[166]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset4
+<LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddNewTaskToReadyList
 </UL>
 <BR>[Called By]<UL><LI><a href="#[129]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskStartScheduler
 </UL>
@@ -2109,31 +2114,31 @@ Global Symbols
 <P><STRONG><a name="[f2]"></a>xTaskIncrementTick</STRONG> (Thumb, 438 bytes, Stack size 36 bytes, tasks.o(.text.xTaskIncrementTick))
 <BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = xTaskIncrementTick
 </UL>
-<BR>[Called By]<UL><LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
+<BR>[Called By]<UL><LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
 <LI><a href="#[11]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Handler
 </UL>
 
-<P><STRONG><a name="[145]"></a>xTaskResumeAll</STRONG> (Thumb, 392 bytes, Stack size 40 bytes, tasks.o(.text.xTaskResumeAll))
+<P><STRONG><a name="[146]"></a>xTaskResumeAll</STRONG> (Thumb, 392 bytes, Stack size 40 bytes, tasks.o(.text.xTaskResumeAll))
 <BR><BR>[Stack]<UL><LI>Max Depth = 76<LI>Call Chain = xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskIncrementTick
-<LI><a href="#[13f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
-<LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
+<LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
+<LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
-<LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
-<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
+<LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
+<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
 </UL>
 
-<P><STRONG><a name="[168]"></a>__0vsnprintf</STRONG> (Thumb, 40 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf), UNUSED)
-<BR><BR>[Calls]<UL><LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
+<P><STRONG><a name="[169]"></a>__0vsnprintf</STRONG> (Thumb, 40 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf), UNUSED)
+<BR><BR>[Calls]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
-<P><STRONG><a name="[182]"></a>__1vsnprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf), UNUSED)
+<P><STRONG><a name="[183]"></a>__1vsnprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf), UNUSED)
 
-<P><STRONG><a name="[183]"></a>__2vsnprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf), UNUSED)
+<P><STRONG><a name="[184]"></a>__2vsnprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf), UNUSED)
 
-<P><STRONG><a name="[184]"></a>__c89vsnprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf), UNUSED)
+<P><STRONG><a name="[185]"></a>__c89vsnprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf), UNUSED)
 
 <P><STRONG><a name="[10d]"></a>vsnprintf</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, printfa.o(i.__0vsnprintf))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = vsnprintf
@@ -2148,13 +2153,13 @@ Global Symbols
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strtol
 </UL>
 
-<P><STRONG><a name="[185]"></a>__rt_errno_addr</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, errno.o(i.__aeabi_errno_addr), UNUSED)
+<P><STRONG><a name="[186]"></a>__rt_errno_addr</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, errno.o(i.__aeabi_errno_addr), UNUSED)
 
-<P><STRONG><a name="[186]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
+<P><STRONG><a name="[187]"></a>__scatterload_copy</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_copy), UNUSED)
 
-<P><STRONG><a name="[187]"></a>__scatterload_null</STRONG> (Thumb, 2 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_null), UNUSED)
+<P><STRONG><a name="[188]"></a>__scatterload_null</STRONG> (Thumb, 2 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_null), UNUSED)
 
-<P><STRONG><a name="[188]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
+<P><STRONG><a name="[189]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 <P>
 <H3>
 Local Symbols
@@ -2282,7 +2287,7 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> display_mgr.o(.text.display_mgr_init)
 </UL>
-<P><STRONG><a name="[14a]"></a>__NVIC_SystemReset</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, sys_config.o(.text.__NVIC_SystemReset))
+<P><STRONG><a name="[14b]"></a>__NVIC_SystemReset</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, sys_config.o(.text.__NVIC_SystemReset))
 <BR><BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_reset
 </UL>
 
@@ -2431,14 +2436,14 @@ Local Symbols
 <P><STRONG><a name="[8e]"></a>preview_confirm_bigtext</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, menu_items.o(.text.preview_confirm_bigtext))
 <BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = preview_confirm_bigtext &rArr; sys_config_set_poweron_type &rArr; sys_config_save &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
 </UL>
-<BR>[Calls]<UL><LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
+<BR>[Calls]<UL><LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> menu_items.o(.rodata.item_poweron_display_2)
 </UL>
 <P><STRONG><a name="[8c]"></a>preview_confirm_logo</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, menu_items.o(.text.preview_confirm_logo))
 <BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = preview_confirm_logo &rArr; sys_config_set_poweron_type &rArr; sys_config_save &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
 </UL>
-<BR>[Calls]<UL><LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
+<BR>[Calls]<UL><LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> menu_items.o(.rodata.item_poweron_display_1)
 </UL>
@@ -2446,8 +2451,8 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = preview_confirm_welcome &rArr; sys_config_set_poweron_type &rArr; sys_config_save &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_boot_text
-<LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
-<LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_boot_text
+<LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_set_poweron_type
+<LI><a href="#[13a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_boot_text
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> menu_items.o(.rodata.item_poweron_display_0)
 </UL>
@@ -2472,7 +2477,7 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = preview_render_welcome &rArr; display_mgr_set_text &rArr; ssd1306_update_screen &rArr; i2c_drv_write_reg &rArr; HAL_I2C_Mem_Write &rArr; I2C_RequestMemoryWrite
 </UL>
 <BR>[Calls]<UL><LI><a href="#[11c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_set_text
-<LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_boot_text
+<LI><a href="#[13a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sys_config_get_boot_text
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> menu_items.o(.rodata.item_poweron_display_0)
 </UL>
@@ -2481,7 +2486,7 @@ Local Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_text
 </UL>
-<BR>[Called By]<UL><LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<BR>[Called By]<UL><LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
 <P><STRONG><a name="[123]"></a>draw_text</STRONG> (Thumb, 1178 bytes, Stack size 56 bytes, menu_mgr.o(.text.draw_text))
@@ -2492,7 +2497,7 @@ Local Symbols
 <LI><a href="#[124]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;font_get_ascii
 </UL>
 <BR>[Called By]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_suffix
-<LI><a href="#[136]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
+<LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_tick
 </UL>
 
 <P><STRONG><a name="[72]"></a>app_task</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, freertos_app.o(.text.app_task))
@@ -2620,7 +2625,7 @@ Local Symbols
 <P><STRONG><a name="[91]"></a>normal_key_func</STRONG> (Thumb, 184 bytes, Stack size 16 bytes, nr_micro_shell_core.o(.text.normal_key_func))
 <BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = normal_key_func &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_putc
+<BR>[Calls]<UL><LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_putc
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_printf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> nr_micro_shell_core.o(.rodata.key_funcs)
@@ -2636,7 +2641,7 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 240<LI>Call Chain = tab_key_func &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_printf
-<LI><a href="#[14e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncmp
+<LI><a href="#[14f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncmp
 <LI><a href="#[10b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
 <LI><a href="#[121]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 <LI><a href="#[125]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memmove
@@ -2656,8 +2661,8 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> nr_micro_shell_core.o(.rodata.key_funcs)
 </UL>
-<P><STRONG><a name="[164]"></a>prvPortStartFirstTask</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, port_1.o(.text.prvPortStartFirstTask))
-<BR><BR>[Called By]<UL><LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
+<P><STRONG><a name="[165]"></a>prvPortStartFirstTask</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, port_1.o(.text.prvPortStartFirstTask))
+<BR><BR>[Called By]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
 </UL>
 
 <P><STRONG><a name="[73]"></a>prvTaskExitError</STRONG> (Thumb, 62 bytes, Stack size 4 bytes, port_1.o(.text.prvTaskExitError))
@@ -2665,28 +2670,28 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> port_1.o(.text.pxPortInitialiseStack)
 </UL>
-<P><STRONG><a name="[163]"></a>vPortEnableVFP</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, port_1.o(.text.vPortEnableVFP))
-<BR><BR>[Called By]<UL><LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
+<P><STRONG><a name="[164]"></a>vPortEnableVFP</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, port_1.o(.text.vPortEnableVFP))
+<BR><BR>[Called By]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xPortStartScheduler
 </UL>
 
-<P><STRONG><a name="[13c]"></a>prvAddNewTaskToReadyList</STRONG> (Thumb, 350 bytes, Stack size 32 bytes, tasks.o(.text.prvAddNewTaskToReadyList))
+<P><STRONG><a name="[13d]"></a>prvAddNewTaskToReadyList</STRONG> (Thumb, 350 bytes, Stack size 32 bytes, tasks.o(.text.prvAddNewTaskToReadyList))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = prvAddNewTaskToReadyList
 </UL>
-<BR>[Calls]<UL><LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInitialise
-<LI><a href="#[13f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
-<LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
+<BR>[Calls]<UL><LI><a href="#[13f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInitialise
+<LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
+<LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Called By]<UL><LI><a href="#[127]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
-<LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
+<LI><a href="#[160]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreateStatic
 </UL>
 
-<P><STRONG><a name="[140]"></a>prvCheckTasksWaitingTermination</STRONG> (Thumb, 122 bytes, Stack size 24 bytes, tasks.o(.text.prvCheckTasksWaitingTermination))
+<P><STRONG><a name="[141]"></a>prvCheckTasksWaitingTermination</STRONG> (Thumb, 122 bytes, Stack size 24 bytes, tasks.o(.text.prvCheckTasksWaitingTermination))
 <BR><BR>[Stack]<UL><LI>Max Depth = 116<LI>Call Chain = prvCheckTasksWaitingTermination &rArr; vPortFree &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxListRemove
-<LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
-<LI><a href="#[13f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
-<LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
+<BR>[Calls]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxListRemove
+<LI><a href="#[142]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
+<LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
+<LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Called By]<UL><LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvIdleTask
 </UL>
@@ -2694,37 +2699,37 @@ Local Symbols
 <P><STRONG><a name="[74]"></a>prvIdleTask</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, tasks.o(.text.prvIdleTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 116<LI>Call Chain = prvIdleTask &rArr; prvCheckTasksWaitingTermination &rArr; vPortFree &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[140]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
+<BR>[Calls]<UL><LI><a href="#[141]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvCheckTasksWaitingTermination
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> tasks.o(.text.vTaskStartScheduler)
 </UL>
-<P><STRONG><a name="[16a]"></a>_fp_digits</STRONG> (Thumb, 366 bytes, Stack size 64 bytes, printfa.o(i._fp_digits), UNUSED)
+<P><STRONG><a name="[16b]"></a>_fp_digits</STRONG> (Thumb, 366 bytes, Stack size 64 bytes, printfa.o(i._fp_digits), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
 <LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2ulz
-<LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
+<LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
 <LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
-<BR>[Called By]<UL><LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
+<BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
-<P><STRONG><a name="[169]"></a>_printf_core</STRONG> (Thumb, 1744 bytes, Stack size 136 bytes, printfa.o(i._printf_core), UNUSED)
-<BR><BR>[Calls]<UL><LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
-<LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_pre_padding
-<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_post_padding
-<LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
+<P><STRONG><a name="[16a]"></a>_printf_core</STRONG> (Thumb, 1744 bytes, Stack size 136 bytes, printfa.o(i._printf_core), UNUSED)
+<BR><BR>[Calls]<UL><LI><a href="#[16f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uidivmod
+<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_pre_padding
+<LI><a href="#[16e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_post_padding
+<LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_fp_digits
 <LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_uldivmod
 </UL>
-<BR>[Called By]<UL><LI><a href="#[168]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0vsnprintf
+<BR>[Called By]<UL><LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__0vsnprintf
 </UL>
 
-<P><STRONG><a name="[16d]"></a>_printf_post_padding</STRONG> (Thumb, 36 bytes, Stack size 24 bytes, printfa.o(i._printf_post_padding), UNUSED)
-<BR><BR>[Called By]<UL><LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
+<P><STRONG><a name="[16e]"></a>_printf_post_padding</STRONG> (Thumb, 36 bytes, Stack size 24 bytes, printfa.o(i._printf_post_padding), UNUSED)
+<BR><BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
-<P><STRONG><a name="[16c]"></a>_printf_pre_padding</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, printfa.o(i._printf_pre_padding), UNUSED)
-<BR><BR>[Called By]<UL><LI><a href="#[169]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
+<P><STRONG><a name="[16d]"></a>_printf_pre_padding</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, printfa.o(i._printf_pre_padding), UNUSED)
+<BR><BR>[Called By]<UL><LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_core
 </UL>
 
 <P><STRONG><a name="[75]"></a>_snputc</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, printfa.o(i._snputc))

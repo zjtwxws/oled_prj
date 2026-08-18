@@ -193,6 +193,17 @@ void sys_config_reset(void)
 }
 
 /**
+ * @brief  设置中断向量表偏移地址
+ * @param  vector_addr 中断向量表基地址，需按硬件要求对齐
+ * @return 无
+ * @date   2026-08-18
+ */
+void sys_config_set_vector_table(uint32_t vector_addr)
+{
+    SCB->VTOR = vector_addr;
+}
+
+/**
  * @brief  获取上电显示类型
  * @date   2026-08-07
  */

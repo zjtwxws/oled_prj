@@ -39,4 +39,12 @@ uint8_t sys_config_get_poweron_type(void);
 /** @brief ç³»ç»å¤ä½ (è°ç¨ NVIC_SystemResetï¼ä¸è¿å) */
 void sys_config_reset(void);
 
+/**
+ * @brief  设置中断向量表偏移地址
+ * @param  vector_addr 中断向量表基地址，需按硬件要求对齐
+ * @return 无
+ * @date   2026-08-18
+ */
+void sys_config_set_vector_table(uint32_t vector_addr);
+
 #endif /* __SYS_CONFIG_H */
