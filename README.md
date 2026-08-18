@@ -182,6 +182,8 @@ Full specification: [docs/protocol-uart.md](docs/protocol-uart.md)
 | [Key Mapping](docs/menu-key-design.md) | Button assignments and input handling |
 | [PC Host Reference](docs/pc-host-code-reference.md) | Windows application module breakdown |
 | [CubeMX Setup](docs/stm32cubemx-f407-hal-setup.md) | STM32CubeMX project creation guide |
+| [FreeRTOS Learning](docs/freertos-learning.md) | xTaskCreate usage, add-task guide, STM32F407 porting notes |
+| [FreeRTOS Port Design](docs/freertos-port-design.md) | Manual FreeRTOS port design and verification |
 | [Bootloader Design](docs/bootloader-design.md) | A/B dual-slot bootloader design and usage |
 | [OTA Tool Design](docs/ota-tool-design.md) | OTA firmware upgrade tool specification |
 | [CLI Integration](docs/cli-integration.md) | Debug console (nr_micro_shell) porting guide |
