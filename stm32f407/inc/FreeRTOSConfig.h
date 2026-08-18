@@ -53,7 +53,7 @@
  * settings.  Your application will certainly need a different value so set this
  * correctly. This is very often, but not always, equal to the main system clock
  * frequency. */
-#define configCPU_CLOCK_HZ    ( ( unsigned long ) 168000000 )
+#define configCPU_CLOCK_HZ    ( ( unsigned long ) 168000000UL )
 
 /* configSYSTICK_CLOCK_HZ is an optional parameter for ARM Cortex-M ports only.
  *
@@ -77,7 +77,7 @@
 
 /* configTICK_RATE_HZ sets frequency of the tick interrupt in Hz, normally
  * calculated from the configCPU_CLOCK_HZ value. */
-#define configTICK_RATE_HZ                         100
+#define configTICK_RATE_HZ                         1000
 
 /* Set configUSE_PREEMPTION to 1 to use pre-emptive scheduling.  Set
  * configUSE_PREEMPTION to 0 to use co-operative scheduling.
@@ -89,7 +89,7 @@
  * configUSE_TIME_SLICING to 0 to prevent the scheduler switching between Ready
  * state tasks just because there was a tick interrupt.  See
  * https://freertos.org/single-core-amp-smp-rtos-scheduling.html. */
-#define configUSE_TIME_SLICING                     0
+#define configUSE_TIME_SLICING                     1
 
 /* Set configUSE_PORT_OPTIMISED_TASK_SELECTION to 1 to select the next task to
  * run using an algorithm optimised to the instruction set of the target
@@ -109,7 +109,7 @@
 /* configMAX_PRIORITIES Sets the number of available task priorities.  Tasks can
  * be assigned priorities of 0 to (configMAX_PRIORITIES - 1).  Zero is the
  * lowest priority. */
-#define configMAX_PRIORITIES                       5
+#define configMAX_PRIORITIES                       8
 
 /* configMINIMAL_STACK_SIZE defines the size of the stack used by the Idle task
  * (in words, not in bytes!).  The kernel does not use this constant for any
@@ -136,7 +136,7 @@
  *
  * Defining configTICK_TYPE_WIDTH_IN_BITS as TICK_TYPE_WIDTH_64_BITS causes
  * TickType_t to be defined (typedef'ed) as an unsigned 64-bit type. */
-#define configTICK_TYPE_WIDTH_IN_BITS              TICK_TYPE_WIDTH_64_BITS
+#define configTICK_TYPE_WIDTH_IN_BITS              TICK_TYPE_WIDTH_32_BITS
 
 /* Set configIDLE_SHOULD_YIELD to 1 to have the Idle task yield to an
  * application task if there is an Idle priority (priority 0) application task
@@ -220,7 +220,7 @@
  * FreeRTOS/source/timers.c source file must be included in the build if
  * configUSE_TIMERS is set to 1.  Default to 0 if left undefined.  See
  * https://www.freertos.org/RTOS-software-timer.html. */
-#define configUSE_TIMERS                1
+#define configUSE_TIMERS                0
 
 /* configTIMER_TASK_PRIORITY sets the priority used by the timer task.  Only
  * used if configUSE_TIMERS is set to 1.  The timer task is a standard FreeRTOS
@@ -287,7 +287,7 @@
  * or heap_4.c are included in the build.  This value is defaulted to 4096 bytes
  * but it must be tailored to each application.  Note the heap will appear in
  * the .bss section.  See https://www.freertos.org/a00111.html. */
-#define configTOTAL_HEAP_SIZE                        4096
+#define configTOTAL_HEAP_SIZE                        12288
 
 /* Set configAPPLICATION_ALLOCATED_HEAP to 1 to have the application allocate
  * the array used as the FreeRTOS heap.  Set to 0 to have the linker allocate
@@ -315,7 +315,12 @@
  * switch performing interrupts.  Not supported by all FreeRTOS ports.  See
  * https://www.freertos.org/RTOS-Cortex-M3-M4.html for information specific to
  * ARM Cortex-M devices. */
-#define configKERNEL_INTERRUPT_PRIORITY          0
+#define configPRIO_BITS                              4
+#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY      15
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5
+
+#define configKERNEL_INTERRUPT_PRIORITY              \
+    ( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << ( 8UL - configPRIO_BITS ) )
 
 /* configMAX_SYSCALL_INTERRUPT_PRIORITY sets the interrupt priority above which
  * FreeRTOS API calls must not be made.  Interrupts above this priority are
@@ -323,11 +328,12 @@
  * to the highest interrupt priority (0).  Not supported by all FreeRTOS ports.
  * See https://www.freertos.org/RTOS-Cortex-M3-M4.html for information specific
  * to ARM Cortex-M devices. */
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY     0
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY         \
+    ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << ( 8UL - configPRIO_BITS ) )
 
 /* Another name for configMAX_SYSCALL_INTERRUPT_PRIORITY - the name used depends
  * on the FreeRTOS port. */
-#define configMAX_API_CALL_INTERRUPT_PRIORITY    0
+#define configMAX_API_CALL_INTERRUPT_PRIORITY        configMAX_SYSCALL_INTERRUPT_PRIORITY
 
 /******************************************************************************/
 /* Hook and callback function related definitions. ****************************/
@@ -417,13 +423,17 @@
  * execution on the failing line for viewing in a debugger. */
 
 /* *INDENT-OFF* */
-#define configASSERT( x )         \
-    if( ( x ) == 0 )              \
-    {                             \
-        taskDISABLE_INTERRUPTS(); \
-        for( ; ; )                \
-        ;                         \
-    }
+#define configASSERT( x )                            \
+    do                                               \
+    {                                                \
+        if( ( x ) == 0 )                             \
+        {                                            \
+            taskDISABLE_INTERRUPTS();                \
+            for( ; ; )                               \
+            {                                        \
+            }                                        \
+        }                                            \
+    } while( 0 )
 /* *INDENT-ON* */
 
 /******************************************************************************/
@@ -629,6 +639,11 @@
  * Defaults to 1 if left undefined. */
 #define configCHECK_HANDLER_INSTALLATION    1
 
+/* Cortex-M Direct Routing: map FreeRTOS port handlers to startup vector names. */
+#define vPortSVCHandler                     SVC_Handler
+#define xPortPendSVHandler                  PendSV_Handler
+#define xPortSysTickHandler                 SysTick_Handler
+
 /******************************************************************************/
 /* Definitions that include or exclude functionality. *************************/
 /******************************************************************************/
@@ -657,7 +672,7 @@
 #define INCLUDE_vTaskDelay                     1
 #define INCLUDE_xTaskGetSchedulerState         1
 #define INCLUDE_xTaskGetCurrentTaskHandle      1
-#define INCLUDE_uxTaskGetStackHighWaterMark    0
+#define INCLUDE_uxTaskGetStackHighWaterMark    1
 #define INCLUDE_xTaskGetIdleTaskHandle         0
 #define INCLUDE_eTaskGetState                  0
 #define INCLUDE_xTimerPendFunctionCall         0

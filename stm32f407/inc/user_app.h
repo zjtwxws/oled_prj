@@ -17,9 +17,9 @@
 #endif
 #endif /* APP_VTOR_ADDR */
 /** 固件版本号 */
-#define FW_VERSION  "V1.1.1"
+#define FW_VERSION  "V1.2.0"
 #define FW_AUTHOR  "赵四"
-#define FW_BUILD_TIME  "2026.08.13 15:04"
+#define FW_BUILD_TIME  "2026.08.18 19:00"
 #define FW_EMAIL  "429511192@qq.com"
 
 /** @brief 用户应用初始化 (外设+驱动+显示+菜单)，在 main() 中调用一次 */

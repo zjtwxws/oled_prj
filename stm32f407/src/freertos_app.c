@@ -49,6 +49,17 @@ void freertos_app_init(void)
 }
 
 /**
+ * @brief  开启任务调度
+ * @param  无
+ * @return 无
+ */
+void freertos_task_start(void)
+{
+	vTaskStartScheduler();
+	return;
+}
+
+/**
  * @brief  栈溢出 Hook，configCHECK_FOR_STACK_OVERFLOW=2 时由内核调用
  */
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)

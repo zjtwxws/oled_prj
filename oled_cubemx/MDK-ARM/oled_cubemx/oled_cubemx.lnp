@@ -55,7 +55,7 @@
 "oled_cubemx\stream_buffer.o"
 "oled_cubemx\tasks.o"
 "oled_cubemx\timers.o"
---library_type=microlib --strict --scatter "oled_cubemx\oled_cubemx.sct"
+--library_type=microlib --strict --scatter "..\..\stm32f407\oled_cubemx_slota.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "oled_cubemx.map" -o oled_cubemx\oled_cubemx.axf

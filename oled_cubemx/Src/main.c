@@ -25,6 +25,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "user_app.h"
+#include "freertos_app.h"
+/* USER CODE END Includes */
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,7 +98,10 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   user_app_init();
-
+  
+  freertos_app_init();
+  freertos_task_start();
+  Error_Handler();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -106,7 +112,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		//HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
-		user_app_handle();
+//		user_app_handle();
   }
   /* USER CODE END 3 */
 }

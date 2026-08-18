@@ -13,5 +13,12 @@
  */
 void freertos_app_init(void);
 
+/**
+ * @brief  开启任务调度
+ * @param  无
+ * @return 无
+ */
+void freertos_task_start(void);
+
 #endif
 
