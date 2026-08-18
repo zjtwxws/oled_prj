@@ -857,11 +857,6 @@
               <FilePath>..\..\stm32f407\thirdparty\freertos\portable\GCC\ARM_CM4F\port.c</FilePath>
             </File>
             <File>
-              <FileName>port.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\stm32f407\thirdparty\freertos\portable\GCC\ARM_CM4F\port.c</FilePath>
-            </File>
-            <File>
               <FileName>heap_4.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\thirdparty\freertos\portable\MemMang\heap_4.c</FilePath>
@@ -1240,7 +1235,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx,APP_SLOT_A</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../../stm32f407/inc</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../../stm32f407/inc;..\..\stm32f407\thirdparty\freertos\include;..\..\stm32f407\thirdparty\freertos\portable\GCC\ARM_CM4F</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1600,11 +1595,6 @@
         <Group>
           <GroupName>Freertos</GroupName>
           <Files>
-            <File>
-              <FileName>port.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\stm32f407\thirdparty\freertos\portable\GCC\ARM_CM4F\port.c</FilePath>
-            </File>
             <File>
               <FileName>port.c</FileName>
               <FileType>1</FileType>
@@ -1989,7 +1979,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx,APP_SLOT_B</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../../stm32f407/inc</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../../stm32f407/inc;..\..\stm32f407\thirdparty\freertos\include;..\..\stm32f407\thirdparty\freertos\portable\GCC\ARM_CM4F</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -2349,11 +2339,6 @@
         <Group>
           <GroupName>Freertos</GroupName>
           <Files>
-            <File>
-              <FileName>port.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\stm32f407\thirdparty\freertos\portable\GCC\ARM_CM4F\port.c</FilePath>
-            </File>
             <File>
               <FileName>port.c</FileName>
               <FileType>1</FileType>

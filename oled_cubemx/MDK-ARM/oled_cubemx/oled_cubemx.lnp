@@ -46,7 +46,6 @@
 "oled_cubemx\freertos_app.o"
 "oled_cubemx\cli_cmds.o"
 "oled_cubemx\nr_micro_shell_core.o"
-"oled_cubemx\port.o"
 "oled_cubemx\port_1.o"
 "oled_cubemx\heap_4.o"
 "oled_cubemx\croutine.o"
