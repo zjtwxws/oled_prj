@@ -64,6 +64,7 @@ static int cmd_info(uint8_t argc, char **argv)
     shell_printf("  Author   : %s\r\n", FW_AUTHOR);
     shell_printf("  Build    : %s\r\n", FW_BUILD_TIME);
     shell_printf("  Uptime   : %lu ms\r\n", sys_tick_ms());
+	shell_printf("  Rtos Vern: %s\r\n",FW_RTOS_VERN);
 
     if (menu_mgr_is_active())
     {

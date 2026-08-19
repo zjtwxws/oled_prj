@@ -21,6 +21,7 @@
 #define FW_AUTHOR  "赵四"
 #define FW_BUILD_TIME  "2026.08.18 19:00"
 #define FW_EMAIL  "429511192@qq.com"
+#define FW_RTOS_VERN "freertos 11.3.0"
 
 /** @brief 用户应用初始化 (外设+驱动+显示+菜单)，在 main() 中调用一次 */
 int user_app_init(void);
