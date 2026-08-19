@@ -56,7 +56,7 @@ typedef void (* TaskFunction_t)( void * arg );
 | `uxStackDepth` | `configSTACK_DEPTH_TYPE` | 任务栈深度，单位是 word，不是 byte。本项目 Cortex-M4F 上 1 word = 4 byte |
 | `pvParameters` | `void *` | 传给任务入口的参数。该对象生命周期必须覆盖任务运行期，不能传一个会失效的栈变量地址 |
 | `uxPriority` | `UBaseType_t` | 任务优先级。0 最低，`configMAX_PRIORITIES - 1` 最高。本项目 `configMAX_PRIORITIES = 8`，可用值为 0~7 |
-| `pxCreatedTask` | `TaskHandle_t *` | 输出参数，用于保存任务句柄。可传 `NULL`，传句柄后可执行挂起、恢复、删除、查栈等操作 |
+| `pxCreatedTask` | `TaskHandle_t *` | 输出参数，用于保存任务句柄。当前项目用它保存 `app_task_handle`。可传 `NULL`，传句柄后可执行挂起、恢复、删除、查栈等操作 |
 
 ### 2.3 返回值
 
@@ -165,6 +165,60 @@ static void app_task(void *argument)
 
 这表示当前业务仍保持“单用户任务”模型。`vTaskDelay(pdMS_TO_TICKS(1U))` 让
 `app_task` 每轮至少阻塞 1 ms，从而给 IDLE 任务和后续低优先级任务运行机会。
+
+### 2.7 当前 app_task_handle 的用途与用法
+
+在 [freertos_app.c](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/freertos_app.c:14)
+中，`app_task_handle` 的定义如下：
+
+```c
+static TaskHandle_t app_task_handle = NULL;
+```
+
+创建 `app_task` 时，把 `&app_task_handle` 作为 `xTaskCreate` 的第 6 个参数传入：
+
+```c
+ret = xTaskCreate(app_task,
+                  "app_task",
+                  APP_TASK_STACK_WORDS,
+                  NULL,
+                  APP_TASK_PRIORITY,
+                  &app_task_handle);
+
+configASSERT(ret == pdPASS);
+```
+
+创建成功后，`app_task_handle` 就是 `app_task` 的任务句柄。后续要操作这个任务时，把它
+传给 FreeRTOS 对应 API。当前项目已经启用了 `vTaskSuspend`、`vTaskResume`、
+`vTaskDelete`、`vTaskPrioritySet` 和 `uxTaskGetStackHighWaterMark` 等接口，因此可以这样
+使用：
+
+```c
+/* 挂起 app_task */
+vTaskSuspend(app_task_handle);
+
+/* 恢复 app_task */
+vTaskResume(app_task_handle);
+
+/* 删除 app_task */
+vTaskDelete(app_task_handle);
+
+/* 修改 app_task 优先级 */
+vTaskPrioritySet(app_task_handle, tskIDLE_PRIORITY + 2U);
+
+/* 查询 app_task 栈高水位，单位 word */
+UBaseType_t stack_high_water = uxTaskGetStackHighWaterMark(app_task_handle);
+```
+
+当前项目暂时只保存 `app_task_handle`，还没有实际调用这些操作。它属于任务句柄预留，
+后续如果要管理 `app_task` 的生命周期、优先级或栈使用情况，可以直接使用。
+
+如果 API 是在 `app_task` 内部操作当前任务自己，也可以把任务句柄参数写成 `NULL`，例如：
+
+```c
+uxTaskGetStackHighWaterMark(NULL);
+vTaskDelete(NULL);
+```
 
 ## 3. 在当前工程中新增一个任务
 
