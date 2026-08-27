@@ -17,9 +17,9 @@
 #endif
 #endif /* APP_VTOR_ADDR */
 /** 固件版本号 */
-#define FW_VERSION  "V1.2.0"
+#define FW_VERSION  "V1.3.0"
 #define FW_AUTHOR  "赵四"
-#define FW_BUILD_TIME  "2026.08.18 19:00"
+#define FW_BUILD_TIME  "2026.08.27 19:55"
 #define FW_EMAIL  "429511192@qq.com"
 #define FW_RTOS_VERN "freertos 11.3.0"
 

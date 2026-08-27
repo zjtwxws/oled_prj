@@ -317,7 +317,7 @@ static int cmd_mode(uint8_t argc, char **argv)
     return 0;
 }
 
-/***
+/**
  * @fn     cmd_cli_info
  * @brief  显示 CLI 调试命令信息
  * @param  argc  参数个数
@@ -349,8 +349,6 @@ static int cmd_cli_info(uint8_t argc, char **argv)
  *  命令表定义
  * ======================================================== */
 #define CLI_CMD_ITEMS_MAX  (30)
-
-typedef int (*fn_cli_cmd_t)(uint8_t argc, char **argv);
 
 struct cmd cmd_table[CLI_CMD_ITEMS_MAX] = {};
 /*
