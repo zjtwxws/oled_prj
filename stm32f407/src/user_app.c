@@ -92,7 +92,6 @@ int user_app_handle(void)
     static uint32_t last_tick = 0;
     static uint32_t last_key_scan = 0;
     static uint32_t led_tick_acc = 0;
-    cli_poll();
 
     uint32_t bytes_read_this_loop = 0;
     key_info_t key_info;
@@ -475,4 +474,5 @@ static void send_mode_status(void)
     uint16_t len = proto_build_frame(CMD_MODE_STATUS, tx_seq++, data, 2);
     safe_send(proto_get_tx_buf(), len);
 }
+
 

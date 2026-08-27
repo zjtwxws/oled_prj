@@ -7,11 +7,16 @@
 #include "task.h"
 #include "freertos_app.h"
 #include "user_app.h"
+#include "debug_console.h"
 
 #define APP_TASK_STACK_WORDS      1024U
 #define APP_TASK_PRIORITY         (tskIDLE_PRIORITY + 1U)
 
+#define CLI_TASK_STACK_WORDS      128U
+#define CLI_TASK_PRIORITY         (tskIDLE_PRIORITY + 2U)
+
 static TaskHandle_t app_task_handle = NULL;
+static TaskHandle_t cli_task_handle = NULL;
 
 /**
  * @brief  APP 主任务，承载原有 user_app_handle 逻辑
@@ -21,12 +26,34 @@ static TaskHandle_t app_task_handle = NULL;
 static void app_task(void *argument)
 {
     (void)argument;
+	DEBUG_PRINTF("app_task start");
 
     for (;;)
     {
         user_app_handle();
         vTaskDelay(pdMS_TO_TICKS(1U));
     }
+}
+
+/**
+ *  @fn     cli_task
+ *  @brief  命令行任务，主要用于命令行的调度和处理
+ *  @param  argument 任务参数，本任务不使用
+ *  @return 无
+ *  @author zhaojiantao
+ *  @date   2026/8/26
+ *  @note   none
+ */
+void cli_task(void *argument)
+{
+	(void)argument;
+	DEBUG_PRINTF("cli_task start");
+	
+	for(;;)
+	{
+		cli_poll();
+		vTaskDelay(pdMS_TO_TICKS(1U));
+	}
 }
 
 /**
@@ -46,6 +73,15 @@ void freertos_app_init(void)
                       &app_task_handle);
 
     configASSERT(ret == pdPASS);
+
+	ret = xTaskCreate(cli_task,
+					  "cli_task",
+					  CLI_TASK_STACK_WORDS,
+					  NULL,
+					  CLI_TASK_PRIORITY,
+					  &cli_task_handle);
+	
+	configASSERT(ret == pdPASS);
 }
 
 /**
