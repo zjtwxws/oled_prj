@@ -64,6 +64,9 @@ int user_app_init(void)
     debug_console_init(&huart2);
     cli_init();
 
+	/* 注册 CLI 命令 */
+    cli_cmds_init();
+
     ssd1306_init();
     sys_config_init();
 

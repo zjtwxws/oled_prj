@@ -317,11 +317,43 @@ static int cmd_mode(uint8_t argc, char **argv)
     return 0;
 }
 
+/***
+ * @fn     cmd_cli_info
+ * @brief  显示 CLI 调试命令信息
+ * @param  argc  参数个数
+ * @param  argv  参数数组
+ * @return 0=成功, 其他=失败
+ * @note   none
+ */
+static int cmd_cli_info(uint8_t argc, char **argv)
+{
+    (void)argc;
+    (void)argv;
+
+    shell_printf("Total commands: %d\r\n", cmd_table_size);
+    for (int i = 0; i < cmd_table_size; i++)
+    {
+        shell_printf("[%d]  %s: %s\r\n", i, cmd_table[i].name, cmd_table[i].desc);
+    }
+    
+    shell_printf("Auto-complete words: %d\r\n", auto_complete_words_size); 
+    for (int i = 0; i < auto_complete_words_size; i++)
+    {
+        shell_printf("[%d]  %s\r\n", i, auto_complete_words[i]);
+    }
+
+    return 0;
+}
+
 /* ========================================================
  *  命令表定义
  * ======================================================== */
+#define CLI_CMD_ITEMS_MAX  (30)
 
-struct cmd cmd_table[] =
+typedef int (*fn_cli_cmd_t)(uint8_t argc, char **argv);
+
+struct cmd cmd_table[CLI_CMD_ITEMS_MAX] = {};
+/*
 {
     { .name = "help",   .func = cmd_help,   .desc = "显示所有命令" },
     { .name = "clear",  .func = cmd_clear,  .desc = "清屏" },
@@ -332,8 +364,8 @@ struct cmd cmd_table[] =
     { .name = "mode",   .func = cmd_mode,   .desc = "显示模式 (mode [local|remote])" },
     { .name = "update", .func = cmd_update, .desc = "进入固件更新模式" },
 };
-
-const uint16_t cmd_table_size = sizeof(cmd_table) / sizeof(cmd_table[0]);
+*/
+uint16_t cmd_table_size = 0/* sizeof(cmd_table) / sizeof(cmd_table[0]) */;
 
 /* 自动补全词表（用于参数补全） */
 char *auto_complete_words[] =
@@ -350,11 +382,63 @@ const uint16_t auto_complete_words_size =
     sizeof(auto_complete_words) / sizeof(auto_complete_words[0]);
 
 /**
+ *  @fn     cli_cmd_register
+ *  @brief  注册 CLI 命令
+ *  @param  name  命令名称
+ *  @param  pfunc  命令处理函数
+ *  @param  desc  命令描述
+ *  @return 0表示成功，其他值表示失败
+ *  @author zhaojiantao
+ *  @date   2026/8/27
+ *  @note   none
+ */
+int cli_cmd_register(char *name, fn_cli_cmd_t pfunc, char *desc)
+{
+	if (NULL == name || NULL == pfunc)
+	{
+		shell_printf("cli_cmd_register name or pfunc is null \n\r");
+		return -1;
+	}
+
+	if (cmd_table_size >= CLI_CMD_ITEMS_MAX)
+	{
+		shell_printf("cli_cmd_register cmd_table_size(%d) is full\n\r",cmd_table_size);
+		return -2;
+	}
+
+	int i = 0;
+    /* 检查命令是否已存在，避免重复注册 */
+	for (i = 0; i < cmd_table_size; i++)
+	{
+		if (0 == strcmp(name,cmd_table[i].name))
+		{
+			shell_printf("cli_cmd_register cmd %s is exesit\n\r",name);
+			return -3;
+		}
+	}
+
+	cmd_table[cmd_table_size].name = (char*)name;
+	cmd_table[cmd_table_size].func = pfunc;
+	cmd_table[cmd_table_size].desc = (char*)desc;
+	cmd_table_size ++;
+
+	return 0;
+}
+
+/**
  * @brief  初始化 CLI 命令（当前无需额外初始化，保留接口供扩展）
  */
 void cli_cmds_init(void)
 {
-    /* 命令表已静态定义，暂无运行时注册需求 */
+    cli_cmd_register("help", cmd_help, "显示所有命令");
+    cli_cmd_register("clear", cmd_clear, "清屏");
+    cli_cmd_register("info", cmd_info, "系统信息");
+    cli_cmd_register("led", cmd_led, "LED 控制 (led 0|1|2)");
+    cli_cmd_register("rd", cmd_rd, "读内存 (rd <addr> [size])");
+    cli_cmd_register("reboot", cmd_reboot, "软件复位");
+    cli_cmd_register("mode", cmd_mode, "显示模式 (mode [local|remote])");
+    cli_cmd_register("update", cmd_update, "进入固件更新模式");
+    cli_cmd_register("cli_info", cmd_cli_info, "显示 CLI 命令信息");
 }
 
 

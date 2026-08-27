@@ -40,7 +40,8 @@ nr_micro_shell_core.c
        └─ 回车 → 命令匹配 → 执行
 
 cli_cmds.c
-  └─ cmd_table[]: help/clear/info/led/rd/reboot/mode
+  └─ cli_cmds_init() → cli_cmd_register() 动态注册命令
+       help/clear/info/led/rd/reboot/mode/update/cli_info
 ```
 
 ---
@@ -65,11 +66,11 @@ UART2: PA2(TX) + PA3(RX), 115200-8-N-1, 无硬件流控
 
 | 文件 | 行数 | 说明 |
 |------|------|------|
-| `inc/nr_micro_shell.h` | ~80 | 引擎 API 头文件 (原始复制) |
+| `inc/nr_micro_shell.h` | ~96 | 引擎 API 头文件 (`cmd_table_size` 去掉 const 以支持运行时注册) |
 | `inc/nr_micro_shell_port.h` | ~40 | 移植配置: 缓冲区大小/历史条数/提示符 |
 | `src/nr_micro_shell_core.c` | ~560 | 引擎实现 (原始复制, 有少量修改) |
 | `inc/cli_cmds.h` | ~15 | 命令注册接口声明 |
-| `src/cli_cmds.c` | ~260 | 命令表 + 7 条调试命令实现 |
+| `src/cli_cmds.c` | ~445 | 命令表 + 9 条调试命令实现 (运行时动态注册) |
 
 ### 修改文件
 
@@ -80,7 +81,7 @@ UART2: PA2(TX) + PA3(RX), 115200-8-N-1, 无硬件流控
 | `src/uart_drv.c` | HAL_UART_RxCpltCallback 扩展: 判断 USART2 分发给 CLI |
 | `oled_cubemx/Src/stm32f4xx_it.c` | 新增 USART2_IRQHandler |
 | `oled_cubemx/Src/main.c` | MX_NVIC_Init 使能 USART2_IRQn |
-| `src/user_app.c` | user_app_init 增加 cli_init(), user_app_handle 首行增加 cli_poll() |
+| `src/user_app.c` | user_app_init 增加 cli_init() + cli_cmds_init(), user_app_handle 首行增加 cli_poll() |
 
 ---
 
@@ -233,6 +234,7 @@ int user_app_init(void)
 {
     debug_console_init(&huart2);
     cli_init();              // ← 新增
+    cli_cmds_init();         // ← 新增: 注册 CLI 命令
     // ...
 }
 
@@ -243,27 +245,56 @@ int user_app_handle(void)
 }
 ```
 
-### Step 7: 创建命令表 (`cli_cmds.c`)
+### Step 7: 创建命令表与运行时注册 (`cli_cmds.c`)
+
+命令采用**运行时动态注册**机制：`cmd_table` 定义为定长数组，命令通过
+`cli_cmd_register()` 在 `cli_cmds_init()` 中逐个注册。
 
 ```c
-// 命令表 (struct cmd 定义于 nr_micro_shell.h)
-struct cmd cmd_table[] =
-{
-    { .name = "help",   .func = cmd_help,   .desc = "显示所有命令" },
-    { .name = "clear",  .func = cmd_clear,  .desc = "清屏" },
-    { .name = "info",   .func = cmd_info,   .desc = "系统信息" },
-    { .name = "led",    .func = cmd_led,    .desc = "LED 控制 (led 0|1|2)" },
-    { .name = "rd",     .func = cmd_rd,     .desc = "读内存 (rd <addr> [size])" },
-    { .name = "reboot", .func = cmd_reboot, .desc = "软件复位" },
-    { .name = "mode",   .func = cmd_mode,   .desc = "显示模式 (mode [local|remote])" },
-};
-const uint16_t cmd_table_size = sizeof(cmd_table) / sizeof(cmd_table[0]);
+#define CLI_CMD_ITEMS_MAX  (30)   // 命令表容量上限
+
+struct cmd cmd_table[CLI_CMD_ITEMS_MAX] = {};
+uint16_t cmd_table_size = 0;      // 已注册命令数 (运行时自增)
 
 // 自动补全候选词 (用于 Tab 参数提示)
 char *auto_complete_words[] = { "0", "1", "2", "local", "remote", "-h" };
 const uint16_t auto_complete_words_size =
     sizeof(auto_complete_words) / sizeof(auto_complete_words[0]);
 ```
+
+> **注意:** 原 nr_micro_shell 中 `cmd_table_size` 是 `const` 自动计算值，
+> 动态注册要求其可变，因此 `nr_micro_shell.h` 中已去掉 `const` 声明。
+
+注册接口 `cli_cmd_register()`（定义于 `cli_cmds.c`）：
+
+```c
+typedef int (*fn_cli_cmd_t)(uint8_t argc, char **argv);
+
+int cli_cmd_register(char *name, fn_cli_cmd_t pfunc, char *desc);
+//   返回 0  注册成功
+//   返回 -1 name 或 pfunc 为 NULL
+//   返回 -2 命令表已满 (>= CLI_CMD_ITEMS_MAX)
+//   返回 -3 命令名重复，已存在
+```
+
+内置命令在 `cli_cmds_init()` 中注册：
+
+```c
+void cli_cmds_init(void)
+{
+    cli_cmd_register("help",     cmd_help,     "显示所有命令");
+    cli_cmd_register("clear",    cmd_clear,    "清屏");
+    cli_cmd_register("info",     cmd_info,     "系统信息");
+    cli_cmd_register("led",      cmd_led,      "LED 控制 (led 0|1|2)");
+    cli_cmd_register("rd",       cmd_rd,       "读内存 (rd <addr> [size])");
+    cli_cmd_register("reboot",   cmd_reboot,   "软件复位");
+    cli_cmd_register("mode",     cmd_mode,     "显示模式 (mode [local|remote])");
+    cli_cmd_register("update",   cmd_update,   "进入固件更新模式");
+    cli_cmd_register("cli_info", cmd_cli_info, "显示 CLI 命令信息");
+}
+```
+
+`cli_cmds_init()` 由 `user_app_init()` 在 `cli_init()` 之后调用（见 Step 6）。
 
 **`rd` 命令必须包含地址合法性校验**，防止用户输入非法地址导致 HardFault。
 利用 STM32F407 的内存映射表，白名单校验 Flash/SRAM/CCM/外设区域：
@@ -295,15 +326,20 @@ static int cmd_uptime(uint8_t argc, char **argv)
 }
 ```
 
-2. 在 `cmd_table[]` 末尾追加:
+2. 在 `cli_cmds_init()` 中通过 `cli_cmd_register()` 注册:
 
 ```c
-{ .name = "uptime", .func = cmd_uptime, .desc = "显示系统运行时间" },
+cli_cmd_register("uptime", cmd_uptime, "显示系统运行时间");
 ```
 
 3. (可选) 将参数候选词加入 `auto_complete_words[]`。
 
-无需修改任何其他文件。`cmd_table_size` 自动计算。
+无需修改命令表本身。`cli_cmd_register()` 会自动将命令写入 `cmd_table[]`
+并更新 `cmd_table_size`；重复注册同名命令会返回 -3。
+
+> 若希望其他模块（如外部库）注册命令，只需在 `user_app_init()` 中
+> `cli_cmds_init()` 之后调用 `cli_cmd_register()`，并包含 `nr_micro_shell.h`。
+> 注意命令总数不得超过 `CLI_CMD_ITEMS_MAX (30)`。
 
 **命令函数签名:**
 ```c
@@ -368,6 +404,8 @@ static int cmd_xxx(uint8_t argc, char **argv);
 | **rd** | `rd 0x20000000 16` | 内存 hex dump |
 | **reboot** | `reboot` | 软件复位 |
 | **mode** | `mode` / `mode local` / `mode remote` | 显示模式 |
+| **update** | `update` | 进入固件更新模式 |
+| **cli_info** | `cli_info` | 显示 CLI 命令信息 (数量/名称/描述/补全词) |
 
 ---
 
@@ -406,5 +444,8 @@ static int cmd_xxx(uint8_t argc, char **argv);
 |------|---------|------|
 | `nr_micro_shell_core.c` | `run_cmdline()` 中移除 `if (!ret)` 条件, 始终调用 `add_history_cmd(sh)` | 失败的/输错的命令也要能通过 ↑ 调出 |
 | `nr_micro_shell_core.c` | `show_all_cmds()` 中 `\n` 改为 `\r\n` | 终端换行兼容, 避免阶梯状输出 |
+| `nr_micro_shell.h` | `cmd_table_size` 声明去掉 `const` | 命令表改为运行时动态注册, 长度需可变 |
+| `cli_cmds.c` | `cmd_table[]` 改为定长数组, 新增 `cli_cmd_register()` 运行时注册接口 | 支持外部模块动态注册命令 |
+| `cli_cmds.c` | 新增 `cmd_cli_info()` 命令 | 调试时查看已注册命令列表 |
 | `cli_cmds.c` | `cmd_rd()` 新增 `is_valid_address()` 地址白名单校验 | 防止非法地址导致 HardFault |
 | `nr_micro_shell_port.h` | 自定义提示符/缓冲区/历史条数 | 项目适配 |

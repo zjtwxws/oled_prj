@@ -208,19 +208,40 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 ### 4.1 命令注册机制
 
-命令表由引擎的 `struct cmd` 定义，注册到表中即可被识别：
+命令表由引擎的 `struct cmd` 定义，本项目采用**运行时动态注册**：
+`cmd_table` 是定长数组，命令通过 `cli_cmd_register()` 逐个注册到表中。
 
 ```c
-static struct cmd cmd_table[] = {
-    {"help",   cmd_help,   "显示所有可用命令"},
-    {"clear",  cmd_clear,  "清屏"},
-    {"info",   cmd_info,   "显示固件版本和系统信息"},
-    {"led",    cmd_led,    "LED 控制: led <0|1|2>"},
-    {"rd",     cmd_rd,     "读取指定地址内存: rd <addr>"},
-    {"reboot", cmd_reboot, "系统复位"},
-    {"mode",   cmd_mode,   "切换显示模式"},
-    {NULL, NULL, NULL}      /* 表结束标记 */
-};
+#define CLI_CMD_ITEMS_MAX  (30)   /* 命令表容量上限 */
+
+struct cmd cmd_table[CLI_CMD_ITEMS_MAX] = {};
+uint16_t cmd_table_size = 0;      /* 已注册命令数（运行时自增） */
+
+typedef int (*fn_cli_cmd_t)(uint8_t argc, char **argv);
+
+/* 注册接口: 返回 0 成功 / -1 参数空 / -2 表满 / -3 命令重复 */
+int cli_cmd_register(char *name, fn_cli_cmd_t pfunc, char *desc);
+```
+
+> **注意**：原 nr_micro_shell 的 `cmd_table_size` 是 `const` 自动计算值，
+> 动态注册要求其可变，因此 `nr_micro_shell.h` 中去掉了 `const` 声明。
+
+内置命令统一在 `cli_cmds_init()` 中注册（由 `user_app_init()` 在
+`cli_init()` 之后调用）：
+
+```c
+void cli_cmds_init(void)
+{
+    cli_cmd_register("help",     cmd_help,     "显示所有命令");
+    cli_cmd_register("clear",    cmd_clear,    "清屏");
+    cli_cmd_register("info",     cmd_info,     "系统信息");
+    cli_cmd_register("led",      cmd_led,      "LED 控制 (led 0|1|2)");
+    cli_cmd_register("rd",       cmd_rd,       "读内存 (rd <addr> [size])");
+    cli_cmd_register("reboot",   cmd_reboot,   "软件复位");
+    cli_cmd_register("mode",     cmd_mode,     "显示模式 (mode [local|remote])");
+    cli_cmd_register("update",   cmd_update,   "进入固件更新模式");
+    cli_cmd_register("cli_info", cmd_cli_info, "显示 CLI 命令信息");
+}
 ```
 
 **命令函数签名**：
@@ -277,6 +298,8 @@ static int cmd_led(uint8_t argc, char **argv)
 | `rd <addr>` | 读取内存（带地址合法性校验，防死机） |
 | `reboot` | 软件复位 |
 | `mode` | 切换显示模式 |
+| `update` | 进入固件更新模式 |
+| `cli_info` | 显示 CLI 命令信息（数量/名称/描述/补全词） |
 
 ### 4.4 地址合法性校验（安全技巧）
 
@@ -341,6 +364,7 @@ if (addr < 0x08000000UL || addr > 0x2001C000UL)
 4. 引擎处理含大量字符串操作，放中断会拉长中断响应；应中断入队、主循环处理
 5. 防止非法地址访问导致 HardFault 死机
 6. 在 `HAL_UART_RxCpltCallback` 中用 `huart->Instance` 判断：USART1→协议，USART2→CLI
-7. 在 `cli_cmds.c` 的 `cmd_table[]` 中增加一行 `{"命令名", 函数, "帮助文本"}`，并实现对应函数
+7. 在 `cli_cmds.c` 中实现命令函数，然后在 `cli_cmds_init()` 里调用
+   `cli_cmd_register("命令名", 函数, "帮助文本")` 注册（命令总数不得超过 `CLI_CMD_ITEMS_MAX`）
 
 </details>
