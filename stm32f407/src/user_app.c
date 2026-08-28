@@ -17,7 +17,6 @@
 #include "sys_config.h"
 #include "sys_tick.h"
 #include "debug_console.h"
-#include "cli_cmds.h"
 #include "menu_mgr.h"
 #include "app_fw_info.h"
 
@@ -63,9 +62,6 @@ int user_app_init(void)
     uart_drv_init(&huart1);  /* USART1: 与 PC 上位机通信 (115200, 中断接收) */
     debug_console_init(&huart2);
     cli_init();
-
-	/* 注册 CLI 命令 */
-    cli_cmds_init();
 
     ssd1306_init();
     sys_config_init();

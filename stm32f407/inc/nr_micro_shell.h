@@ -81,7 +81,7 @@ struct cmd {
 extern struct cmd cmd_table[];
 extern char *auto_complete_words[];
 extern /* const */ uint16_t cmd_table_size; /* 删除const，保证size可变，以支持命令可注册功能 */
-extern const uint16_t auto_complete_words_size;
+extern /* const */ uint16_t auto_complete_words_size;
 
 void shell_printf(const char *fmt, ...);
 void shell_init(void);

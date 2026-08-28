@@ -3,7 +3,7 @@
 <title>Static Call Graph - [oled_cubemx\oled_cubemx.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image oled_cubemx\oled_cubemx.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Thu Aug 27 19:53:15 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6130100: Last Updated: Fri Aug 28 10:53:32 2026
 <BR><P>
 <H3>Maximum Stack Usage =        688 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -560,9 +560,9 @@ Global Symbols
 <P><STRONG><a name="[106]"></a>strcmp</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, strcmp.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = strcmp
 </UL>
-<BR>[Called By]<UL><LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_mode
+<BR>[Called By]<UL><LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_cmds_init
+<LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_mode
 <LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_cmd_register
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_cmds_init
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tab_key_func
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enter_key_func
 </UL>
@@ -1269,19 +1269,20 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[12d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;freertos_app_init
 </UL>
 
-<P><STRONG><a name="[107]"></a>cli_cmds_init</STRONG> (Thumb, 1440 bytes, Stack size 32 bytes, cli_cmds.o(.text.cli_cmds_init))
+<P><STRONG><a name="[107]"></a>cli_cmds_init</STRONG> (Thumb, 1840 bytes, Stack size 32 bytes, cli_cmds.o(.text.cli_cmds_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = cli_cmds_init &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_printf
 <LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
 </UL>
-<BR>[Called By]<UL><LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
+<BR>[Called By]<UL><LI><a href="#[108]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_init
 </UL>
 
-<P><STRONG><a name="[108]"></a>cli_init</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, debug_console.o(.text.cli_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 208<LI>Call Chain = cli_init &rArr; shell_init &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
+<P><STRONG><a name="[108]"></a>cli_init</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, debug_console.o(.text.cli_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = cli_init &rArr; cli_cmds_init &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_init
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_cmds_init
 <LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 </UL>
 <BR>[Called By]<UL><LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;user_app_init
@@ -1750,6 +1751,7 @@ Global Symbols
 <LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsnprintf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_init
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_cmds_init
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;show_all_cmds
 <LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_update
 <LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_reboot
@@ -1760,7 +1762,6 @@ Global Symbols
 <LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_cli_info
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cmd_clear
 <LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_cmd_register
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_cmds_init
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;up_key_func
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;tab_key_func
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;right_key_func
@@ -2008,7 +2009,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;app_task
 </UL>
 
-<P><STRONG><a name="[137]"></a>user_app_init</STRONG> (Thumb, 172 bytes, Stack size 8 bytes, user_app.o(.text.user_app_init))
+<P><STRONG><a name="[137]"></a>user_app_init</STRONG> (Thumb, 168 bytes, Stack size 8 bytes, user_app.o(.text.user_app_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 344<LI>Call Chain = user_app_init &rArr; debug_printf &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;display_mgr_init
@@ -2024,7 +2025,6 @@ Global Symbols
 <LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;key_drv_init
 <LI><a href="#[164]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;i2c_drv_init
 <LI><a href="#[13d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;menu_mgr_init
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cli_cmds_init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -2600,7 +2600,7 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> cli_cmds.o(.text.cli_cmds_init)
 </UL>
-<P><STRONG><a name="[6b]"></a>cmd_cli_info</STRONG> (Thumb, 220 bytes, Stack size 24 bytes, cli_cmds.o(.text.cmd_cli_info))
+<P><STRONG><a name="[6b]"></a>cmd_cli_info</STRONG> (Thumb, 204 bytes, Stack size 24 bytes, cli_cmds.o(.text.cmd_cli_info))
 <BR><BR>[Stack]<UL><LI>Max Depth = 208<LI>Call Chain = cmd_cli_info &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_printf
@@ -2725,7 +2725,7 @@ Local Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> nr_micro_shell_core.o(.rodata.key_funcs)
 </UL>
-<P><STRONG><a name="[96]"></a>tab_key_func</STRONG> (Thumb, 896 bytes, Stack size 56 bytes, nr_micro_shell_core.o(.text.tab_key_func))
+<P><STRONG><a name="[96]"></a>tab_key_func</STRONG> (Thumb, 904 bytes, Stack size 56 bytes, nr_micro_shell_core.o(.text.tab_key_func))
 <BR><BR>[Stack]<UL><LI>Max Depth = 240<LI>Call Chain = tab_key_func &rArr; shell_printf &rArr; shell_putc &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shell_printf

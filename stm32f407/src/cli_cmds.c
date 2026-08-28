@@ -349,6 +349,7 @@ static int cmd_cli_info(uint8_t argc, char **argv)
  *  命令表定义
  * ======================================================== */
 #define CLI_CMD_ITEMS_MAX  (30)
+#define CLI_COMPLETE_ITEMS_MAX  (30)
 
 struct cmd cmd_table[CLI_CMD_ITEMS_MAX] = {};
 /*
@@ -366,7 +367,8 @@ struct cmd cmd_table[CLI_CMD_ITEMS_MAX] = {};
 uint16_t cmd_table_size = 0/* sizeof(cmd_table) / sizeof(cmd_table[0]) */;
 
 /* 自动补全词表（用于参数补全） */
-char *auto_complete_words[] =
+char *auto_complete_words[CLI_COMPLETE_ITEMS_MAX] = {};
+/*
 {
     "0",
     "1",
@@ -375,9 +377,9 @@ char *auto_complete_words[] =
     "remote",
     "-h",
 };
-
-const uint16_t auto_complete_words_size =
-    sizeof(auto_complete_words) / sizeof(auto_complete_words[0]);
+*/
+uint16_t auto_complete_words_size = 0;
+   /* sizeof(auto_complete_words) / sizeof(auto_complete_words[0]); */
 
 /**
  *  @fn     cli_cmd_register
@@ -424,20 +426,79 @@ int cli_cmd_register(char *name, fn_cli_cmd_t pfunc, char *desc)
 }
 
 /**
+ *  @fn     cli_cmds_coplete_words_register
+ *  @brief  注册命令自动补全词表
+ *  @param  words  要注册的补全词数组
+ *  @param  size  补全词数量
+ *  @return 0表示成功，其他值表示失败
+ *  @author zhaojiantao
+ *  @date   2026/8/28
+ *  @note   none
+ */
+int cli_cmds_coplete_words_register(char *words[], uint16_t size)
+{
+    if (NULL == words || 0 == size)
+    {
+        shell_printf("cli_cmds_coplete_words_register words is null or size is 0 \n\r");
+        return -1;
+    }
+
+    /* 检查是否超过最大限制 */
+    if (size + auto_complete_words_size > CLI_COMPLETE_ITEMS_MAX)
+    {
+        shell_printf("cli_cmds_coplete_words_register size(%d) is too big\n\r",size);
+        return -2;
+    }
+
+    /* 检查是否已存在 */
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < auto_complete_words_size; j++)
+        {
+            if (0 == strcmp(words[i], auto_complete_words[j]))
+            {
+                shell_printf("cli_cmds_coplete_words_register word %s is exesit\n\r",words[i]);
+                return -3;
+            }
+        }
+    }
+
+    for (int i = 0; i < size; i++)
+    {
+        auto_complete_words[auto_complete_words_size] = words[i];
+        auto_complete_words_size += 1;
+    }
+
+    return 0;
+}
+
+/**
  * @brief  初始化 CLI 命令（当前无需额外初始化，保留接口供扩展）
  */
 void cli_cmds_init(void)
 {
-    cli_cmd_register("help", cmd_help, "显示所有命令");
-    cli_cmd_register("clear", cmd_clear, "清屏");
-    cli_cmd_register("info", cmd_info, "系统信息");
-    cli_cmd_register("led", cmd_led, "LED 控制 (led 0|1|2)");
-    cli_cmd_register("rd", cmd_rd, "读内存 (rd <addr> [size])");
-    cli_cmd_register("reboot", cmd_reboot, "软件复位");
-    cli_cmd_register("mode", cmd_mode, "显示模式 (mode [local|remote])");
-    cli_cmd_register("update", cmd_update, "进入固件更新模式");
-    cli_cmd_register("cli_info", cmd_cli_info, "显示 CLI 命令信息");
+    /* 注册内置命令 */
+    (void)cli_cmd_register("help", cmd_help, "显示所有命令");
+    (void)cli_cmd_register("clear", cmd_clear, "清屏");
+    (void)cli_cmd_register("info", cmd_info, "系统信息");
+    (void)cli_cmd_register("led", cmd_led, "LED 控制 (led 0|1|2)");
+    (void)cli_cmd_register("rd", cmd_rd, "读内存 (rd <addr> [size])");
+    (void)cli_cmd_register("reboot", cmd_reboot, "软件复位");
+    (void)cli_cmd_register("mode", cmd_mode, "显示模式 (mode [local|remote])");
+    (void)cli_cmd_register("update", cmd_update, "进入固件更新模式");
+    (void)cli_cmd_register("cli_info", cmd_cli_info, "显示 CLI 命令信息");
+
+    /* 自动补全词表注册 */
+    char *default_complete_words[] = {
+        "0",
+        "1",
+        "2",
+        "local",
+        "remote",
+        "-h",
+    };
+
+    (void)cli_cmds_coplete_words_register(default_complete_words, sizeof(default_complete_words) / sizeof(default_complete_words[0]));
+
+    return;
 }
-
-
-

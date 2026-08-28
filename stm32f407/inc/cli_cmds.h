@@ -22,5 +22,6 @@ typedef int (*fn_cli_cmd_t)(uint8_t argc, char **argv);
  */
 void cli_cmds_init(void);
 int cli_cmd_register(char *name, fn_cli_cmd_t pfunc, char *desc);
+int cli_cmds_coplete_words_register(char *words[], uint16_t size);
 
 #endif /* __CLI_CMDS_H */

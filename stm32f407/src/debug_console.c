@@ -175,6 +175,9 @@ void cli_init(void)
 
     /* 初始化 nr_micro_shell 引擎 */
     shell_init();
+
+	/* 注册默认的 CLI 命令 */
+    cli_cmds_init();
 }
 
 /**
