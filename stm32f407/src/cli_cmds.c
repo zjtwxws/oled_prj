@@ -16,6 +16,7 @@
 #include "sys_tick.h"
 #include "user_app.h"
 #include "menu_mgr.h"
+#include "app_ipc.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -104,7 +105,11 @@ static int cmd_led(uint8_t argc, char **argv)
         return -1;
     }
 
-    led_mgr_set_state((led_state_t)state);
+    led_cmd_t cmd = {0};
+    cmd.type = LED_CMD_SET_STATE;
+    cmd.state = (led_state_t)state;
+    (void)app_ipc_send_led_cmd(&cmd, 0);
+
     shell_printf("LED set to %d\r\n", state);
 
     return 0;
@@ -300,12 +305,18 @@ static int cmd_mode(uint8_t argc, char **argv)
 
     if (strcmp(argv[1], "local") == 0)
     {
-        display_mgr_set_remote(false);
+        disp_cmd_t cmd = {0};
+        cmd.type = DISP_CMD_SET_REMOTE;
+        cmd.u.remote = false;
+        (void)app_ipc_send_disp_cmd(&cmd, 0);
         shell_printf("Switched to local mode\r\n");
     }
     else if (strcmp(argv[1], "remote") == 0)
     {
-        display_mgr_set_remote(true);
+        disp_cmd_t cmd = {0};
+        cmd.type = DISP_CMD_SET_REMOTE;
+        cmd.u.remote = true;
+        (void)app_ipc_send_disp_cmd(&cmd, 0);
         shell_printf("Switched to remote mode\r\n");
     }
     else

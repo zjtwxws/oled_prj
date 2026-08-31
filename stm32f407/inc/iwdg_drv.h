@@ -10,7 +10,7 @@
  * 调试开关: 注释掉下行以关闭看门狗
  * 发布时取消注释
  */
-/* #define IWDG_ENABLE  1 */
+#define IWDG_ENABLE  1
 
 #ifdef IWDG_ENABLE
 

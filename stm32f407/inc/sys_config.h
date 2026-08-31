@@ -31,9 +31,9 @@ typedef struct
 
 int  sys_config_init(void);                /* 加载配置; 如无效则以默认值初始化 */
 int  sys_config_save(void);                /* 保存配置到 Flash */
-void sys_config_set_boot_text(const char *text);
+int  sys_config_set_boot_text(const char *text);
 const char* sys_config_get_boot_text(void);
-void sys_config_set_poweron_type(uint8_t type);
+int  sys_config_set_poweron_type(uint8_t type);
 uint8_t sys_config_get_poweron_type(void);
 
 /** @brief ç³»ç»å¤ä½ (è°ç¨ NVIC_SystemResetï¼ä¸è¿å) */

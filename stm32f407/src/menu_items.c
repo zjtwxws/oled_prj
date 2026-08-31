@@ -23,6 +23,7 @@
 #include "app_fw_info.h"
 #include "debug_console.h"
 #include "user_app.h"
+#include "app_ipc.h"
 #include <string.h>
 
 /* ================================================================
@@ -45,7 +46,10 @@ static uint8_t g_poweron_type = SYS_CONFIG_POWERON_WELCOME;  /* 当前选中的�
  */
 static void cb_mode_changed(uint8_t new_val)
 {
-    display_mgr_set_remote(new_val != 0);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_REMOTE;
+    cmd.u.remote = (new_val != 0U);
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 
 /* --- 显示内容 ACTION 回调 --- */
@@ -55,8 +59,11 @@ static void cb_mode_changed(uint8_t new_val)
  */
 static void cb_disp_time(void)
 {
-    display_mgr_set_remote(true);
-    display_mgr_set_sub_mode(REMOTE_SUB_TIME);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_REMOTE_SUB;
+    cmd.u.remote_sub.remote = true;
+    cmd.u.remote_sub.sub_mode = REMOTE_SUB_TIME;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 
 /**
@@ -65,8 +72,11 @@ static void cb_disp_time(void)
  */
 static void cb_disp_weather(void)
 {
-    display_mgr_set_remote(true);
-    display_mgr_set_sub_mode(REMOTE_SUB_WEATHER);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_REMOTE_SUB;
+    cmd.u.remote_sub.remote = true;
+    cmd.u.remote_sub.sub_mode = REMOTE_SUB_WEATHER;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 
 /**
@@ -75,8 +85,11 @@ static void cb_disp_weather(void)
  */
 static void cb_disp_date(void)
 {
-    display_mgr_set_remote(true);
-    display_mgr_set_sub_mode(REMOTE_SUB_DATE);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_REMOTE_SUB;
+    cmd.u.remote_sub.remote = true;
+    cmd.u.remote_sub.sub_mode = REMOTE_SUB_DATE;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 
 /**
@@ -85,7 +98,11 @@ static void cb_disp_date(void)
  */
 static void cb_disp_custom(void)
 {
-    display_mgr_set_sub_mode(REMOTE_SUB_TEXT);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_REMOTE_SUB;
+    cmd.u.remote_sub.remote = true;
+    cmd.u.remote_sub.sub_mode = REMOTE_SUB_TEXT;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 
 /* --- 显示特效 ACTION 回调 --- */
@@ -95,7 +112,10 @@ static void cb_disp_custom(void)
  */
 static void cb_effect_static(void)
 {
-    display_mgr_set_mode(DISP_MODE_STATIC);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_MODE;
+    cmd.u.mode = DISP_MODE_STATIC;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 /**
  * @brief  左滚特效回调
@@ -103,7 +123,10 @@ static void cb_effect_static(void)
  */
 static void cb_effect_scroll_l(void)
 {
-    display_mgr_set_mode(DISP_MODE_SCROLL_L);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_MODE;
+    cmd.u.mode = DISP_MODE_SCROLL_L;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 /**
  * @brief  右滚特效回调
@@ -111,7 +134,10 @@ static void cb_effect_scroll_l(void)
  */
 static void cb_effect_scroll_r(void)
 {
-    display_mgr_set_mode(DISP_MODE_SCROLL_R);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_MODE;
+    cmd.u.mode = DISP_MODE_SCROLL_R;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 /**
  * @brief  上滚特效回调
@@ -119,7 +145,10 @@ static void cb_effect_scroll_r(void)
  */
 static void cb_effect_scroll_u(void)
 {
-    display_mgr_set_mode(DISP_MODE_SCROLL_U);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_MODE;
+    cmd.u.mode = DISP_MODE_SCROLL_U;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 /**
  * @brief  下滚特效回调
@@ -127,7 +156,10 @@ static void cb_effect_scroll_u(void)
  */
 static void cb_effect_scroll_d(void)
 {
-    display_mgr_set_mode(DISP_MODE_SCROLL_D);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_MODE;
+    cmd.u.mode = DISP_MODE_SCROLL_D;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 /**
  * @brief  翻页特效回调
@@ -135,7 +167,10 @@ static void cb_effect_scroll_d(void)
  */
 static void cb_effect_flip(void)
 {
-    display_mgr_set_mode(DISP_MODE_FLIP);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_MODE;
+    cmd.u.mode = DISP_MODE_FLIP;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 /**
  * @brief  淡入淡出特效回调
@@ -143,7 +178,10 @@ static void cb_effect_flip(void)
  */
 static void cb_effect_fade(void)
 {
-    display_mgr_set_mode(DISP_MODE_FADE);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_MODE;
+    cmd.u.mode = DISP_MODE_FADE;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 
 /* --- 对比度 VALUE 回调 --- */
@@ -154,7 +192,10 @@ static void cb_effect_fade(void)
  */
 static void cb_contrast_changed(uint8_t val)
 {
-    ssd1306_set_contrast(val);
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_SET_CONTRAST;
+    cmd.u.contrast = val;
+    (void)app_ipc_send_disp_cmd(&cmd, 0);
 }
 
 /* --- LED 控制 ACTION 回调 --- */
@@ -164,7 +205,10 @@ static void cb_contrast_changed(uint8_t val)
  */
 static void cb_led_off(void)
 {
-    led_mgr_set_state(LED_STATE_OFF);
+    led_cmd_t cmd = {0};
+    cmd.type = LED_CMD_SET_STATE;
+    cmd.state = LED_STATE_OFF;
+    (void)app_ipc_send_led_cmd(&cmd, 0);
 }
 
 /**
@@ -173,7 +217,10 @@ static void cb_led_off(void)
  */
 static void cb_led_on(void)
 {
-    led_mgr_set_state(LED_STATE_ON);
+    led_cmd_t cmd = {0};
+    cmd.type = LED_CMD_SET_STATE;
+    cmd.state = LED_STATE_ON;
+    (void)app_ipc_send_led_cmd(&cmd, 0);
 }
 
 /**
@@ -182,7 +229,10 @@ static void cb_led_on(void)
  */
 static void cb_led_blink(void)
 {
-    led_mgr_set_state(LED_STATE_BLINK);
+    led_cmd_t cmd = {0};
+    cmd.type = LED_CMD_SET_STATE;
+    cmd.state = LED_STATE_BLINK;
+    (void)app_ipc_send_led_cmd(&cmd, 0);
 }
 
 /* --- 三级示例 ACTION 回调 --- */
@@ -376,7 +426,6 @@ static void preview_render_welcome(void)
     const char *text = sys_config_get_boot_text();
     /* 复用 display_mgr 的全屏文字绘制（通过声明 extern 访问） */
     display_mgr_set_text(text ? text : "欢迎进入系统");
-    /* set_text 内部已调用 draw_text_fullscreen + update_screen */
 }
 
 /* PREVIEW 渲染回调：Logo */
@@ -388,7 +437,6 @@ static void preview_render_logo(void)
 {
     uint8_t *buf = ssd1306_get_buffer();
     memcpy(buf, logo_boot_bmp, 1024);
-    ssd1306_update_screen();
 }
 
 /* PREVIEW 渲染回调：大号文字 */
@@ -399,7 +447,6 @@ static void preview_render_logo(void)
 static void preview_render_bigtext(void)
 {
     draw_bigtext_zhaosi();
-    ssd1306_update_screen();
 }
 
 /* PREVIEW 确认回调 */
@@ -410,8 +457,11 @@ static void preview_render_bigtext(void)
 static void preview_confirm_welcome(void)
 {
     g_poweron_type = SYS_CONFIG_POWERON_WELCOME;
-    sys_config_set_poweron_type(SYS_CONFIG_POWERON_WELCOME);
-    display_mgr_set_boot_text(sys_config_get_boot_text());
+
+    storage_cmd_t cmd = {0};
+    cmd.type = STORAGE_CMD_POWERON_TYPE;
+    cmd.u.poweron_type = SYS_CONFIG_POWERON_WELCOME;
+    (void)app_ipc_send_storage_cmd(&cmd, 0);
 }
 
 /**
@@ -421,7 +471,11 @@ static void preview_confirm_welcome(void)
 static void preview_confirm_logo(void)
 {
     g_poweron_type = SYS_CONFIG_POWERON_LOGO;
-    sys_config_set_poweron_type(SYS_CONFIG_POWERON_LOGO);
+
+    storage_cmd_t cmd = {0};
+    cmd.type = STORAGE_CMD_POWERON_TYPE;
+    cmd.u.poweron_type = SYS_CONFIG_POWERON_LOGO;
+    (void)app_ipc_send_storage_cmd(&cmd, 0);
 }
 
 /**
@@ -431,7 +485,11 @@ static void preview_confirm_logo(void)
 static void preview_confirm_bigtext(void)
 {
     g_poweron_type = SYS_CONFIG_POWERON_BIGTEXT;
-    sys_config_set_poweron_type(SYS_CONFIG_POWERON_BIGTEXT);
+
+    storage_cmd_t cmd = {0};
+    cmd.type = STORAGE_CMD_POWERON_TYPE;
+    cmd.u.poweron_type = SYS_CONFIG_POWERON_BIGTEXT;
+    (void)app_ipc_send_storage_cmd(&cmd, 0);
 }
 
 /* --- 固件升级确认回调 --- */

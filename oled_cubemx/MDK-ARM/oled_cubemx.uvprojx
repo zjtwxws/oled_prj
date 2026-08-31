@@ -606,6 +606,11 @@
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c</FilePath>
             </File>
             <File>
+              <FileName>stm32f4xx_hal_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f4xx_hal_rcc.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c</FilePath>
@@ -825,6 +830,11 @@
               <FileName>ota_req.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\ota_req.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_ipc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\app_ipc.c</FilePath>
             </File>
             <File>
               <FileName>freertos_app.c</FileName>
@@ -1350,6 +1360,11 @@
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c</FilePath>
             </File>
             <File>
+              <FileName>stm32f4xx_hal_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f4xx_hal_rcc.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c</FilePath>
@@ -1569,6 +1584,11 @@
               <FileName>ota_req.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\ota_req.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_ipc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\app_ipc.c</FilePath>
             </File>
             <File>
               <FileName>freertos_app.c</FileName>
@@ -2094,6 +2114,11 @@
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c</FilePath>
             </File>
             <File>
+              <FileName>stm32f4xx_hal_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f4xx_hal_rcc.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c</FilePath>
@@ -2313,6 +2338,11 @@
               <FileName>ota_req.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\ota_req.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_ipc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\app_ipc.c</FilePath>
             </File>
             <File>
               <FileName>freertos_app.c</FileName>

@@ -63,6 +63,7 @@ static bool     disconnect_msg_shown = false;  /* 串口断开提示是否已显
 
 /* 菜单激活时抑制 display_mgr 内部刷屏 */
 static bool     menu_suppress = false;           /* 菜单激活期间抑制 display_mgr 自行刷屏，防止与 menu_mgr 冲突 */
+static bool     display_dirty = false;           /* OLED buffer 有内容需要统一刷新 */
 
 typedef void (*effect_func_t)(void);
 /* 特效函数指针表: 按 display_mode_t 枚举值索引，在 display_mgr_init() 中注册 */
@@ -346,6 +347,35 @@ static void effect_fade(void)
 /* --- 公开接口: 初始化 --- */
 
 /**
+ * @brief  查询是否有待刷新内容
+ * @return true 有待刷新
+ */
+bool display_mgr_is_dirty(void)
+{
+    return display_dirty;
+}
+
+/**
+ * @brief  清除脏标记
+ */
+void display_mgr_clear_dirty(void)
+{
+    display_dirty = false;
+}
+
+/**
+ * @brief  由显示任务统一刷新 OLED
+ */
+void display_mgr_flush(void)
+{
+    if (display_dirty)
+    {
+        ssd1306_update_screen();
+        display_dirty = false;
+    }
+}
+
+/**
  * @brief  初始化显示管理器
  * @param  boot_text_str 参数说明
  * @date   2026-08-07
@@ -398,6 +428,7 @@ void display_mgr_init(const char *boot_text_str)
         break;
     }
     ssd1306_update_screen();
+    display_dirty = false;
 }
 
 /* --- 公开接口: 本地/远程模式切换 --- */
@@ -420,7 +451,6 @@ void display_mgr_set_remote(bool remote)
     {
         /* 切换到远程模式: 清屏准备接收帧缓冲 */
         clear_full_screen();
-        update_screen_if_allowed();
         memset(frame_buf, 0, FRAME_BUF_SIZE);
         frame_seg_received = 0;
         frame_seg_total = 0;
@@ -435,8 +465,9 @@ void display_mgr_set_remote(bool remote)
         fade_step = 0;
         fade_dir = 0;
         draw_text_fullscreen(content_text);
-        update_screen_if_allowed();
     }
+
+    display_dirty = true;
 }
 
 /**
@@ -483,25 +514,25 @@ uint8_t display_mgr_get_sub_mode(void)
  * @param  len 参数说明
  * @date   2026-08-07
  */
-void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, uint8_t len)
+bool display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, uint8_t len)
 {
     uint16_t offset;
     uint16_t copy_len;
 
     if (!is_remote || total == 0 || total > FRAME_SEG_COUNT)
     {
-        return;
+        return false;
     }
 
     if (seg >= total)
     {
-        return;
+        return false;
     }
 
     offset = (uint16_t)seg * FRAME_SEG_SIZE;
     if (offset >= FRAME_BUF_SIZE)
     {
-        return;
+        return false;
     }
 
     if (seg == 0)
@@ -515,12 +546,17 @@ void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, u
 
     if (!frame_rx_active || frame_seg_total != total)
     {
-        return;
+        return false;
     }
 
     if ((frame_seg_mask & (1U << seg)) != 0U)
     {
-        return;
+        return false;
+    }
+
+    if (data == NULL && len > 0U)
+    {
+        return false;
     }
 
     copy_len = (offset + len > FRAME_BUF_SIZE) ? (FRAME_BUF_SIZE - offset) : len;
@@ -532,15 +568,13 @@ void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, u
     {
         uint8_t *buf = ssd1306_get_buffer();
         memcpy(buf, frame_buf, FRAME_BUF_SIZE);
-        /* 菜单激活期间只拼装帧缓冲, 不直接刷屏 */
-        if (!menu_suppress)
-        {
-            ssd1306_update_screen();
-        }
+        display_dirty = true;
         frame_seg_received = 0;
         frame_seg_mask = 0;
         frame_rx_active = 0;
     }
+
+    return true;
 }
 
 /* --- 公开接口: 本地模式 文字+特效 --- */
@@ -560,7 +594,7 @@ void display_mgr_set_text(const char *text)
         if (!is_remote)
         {
             draw_text_fullscreen(content_text);
-            update_screen_if_allowed();
+            display_dirty = true;
         }
     }
 }
@@ -622,7 +656,7 @@ void display_mgr_set_mode(display_mode_t mode)
 
     if (!is_remote)
     {
-        update_screen_if_allowed();
+        display_dirty = true;
     }
 }
 
@@ -704,7 +738,7 @@ void display_mgr_show_disconnect(void)
         col += FONT_CHINESE_W;
         p += 3;
     }
-    ssd1306_update_screen();
+    display_dirty = true;
 }
 
 /**
@@ -744,7 +778,7 @@ void display_mgr_tick(void)
         if (effects[current_mode])
         {
             effects[current_mode]();
-            ssd1306_update_screen();
+            display_dirty = true;
         }
         break;
 
@@ -755,7 +789,7 @@ void display_mgr_tick(void)
             flip_timer = 0;
             flip_phase ^= 1;
             draw_text_fullscreen(flip_phase ? content_text : "");
-            ssd1306_update_screen();
+            display_dirty = true;
         }
         break;
 
@@ -782,6 +816,7 @@ void display_mgr_tick(void)
             }
             uint8_t contrast = (uint8_t)((uint32_t)fade_step * 255 / FADE_STEPS);
             ssd1306_set_contrast(contrast);
+            display_dirty = true;
         }
         break;
 
@@ -818,7 +853,6 @@ void display_mgr_redraw(void)
         /* 远程模式: 将最近拼装完成的帧刷到屏幕 */
         uint8_t *buf = ssd1306_get_buffer();
         memcpy(buf, frame_buf, FRAME_BUF_SIZE);
-        ssd1306_update_screen();
     }
     else
     {
@@ -828,6 +862,6 @@ void display_mgr_redraw(void)
         fade_step = 0;
         fade_dir = 0;
         draw_text_fullscreen(content_text);
-        ssd1306_update_screen();
     }
+    display_dirty = true;
 }

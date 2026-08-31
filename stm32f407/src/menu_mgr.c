@@ -11,6 +11,7 @@
 #include "font.h"
 #include "display_mgr.h"
 #include "debug_console.h"
+#include "app_ipc.h"
 #include <string.h>
 
 /* menu_items.c 提供的接口 (跨编译单元, 无独立 .h) */
@@ -929,11 +930,6 @@ static void handle_confirm(void)
 
     case MENU_TYPE_PREVIEW:
         /* 进入全屏预览 */
-        if (item->preview.render)
-        {
-            item->preview.render();
-            ssd1306_update_screen();
-        }
         g_menu.preview_showing = true;
         g_menu.dirty = true;
         break;
@@ -1235,12 +1231,19 @@ void menu_mgr_tick(void)
     {
         if (g_menu.preview_showing)
         {
-            /* 预览模式不重新渲染 (内容由 MENU_TYPE_PREVIEW 回调直接绘制) */
-        } else if (g_menu.confirm_showing)
+            const menu_item_t *item = g_menu.current_menu[g_menu.cursor];
+            if (item->type == MENU_TYPE_PREVIEW && item->preview.render != NULL)
+            {
+                item->preview.render();
+            }
+            ssd1306_update_screen();
+        }
+        else if (g_menu.confirm_showing)
         {
             render_confirm();
             ssd1306_update_screen();
-        } else if (g_menu.info_showing)
+        }
+        else if (g_menu.info_showing)
         {
             render_info();
             ssd1306_update_screen();
@@ -1283,8 +1286,6 @@ void menu_mgr_init(void)
     g_menu.preview_showing    = false;
     g_menu.confirm_showing    = false;
 
-    /* 通知 display_mgr 抑制远程帧刷屏 */
-    display_mgr_set_menu_suppress(true);
 }
 
 /**
@@ -1326,7 +1327,6 @@ void menu_mgr_activate(void)
 
     memset(g_menu.stack, 0, sizeof(g_menu.stack));
 
-    display_mgr_set_menu_suppress(true);
 }
 
 /**
@@ -1342,7 +1342,9 @@ void menu_mgr_deactivate(void)
     g_menu.confirm_showing = false;
     g_menu.value_editing = false;
 
-    display_mgr_redraw();
+    disp_cmd_t cmd = {0};
+    cmd.type = DISP_CMD_REDRAW;
+    (void)app_ipc_send_disp_cmd(&cmd, pdMS_TO_TICKS(20U));
 }
 
 /**

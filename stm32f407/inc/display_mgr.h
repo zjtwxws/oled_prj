@@ -49,6 +49,9 @@ typedef struct
 
 /* ---- 初始化 ---- */
 void display_mgr_init(const char *boot_text);
+bool display_mgr_is_dirty(void);
+void display_mgr_clear_dirty(void);
+void display_mgr_flush(void);
 
 /* ---- 本地/远程模式切换 ---- */
 void display_mgr_set_remote(bool remote);
@@ -59,7 +62,7 @@ void display_mgr_set_sub_mode(uint8_t sub_mode);
 uint8_t display_mgr_get_sub_mode(void);
 
 /* ---- 远程帧缓冲接收 ---- */
-void display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, uint8_t len);
+bool display_mgr_rx_frame_seg(uint8_t seg, uint8_t total, const uint8_t *data, uint8_t len);
 
 /* ---- 本地模式: 文字+特效 ---- */
 void display_mgr_set_text(const char *text);

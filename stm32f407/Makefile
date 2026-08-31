@@ -19,7 +19,9 @@ INC_APP = -Iinc \
           -I$(CORE_DIR)/Inc \
           -I$(CORE_DIR)/Drivers/STM32F4xx_HAL_Driver/Inc \
           -I$(CORE_DIR)/Drivers/CMSIS/Device/ST/STM32F4xx/Include \
-          -I$(CORE_DIR)/Drivers/CMSIS/Include
+          -I$(CORE_DIR)/Drivers/CMSIS/Include \
+          -Ithirdparty/freertos/include \
+          -Ithirdparty/freertos/portable/GCC/ARM_CM4F
 
 INC_BOOT = $(INC_APP) -Iiap/inc
 
@@ -29,7 +31,12 @@ APP_SRC = src/ssd1306.c src/font.c src/display_mgr.c \
           src/led_mgr.c src/key_drv.c src/iwdg_drv.c src/sys_config.c \
           src/sys_tick.c src/user_app.c src/menu_mgr.c src/menu_items.c \
           src/debug_console.c src/nr_micro_shell_core.c src/cli_cmds.c \
-          src/app_fw_info.c src/ota_req.c
+          src/app_fw_info.c src/ota_req.c src/app_ipc.c src/freertos_app.c \
+          thirdparty/freertos/tasks.c thirdparty/freertos/queue.c \
+          thirdparty/freertos/list.c thirdparty/freertos/event_groups.c \
+          thirdparty/freertos/stream_buffer.c thirdparty/freertos/timers.c \
+          thirdparty/freertos/portable/GCC/ARM_CM4F/port.c \
+          thirdparty/freertos/portable/MemMang/heap_4.c
 
 HAL_SRC = $(CORE_DIR)/Src/main.c $(CORE_DIR)/Src/stm32f4xx_it.c \
           $(CORE_DIR)/Src/stm32f4xx_hal_msp.c $(CORE_DIR)/Src/system_stm32f4xx.c

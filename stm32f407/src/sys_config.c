@@ -137,20 +137,23 @@ int sys_config_save(void)
  * @param  text 参数说明
  * @date   2026-08-07
  */
-void sys_config_set_boot_text(const char *text)
+int sys_config_set_boot_text(const char *text)
 {
-    if (text)
+    if (text == NULL)
     {
-        /* 仅内容变化时才擦写 Flash, 减少磨损 */
-        if (strncmp(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN) == 0)
-        {
-            return;
-        }
-        strncpy(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN - 1);
-        config.boot_text[SYS_CONFIG_BOOT_TEXT_LEN - 1] = '\0';
-        config.crc32 = crc32_simple((const uint8_t *)&config, sizeof(sys_config_t) - 4);
-        sys_config_save();
+        return -1;
     }
+
+    if (strncmp(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN) == 0)
+    {
+        return 0;
+    }
+
+    strncpy(config.boot_text, text, SYS_CONFIG_BOOT_TEXT_LEN - 1);
+    config.boot_text[SYS_CONFIG_BOOT_TEXT_LEN - 1] = '\0';
+    config.crc32 = crc32_simple((const uint8_t *)&config, sizeof(sys_config_t) - 4U);
+
+    return sys_config_save();
 }
 
 /**
@@ -168,19 +171,22 @@ const char* sys_config_get_boot_text(void)
  * @param  type 参数说明
  * @date   2026-08-07
  */
-void sys_config_set_poweron_type(uint8_t type)
+int sys_config_set_poweron_type(uint8_t type)
 {
-    if (type > 2)
+    if (type > 2U)
     {
-        return;
+        return -1;
     }
+
     if (config.poweron_type == type)
     {
-        return;
+        return 0;
     }
+
     config.poweron_type = type;
-    config.crc32 = crc32_simple((const uint8_t *)&config, sizeof(sys_config_t) - 4);
-    sys_config_save();
+    config.crc32 = crc32_simple((const uint8_t *)&config, sizeof(sys_config_t) - 4U);
+
+    return sys_config_save();
 }
 
 /**

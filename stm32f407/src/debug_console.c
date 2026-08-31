@@ -18,6 +18,7 @@
 #include "nr_micro_shell.h"
 #include "cli_cmds.h"
 #include "sys_config.h"
+#include "app_ipc.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -102,22 +103,28 @@ void debug_console_write(const char *str)
  */
 void debug_printf(const char *fmt, ...)
 {
-    if (p_debug_uart == NULL)
-    {
-        return;
-    }
-
-    char buf[256];
+    char buf[DEBUG_LOG_TEXT_MAX];
     va_list args;
     va_start(args, fmt);
     int len = vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
 
-    if (len > 0 && (uint16_t)len < sizeof(buf))
+    if (len < 0)
     {
-        HAL_UART_Transmit(p_debug_uart, (uint8_t *)buf, (uint16_t)len, HAL_MAX_DELAY);
+        return;
     }
-    HAL_UART_Transmit(p_debug_uart, (uint8_t *)"\r\n", 2, HAL_MAX_DELAY);
+
+    if (g_debug_log_queue != NULL)
+    {
+        (void)app_ipc_send_debug_log(buf);
+        return;
+    }
+
+    if (p_debug_uart != NULL)
+    {
+        HAL_UART_Transmit(p_debug_uart, (uint8_t *)buf, (uint16_t)strlen(buf), HAL_MAX_DELAY);
+        HAL_UART_Transmit(p_debug_uart, (uint8_t *)"\r\n", 2U, HAL_MAX_DELAY);
+    }
 }
 
 /* ---- 十六进制 dump ---- */

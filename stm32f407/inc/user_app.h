@@ -6,6 +6,8 @@
 #ifndef __USER_APP_H
 #define __USER_APP_H
 
+#include "app_ipc.h"
+
 /* APP Slot 基地址 — 编译宏 APP_SLOT_B/APP_SLOT_A 控制 */
 #ifndef APP_VTOR_ADDR
 #if defined(APP_SLOT_B)
@@ -25,7 +27,11 @@
 
 /** @brief 用户应用初始化 (外设+驱动+显示+菜单)，在 main() 中调用一次 */
 int user_app_init(void);
-/** @brief 用户应用主循环 (协议处理+按键扫描+LED/显示 tick+喂狗)，在 while(1) 中每帧调用 */
-int user_app_handle(void);
+/** @brief 串口任务处理 (协议接收、断线检测、统一 UART1 发送) */
+void user_app_comm_process(void);
+/** @brief 按键任务处理 (扫描与分发) */
+void user_app_key_process(void);
+/** @brief 串口任务统一发送协议上行帧 */
+void user_app_send_proto_tx(const proto_tx_req_t *req);
 
 #endif

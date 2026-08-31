@@ -6,6 +6,7 @@
 #include "uart_drv.h"
 
 #include "debug_console.h"
+#include "app_ipc.h"
 #include "stm32f4xx_hal.h"
 #include <string.h>
 
@@ -169,6 +170,10 @@ void uart_drv_rx_callback(uint8_t byte)
             }
         }
     }
+
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    app_ipc_notify_comm_from_isr(&xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 /**

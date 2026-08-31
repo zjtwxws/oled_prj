@@ -19,6 +19,7 @@
 #include "debug_console.h"
 #include "menu_mgr.h"
 #include "app_fw_info.h"
+#include "app_ipc.h"
 
 /* 外设定义 — HAL 句柄类型前向声明 (定义于 CubeMX 生成的 main.c) */
 typedef struct I2C_HandleTypeDef  I2C_HandleTypeDef;
@@ -33,6 +34,10 @@ static void send_nak(uint8_t seq, uint8_t error_code);
 static void send_key_event(uint8_t key_id, uint8_t action);
 static void send_led_status(void);
 static void send_mode_status(void);
+static apply_status_t comm_wait_results(uint8_t seq,
+                                        uint8_t cmd,
+                                        uint8_t expected,
+                                        uint32_t timeout_ms);
 
 static volatile uint8_t tx_seq = 0;  /* 发送帧序列号 (每次发送递增，用于协议层去重和确认) */
 
@@ -68,12 +73,13 @@ int user_app_init(void)
 
     led_mgr_init();
     key_drv_init();
-    iwdg_drv_init();
     
     display_mgr_init(sys_config_get_boot_text());
     /* 上电画面保持 2s，让用户看清启动内容 */
     sys_tick_delay_ms(2000);
     menu_mgr_init();
+    /* IWDG 必须在长时间启动延时之后、调度器启动之前初始化，否则喂狗任务尚未运行就会复位 */
+    iwdg_drv_init();
     
     DEBUG_PRINTF("Firmware Version: " FW_VERSION);
     DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");
@@ -81,36 +87,29 @@ int user_app_init(void)
     return 0;
 }
 
-//需要在main里面的while(1)里面调用
 /**
- * @brief  主循环处理（协议解析/按键扫描/显示/看门狗）
- * @date   2026-08-07
+ * @brief  串口任务处理：协议超时、接收字节、断线检测
  */
-int user_app_handle(void)
+void user_app_comm_process(void)
 {
-    static uint32_t last_tick = 0;
-    static uint32_t last_key_scan = 0;
-    static uint32_t led_tick_acc = 0;
+    static uint32_t last_rx_tick = 0;
+    static bool disconnect_shown = false;
 
     uint32_t bytes_read_this_loop = 0;
-    key_info_t key_info;
     uint8_t rx_byte;
 
-    /*
-     * 协议帧间超时检测: 若超过 PROTO_RX_TIMEOUT_MS 未收到完整帧,
-     * 自动复位接收状态机防止卡死。
-     */
-    if (proto_get_last_byte_tick() > 0 &&
+    if (proto_get_last_byte_tick() > 0U &&
         sys_tick_ms() - proto_get_last_byte_tick() > PROTO_RX_TIMEOUT_MS)
     {
         proto_reset_rx();
     }
 
-    while (uart_drv_available())
+    while (uart_drv_available() > 0U)
     {
         uart_drv_read_byte(&rx_byte);
         bytes_read_this_loop++;
-        if (proto_feed_byte(rx_byte))
+
+        if (proto_feed_byte(rx_byte) != 0)
         {
             const proto_frame_t *f = proto_get_frame();
             DEBUG_PRINTF("RX: cmd=0x%02X seq=%d len=%d", f->cmd, f->seq, f->len);
@@ -118,104 +117,174 @@ int user_app_handle(void)
         }
     }
 
-    /* 远程模式超时提示: 5秒无串口数据则在OLED显示"串口已断开" */
+    if (bytes_read_this_loop > 0U)
     {
-        static uint32_t last_rx_tick = 0;
-        static bool     disconnect_shown = false;
-        if (bytes_read_this_loop > 0)
+        last_rx_tick = sys_tick_ms();
+        if (disconnect_shown)
         {
-            last_rx_tick = sys_tick_ms();
-            if (disconnect_shown)
-            {
-                disconnect_shown = false;
-                display_mgr_hide_disconnect();
-            }
-        }
-        if (!menu_mgr_is_active() && display_mgr_is_remote() && last_rx_tick > 0 &&
-            sys_tick_ms() - last_rx_tick > 5000 && !disconnect_shown)
-        {
-            disconnect_shown = true;
-            DEBUG_PRINTF("MODE: serial disconnected");
-            display_mgr_show_disconnect();
+            disconnect_shown = false;
+            disp_cmd_t cmd = {0};
+            cmd.type = DISP_CMD_HIDE_DISCONNECT;
+            (void)app_ipc_send_disp_cmd(&cmd, 0);
         }
     }
 
-    if (sys_tick_ms() - last_key_scan >= 20)
+    if (!menu_mgr_is_active() && display_mgr_is_remote() &&
+        last_rx_tick > 0U &&
+        sys_tick_ms() - last_rx_tick > 5000U &&
+        !disconnect_shown)
     {
-        last_key_scan = sys_tick_ms();
-        if (key_drv_scan(&key_info))
+        disconnect_shown = true;
+        DEBUG_PRINTF("MODE: serial disconnected");
+        disp_cmd_t cmd = {0};
+        cmd.type = DISP_CMD_SHOW_DISCONNECT;
+        (void)app_ipc_send_disp_cmd(&cmd, 0);
+    }
+}
+
+/**
+ * @brief  按键任务处理：扫描与分发
+ */
+void user_app_key_process(void)
+{
+    static uint32_t last_key_scan = 0;
+    key_info_t key_info;
+
+    if (sys_tick_ms() - last_key_scan < 20U)
+    {
+        return;
+    }
+    last_key_scan = sys_tick_ms();
+
+    if (key_drv_scan(&key_info) == 0)
+    {
+        return;
+    }
+
+    DEBUG_PRINTF("KEY: id=%d event=%d", key_info.key_id, key_info.event);
+
+    if (menu_mgr_is_active())
+    {
+        menu_mgr_handle_key(key_info.key_id, key_info.event);
+    }
+    else
+    {
+        switch (key_info.key_id)
         {
-            DEBUG_PRINTF("KEY: id=%d event=%d", key_info.key_id, key_info.event);
-            if (menu_mgr_is_active())
+        case 1:
+        {
+            disp_cmd_t cmd = {0};
+            cmd.type = DISP_CMD_NEXT_MODE;
+            cmd.report_status = true;
+            (void)app_ipc_send_disp_cmd(&cmd, 0);
+            break;
+        }
+
+        case 2:
+        {
+            led_cmd_t cmd = {0};
+            cmd.type = LED_CMD_NEXT_MODE;
+            cmd.report_status = true;
+            (void)app_ipc_send_led_cmd(&cmd, 0);
+            break;
+        }
+
+        case 4:
+            if (key_info.event == KEY_EVENT_LONG_PRESS)
             {
-                /* 菜单激活: 按键全部交给 menu_mgr */
-                menu_mgr_handle_key(key_info.key_id, key_info.event);
+                menu_mgr_activate();
             }
-            else
-            {
-                /* 正常显示: 原有按键逻辑 */
-                switch (key_info.key_id)
-                {
-                case 1:
-                    display_mgr_next_mode();
-                    send_mode_status();
-                    break;
-                case 2:
-                    {
-                        uint8_t next = (led_mgr_get_state() + 1) % 3;
-                        led_mgr_set_state((led_state_t)next);
-                        send_led_status();
-                    }
-                    break;
-                case 4:
-                    /* KEY4 长按 → 激活菜单 */
-                    if (key_info.event == KEY_EVENT_LONG_PRESS)
-                    {
-                        menu_mgr_activate();
-                    }
-                    break;
-                }
-            }
-            /* REPEAT 事件不上报上位机 */
-            if (key_info.event != KEY_EVENT_LONG_PRESS_REPEAT)
-            {
-                send_key_event(key_info.key_id, key_info.event);
-            }
+            break;
+
+        default:
+            break;
         }
     }
 
+    if (key_info.event != KEY_EVENT_LONG_PRESS_REPEAT)
     {
-        uint32_t now = sys_tick_ms();
-        uint32_t elapsed = now - last_tick;
-        last_tick = now;
-        led_tick_acc += elapsed;
-        if (led_tick_acc >= 50)
+        proto_tx_req_t tx = {0};
+        tx.type = PROTO_TX_KEY_EVENT;
+        tx.a = key_info.key_id;
+        tx.b = (uint8_t)key_info.event;
+        (void)app_ipc_send_proto_tx(&tx, 0);
+    }
+}
+
+/**
+ * @brief  串口任务统一发送协议上行帧
+ * @param  req 发送请求
+ */
+void user_app_send_proto_tx(const proto_tx_req_t *req)
+{
+    if (req == NULL)
+    {
+        return;
+    }
+
+    switch (req->type)
+    {
+    case PROTO_TX_KEY_EVENT:
+        send_key_event(req->a, req->b);
+        break;
+
+    case PROTO_TX_LED_STATUS:
+        send_led_status();
+        break;
+
+    case PROTO_TX_MODE_STATUS:
+        send_mode_status();
+        break;
+
+    default:
+        break;
+    }
+}
+
+/**
+ * @brief  等待命令拥有者任务返回应用结果
+ * @param  seq       协议序列号
+ * @param  cmd       协议命令字
+ * @param  expected  需要收到的成功结果数量
+ * @param  timeout_ms 最大等待时间
+ * @return 应用结果
+ */
+static apply_status_t comm_wait_results(uint8_t seq,
+                                        uint8_t cmd,
+                                        uint8_t expected,
+                                        uint32_t timeout_ms)
+{
+    uint32_t deadline = sys_tick_ms() + timeout_ms;
+    uint8_t ok_count = 0;
+
+    while (sys_tick_ms() < deadline)
+    {
+        cmd_result_t result;
+        if (xQueueReceive(g_cmd_result_queue,
+                          &result,
+                          pdMS_TO_TICKS(10U)) != pdPASS)
         {
-            led_mgr_tick(led_tick_acc);
-            led_tick_acc = 0;
+            continue;
+        }
+
+        if (result.seq != seq || result.cmd != cmd)
+        {
+            continue;
+        }
+
+        if (result.status != APPLY_OK)
+        {
+            return result.status;
+        }
+
+        ok_count++;
+        if (ok_count >= expected)
+        {
+            return APPLY_OK;
         }
     }
 
-    {
-        static uint32_t disp_tick = 0;
-        uint32_t now = sys_tick_ms();
-        if (now - disp_tick >= 50)
-        {
-            disp_tick = now;
-            if (menu_mgr_is_active())
-            {
-                menu_mgr_tick();
-            }
-            else
-            {
-                display_mgr_tick();
-            }
-        }
-    }
-
-    iwdg_drv_feed();
-
-    return 0;
+    return APPLY_BUSY;
 }
 
 /**
@@ -227,174 +296,319 @@ static void process_frame(const proto_frame_t *frame)
 {
     switch (frame->cmd)
     {
-
     case CMD_LED_CTRL:
-        if (frame->len >= 1 && frame->data[0] <= 2)
-        {
-            DEBUG_PRINTF("LED: set state=%d", frame->data[0]);
-            led_mgr_set_state((led_state_t)frame->data[0]);
-            send_ack(frame->seq);
-            send_led_status();
-        }
-        else
+    {
+        if (frame->len < 1U || frame->data[0] > 2U)
         {
             send_nak(frame->seq, NAK_PARAM_ERROR);
+            break;
         }
-        break;
 
-    case CMD_DISPLAY_MODE:
-        if (frame->len >= 1)
-        {
-            /*
-             * data[0]: bit7=0 本地, bit7=1 远程; 低7位=子模式
-             * 本地模式: 低7位=特效号
-             * 远程模式: 低7位=子模式 (0=TEXT,1=TIME,2=WEATHER,3=DATE)
-             */
-            bool to_remote = (frame->data[0] & 0x80) != 0;
-            uint8_t sub = frame->data[0] & 0x7F;
+        led_cmd_t cmd = {0};
+        cmd.type = LED_CMD_SET_STATE;
+        cmd.state = (led_state_t)frame->data[0];
+        cmd.seq = frame->seq;
+        cmd.proto_cmd = frame->cmd;
+        cmd.need_result = true;
 
-            DEBUG_PRINTF("DISP: to=%s sub=%d",
-                         to_remote ? "remote" : "local", sub);
-
-            display_mgr_set_remote(to_remote);
-
-            if (to_remote)
-            {
-                if (sub <= REMOTE_SUB_DATE)
-                    display_mgr_set_sub_mode(sub);
-                /* 远程模式下 EFFECT 切换通过 CMD_DISPLAY_MODE bit7=0 实现 */
-            }
-            else
-            {
-                if (sub < DISP_MODE_COUNT)
-                    display_mgr_set_mode((display_mode_t)sub);
-            }
-
-            send_ack(frame->seq);
-            send_mode_status();
-        }
-        else
+        if (app_ipc_send_led_cmd(&cmd, pdMS_TO_TICKS(20U)) != pdPASS)
         {
-            send_nak(frame->seq, NAK_PARAM_ERROR);
-        }
-        break;
-
-    case CMD_TEXT_CONTENT:
-        if (frame->len > 0 && frame->len <= PROTO_MAX_DATA)
-        {
-            DEBUG_PRINTF("TEXT: len=%d", frame->len);
-            char buf[PROTO_MAX_DATA + 1];
-            memcpy(buf, frame->data, frame->len);
-            buf[frame->len] = '\0';
-            display_mgr_set_text(buf);
-            send_ack(frame->seq);
-        }
-        else
-        {
-            send_nak(frame->seq, NAK_PARAM_ERROR);
-        }
-        break;
-
-    case CMD_TIME_SYNC:
-        if (frame->len >= 7)
-        {
-            DEBUG_PRINTF("TIME: 20%02d-%02d-%02d %02d:%02d:%02d wd=%d",
-                         frame->data[0], frame->data[1], frame->data[2],
-                         frame->data[3], frame->data[4], frame->data[5],
-                         frame->data[6]);
-            display_status_t st = *display_mgr_get_status();
-            st.year     = frame->data[0];
-            st.month    = frame->data[1];
-            st.day      = frame->data[2];
-            st.hour     = frame->data[3];
-            st.minute   = frame->data[4];
-            st.second   = frame->data[5];
-            st.week_day = frame->data[6];
-            display_mgr_update_status(&st);
-            send_ack(frame->seq);
-        }
-        else
-        {
-            send_nak(frame->seq, NAK_PARAM_ERROR);
-        }
-        break;
-
-    case CMD_WEATHER_DATA:
-        if (frame->len >= 4)
-        {
-            DEBUG_PRINTF("WTHR: type=%d temp=%d hum=%d wind=%d",
-                         frame->data[0], (int8_t)frame->data[1],
-                         frame->data[2], frame->data[3]);
-            display_status_t st = *display_mgr_get_status();
-            st.weather_type = frame->data[0];
-            st.temperature  = (int8_t)frame->data[1];
-            st.humidity     = frame->data[2];
-            st.wind_dir     = frame->data[3];
-            display_mgr_update_status(&st);
-            send_ack(frame->seq);
-        }
-        else
-        {
-            send_nak(frame->seq, NAK_PARAM_ERROR);
-        }
-        break;
-
-    case CMD_FRAME_SYNC:
-        /* 仅远程模式处理帧缓冲分段 */
-        if (!display_mgr_is_remote())
-        {
-            DEBUG_PRINTF("FRAME: ignored (local mode)");
             send_nak(frame->seq, NAK_BUSY);
             break;
         }
-        if (frame->len >= 2)
+
+        apply_status_t status = comm_wait_results(frame->seq, frame->cmd, 1U, 100U);
+        if (status != APPLY_OK)
         {
-            uint8_t seg   = frame->data[0];
-            uint8_t total = frame->data[1];
-            uint8_t payload_len = frame->len - 2;
-            DEBUG_PRINTF("FRAME: seg=%d/%d len=%d", seg, total, payload_len);
-            display_mgr_rx_frame_seg(seg, total, frame->data + 2, payload_len);
-            send_ack(frame->seq);
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        send_ack(frame->seq);
+        send_led_status();
+        break;
+    }
+
+    case CMD_DISPLAY_MODE:
+    {
+        if (frame->len < 1U)
+        {
+            send_nak(frame->seq, NAK_PARAM_ERROR);
+            break;
+        }
+
+        bool to_remote = (frame->data[0] & 0x80U) != 0U;
+        uint8_t sub = frame->data[0] & 0x7FU;
+
+        disp_cmd_t cmd = {0};
+        cmd.seq = frame->seq;
+        cmd.proto_cmd = frame->cmd;
+        cmd.need_result = true;
+
+        if (to_remote)
+        {
+            if (sub > REMOTE_SUB_DATE)
+            {
+                send_nak(frame->seq, NAK_PARAM_ERROR);
+                break;
+            }
+            cmd.type = DISP_CMD_SET_REMOTE_SUB;
+            cmd.u.remote_sub.remote = true;
+            cmd.u.remote_sub.sub_mode = sub;
         }
         else
         {
-            send_nak(frame->seq, NAK_PARAM_ERROR);
+            if (sub >= DISP_MODE_COUNT)
+            {
+                send_nak(frame->seq, NAK_PARAM_ERROR);
+                break;
+            }
+            cmd.type = DISP_CMD_SET_MODE;
+            cmd.u.mode = (display_mode_t)sub;
         }
+
+        if (app_ipc_send_disp_cmd(&cmd, pdMS_TO_TICKS(20U)) != pdPASS)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        apply_status_t status = comm_wait_results(frame->seq, frame->cmd, 1U, 150U);
+        if (status != APPLY_OK)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        send_ack(frame->seq);
+        send_mode_status();
         break;
+    }
+
+    case CMD_TEXT_CONTENT:
+    {
+        if (frame->len == 0U || frame->len > PROTO_MAX_DATA)
+        {
+            send_nak(frame->seq, NAK_PARAM_ERROR);
+            break;
+        }
+
+        disp_cmd_t cmd = {0};
+        cmd.type = DISP_CMD_SET_TEXT;
+        cmd.seq = frame->seq;
+        cmd.proto_cmd = frame->cmd;
+        cmd.need_result = true;
+        memcpy(cmd.u.text, frame->data, frame->len);
+        cmd.u.text[frame->len] = '\0';
+
+        if (app_ipc_send_disp_cmd(&cmd, pdMS_TO_TICKS(20U)) != pdPASS)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        apply_status_t status = comm_wait_results(frame->seq, frame->cmd, 1U, 150U);
+        if (status != APPLY_OK)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        send_ack(frame->seq);
+        break;
+    }
+
+    case CMD_TIME_SYNC:
+    {
+        if (frame->len < 7U)
+        {
+            send_nak(frame->seq, NAK_PARAM_ERROR);
+            break;
+        }
+
+        display_status_t st = {0};
+        st.year = frame->data[0];
+        st.month = frame->data[1];
+        st.day = frame->data[2];
+        st.hour = frame->data[3];
+        st.minute = frame->data[4];
+        st.second = frame->data[5];
+        st.week_day = frame->data[6];
+
+        disp_cmd_t cmd = {0};
+        cmd.type = DISP_CMD_UPDATE_STATUS;
+        cmd.seq = frame->seq;
+        cmd.proto_cmd = frame->cmd;
+        cmd.need_result = true;
+        cmd.u.status = st;
+
+        if (app_ipc_send_disp_cmd(&cmd, pdMS_TO_TICKS(20U)) != pdPASS)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        apply_status_t status = comm_wait_results(frame->seq, frame->cmd, 1U, 150U);
+        if (status != APPLY_OK)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        send_ack(frame->seq);
+        break;
+    }
+
+    case CMD_WEATHER_DATA:
+    {
+        if (frame->len < 4U)
+        {
+            send_nak(frame->seq, NAK_PARAM_ERROR);
+            break;
+        }
+
+        display_status_t st = {0};
+        st.weather_type = frame->data[0];
+        st.temperature = (int8_t)frame->data[1];
+        st.humidity = frame->data[2];
+        st.wind_dir = frame->data[3];
+
+        disp_cmd_t cmd = {0};
+        cmd.type = DISP_CMD_UPDATE_STATUS;
+        cmd.seq = frame->seq;
+        cmd.proto_cmd = frame->cmd;
+        cmd.need_result = true;
+        cmd.u.status = st;
+
+        if (app_ipc_send_disp_cmd(&cmd, pdMS_TO_TICKS(20U)) != pdPASS)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        apply_status_t status = comm_wait_results(frame->seq, frame->cmd, 1U, 150U);
+        if (status != APPLY_OK)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        send_ack(frame->seq);
+        break;
+    }
+
+    case CMD_FRAME_SYNC:
+    {
+        if (!display_mgr_is_remote())
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        if (frame->len < 2U)
+        {
+            send_nak(frame->seq, NAK_PARAM_ERROR);
+            break;
+        }
+
+        uint8_t seg = frame->data[0];
+        uint8_t total = frame->data[1];
+        uint8_t payload_len = (uint8_t)(frame->len - 2U);
+        if (payload_len > DISP_FRAME_SEG_MAX)
+        {
+            send_nak(frame->seq, NAK_PARAM_ERROR);
+            break;
+        }
+
+        disp_cmd_t cmd = {0};
+        cmd.type = DISP_CMD_FRAME_SEG;
+        cmd.seq = frame->seq;
+        cmd.proto_cmd = frame->cmd;
+        cmd.need_result = true;
+        cmd.u.frame_seg.seg = seg;
+        cmd.u.frame_seg.total = total;
+        cmd.u.frame_seg.len = payload_len;
+        memcpy(cmd.u.frame_seg.data, frame->data + 2U, payload_len);
+
+        if (app_ipc_send_disp_cmd(&cmd, pdMS_TO_TICKS(20U)) != pdPASS)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        apply_status_t status = comm_wait_results(frame->seq, frame->cmd, 1U, 150U);
+        if (status != APPLY_OK)
+        {
+            send_nak(frame->seq, status == APPLY_PARAM_ERROR ? NAK_PARAM_ERROR : NAK_BUSY);
+            break;
+        }
+
+        send_ack(frame->seq);
+        break;
+    }
 
     case CMD_BOOT_TEXT:
-        if (frame->len > 0)
+    {
+        if (frame->len == 0U || frame->len >= STORAGE_TEXT_MAX)
         {
-            DEBUG_PRINTF("BOOT: text len=%d", frame->len);
-            char buf[PROTO_MAX_DATA + 1];
-            memcpy(buf, frame->data, frame->len);
-            buf[frame->len] = '\0';
-            sys_config_set_boot_text(buf);
-            display_mgr_set_boot_text(buf);
-            send_ack(frame->seq);
+            send_nak(frame->seq, NAK_PARAM_ERROR);
+            break;
+        }
+
+        storage_cmd_t store = {0};
+        store.type = STORAGE_CMD_BOOT_TEXT;
+        store.seq = frame->seq;
+        store.proto_cmd = frame->cmd;
+        store.need_result = true;
+        memcpy(store.u.text, frame->data, frame->len);
+        store.u.text[frame->len] = '\0';
+
+        disp_cmd_t disp = {0};
+        disp.type = DISP_CMD_SET_BOOT_TEXT;
+        disp.seq = frame->seq;
+        disp.proto_cmd = frame->cmd;
+        disp.need_result = true;
+        memcpy(disp.u.boot_text, frame->data, frame->len);
+        disp.u.boot_text[frame->len] = '\0';
+
+        if (app_ipc_send_storage_cmd(&store, pdMS_TO_TICKS(20U)) != pdPASS ||
+            app_ipc_send_disp_cmd(&disp, pdMS_TO_TICKS(20U)) != pdPASS)
+        {
+            send_nak(frame->seq, NAK_BUSY);
+            break;
+        }
+
+        apply_status_t status = comm_wait_results(frame->seq, frame->cmd, 2U, 800U);
+        if (status == APPLY_FLASH_ERROR)
+        {
+            send_nak(frame->seq, NAK_FLASH_ERROR);
+        }
+        else if (status != APPLY_OK)
+        {
+            send_nak(frame->seq, NAK_BUSY);
         }
         else
         {
-            send_nak(frame->seq, NAK_PARAM_ERROR);
+            send_ack(frame->seq);
         }
         break;
+    }
 
     case CMD_OTA_RESERVED:
     {
-        /* APP 收到 OTA 命令: 写 ota_request → 复位进入 Bootloader */
         DEBUG_PRINTF("OTA: request received, rebooting to bootloader...");
         app_fw_info_set_ota_request();
         send_ack(frame->seq);
         sys_tick_delay_ms(100);
         sys_config_reset();
+        break;
     }
-    break;
 
     case CMD_ACK:
         break;
 
     case CMD_NAK:
-        if (frame->len >= 1)
+        if (frame->len >= 1U)
         {
             DEBUG_PRINTF("NAK from host: code=0x%02X", frame->data[0]);
         }
