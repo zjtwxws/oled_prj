@@ -13,17 +13,14 @@
 #include "led_mgr.h"
 #include "key_drv.h"
 #include "user_app.h"
-#include "iwdg_drv.h"
 #include "sys_config.h"
 #include "sys_tick.h"
 #include "debug_console.h"
 #include "menu_mgr.h"
 #include "app_fw_info.h"
 #include "app_ipc.h"
+#include "iwdg.h"
 
-/* 外设定义 — HAL 句柄类型前向声明 (定义于 CubeMX 生成的 main.c) */
-typedef struct I2C_HandleTypeDef  I2C_HandleTypeDef;
-typedef struct UART_HandleTypeDef UART_HandleTypeDef;
 extern I2C_HandleTypeDef  hi2c2;  /* I2C2: SSD1306 OLED 通信 */
 extern UART_HandleTypeDef huart1; /* USART1: PC 上位机通信 */
 extern UART_HandleTypeDef huart2; /* USART2: 调试打印信息 */
@@ -75,11 +72,15 @@ int user_app_init(void)
     key_drv_init();
     
     display_mgr_init(sys_config_get_boot_text());
+	
     /* 上电画面保持 2s，让用户看清启动内容 */
-    sys_tick_delay_ms(2000);
+	for (uint32_t i = 0; i < 10; i++)
+	{
+		iwdg_drv_feed();
+		sys_tick_delay_ms(200);
+	}
+	
     menu_mgr_init();
-    /* IWDG 必须在长时间启动延时之后、调度器启动之前初始化，否则喂狗任务尚未运行就会复位 */
-    iwdg_drv_init();
     
     DEBUG_PRINTF("Firmware Version: " FW_VERSION);
     DEBUG_PRINTF("SYSTEM: Boot complete, entering main loop");

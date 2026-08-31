@@ -16,8 +16,8 @@
 #include "menu_mgr.h"
 #include "led_mgr.h"
 #include "sys_config.h"
-#include "iwdg_drv.h"
 #include "ssd1306.h"
+#include "iwdg.h"
 
 #define COMM_TASK_STACK_WORDS       1024U
 #define KEY_TASK_STACK_WORDS        512U
