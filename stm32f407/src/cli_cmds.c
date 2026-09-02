@@ -17,6 +17,8 @@
 #include "user_app.h"
 #include "menu_mgr.h"
 #include "app_ipc.h"
+#include "debug_console.h"
+#include "app_watchdog.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -513,3 +515,34 @@ void cli_cmds_init(void)
 
     return;
 }
+
+/**
+ * @brief  CLI 与异步日志输出任务
+ * @param  argument 任务参数
+ */
+void cli_task(void *argument)
+{
+    (void)argument;
+    DEBUG_PRINTF("cli_task start");
+
+    /* 注册 CLI 任务到看门狗监视器 */
+    int wdt_slot_for_cli_task = wdt_monitor_register("cli_task", 100, 1);
+
+    for (;;)
+    {
+        cli_poll();
+
+        debug_log_item_t item;
+        while (xQueueReceive(g_debug_log_queue, &item, 0) == pdPASS)
+        {
+            debug_console_write(item.text);
+            debug_console_write("\r\n");
+        }
+
+        /* 喂狗 */
+        wdt_monitor_feed(wdt_slot_for_cli_task);
+
+        vTaskDelay(pdMS_TO_TICKS(2U));
+    }
+}
+

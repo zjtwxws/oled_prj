@@ -210,6 +210,8 @@ static void comm_task(void *argument)
     (void)argument;
     DEBUG_PRINTF("comm_task start");
 
+    int wdt_slot_for_comm_task = wdt_monitor_register("comm_task", 100, 1);
+
     for (;;)
     {
         (void)ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(2U));
@@ -224,6 +226,9 @@ static void comm_task(void *argument)
         {
             user_app_send_proto_tx(&tx);
         }
+
+        /* 喂狗 */
+        wdt_monitor_feed(wdt_slot_for_comm_task);
     }
 }
 
@@ -237,9 +242,12 @@ static void key_task(void *argument)
     TickType_t last_wake = xTaskGetTickCount();
     DEBUG_PRINTF("key_task start");
 
+    int wdt_slot_for_key_task = wdt_monitor_register("key_task", 100, 1);
+
     for (;;)
     {
         user_app_key_process();
+        wdt_monitor_feed(wdt_slot_for_key_task);        /* 喂狗 */
         vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(20U));
     }
 }
@@ -253,6 +261,8 @@ static void display_task(void *argument)
     (void)argument;
     TickType_t last_wake = xTaskGetTickCount();
     DEBUG_PRINTF("display_task start");
+
+    int wdt_slot_for_display_task = wdt_monitor_register("display_task", 100, 1);
 
     for (;;)
     {
@@ -292,6 +302,8 @@ static void display_task(void *argument)
             display_mgr_flush();
         }
 
+        /* 喂狗 */
+        wdt_monitor_feed(wdt_slot_for_display_task);
         vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(50U));
     }
 }
@@ -305,6 +317,8 @@ static void led_task(void *argument)
     (void)argument;
     TickType_t last_wake = xTaskGetTickCount();
     DEBUG_PRINTF("led_task start");
+
+    int wdt_slot_for_led_task = wdt_monitor_register("led_task", 100, 1);
 
     for (;;)
     {
@@ -333,6 +347,9 @@ static void led_task(void *argument)
         }
 
         led_mgr_tick(50U);
+
+        /* 喂狗 */
+        wdt_monitor_feed(wdt_slot_for_led_task);
         vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(50U));
     }
 }
@@ -345,6 +362,8 @@ static void storage_task(void *argument)
 {
     (void)argument;
     DEBUG_PRINTF("storage_task start");
+
+    int wdt_slot_for_storage_task = wdt_monitor_register("storage_task", 100, 0);
 
     for (;;)
     {
@@ -364,49 +383,10 @@ static void storage_task(void *argument)
                 (void)app_ipc_send_apply_result(&result, pdMS_TO_TICKS(10U));
             }
         }
+
+        /* 喂狗 */
+        wdt_monitor_feed(wdt_slot_for_storage_task);
     }
-}
-
-/**
- * @brief  CLI 与异步日志输出任务
- * @param  argument 任务参数
- */
-static void cli_task(void *argument)
-{
-    (void)argument;
-    DEBUG_PRINTF("cli_task start");
-
-    for (;;)
-    {
-        cli_poll();
-
-        debug_log_item_t item;
-        while (xQueueReceive(g_debug_log_queue, &item, 0) == pdPASS)
-        {
-            debug_console_write(item.text);
-            debug_console_write("\r\n");
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(2U));
-    }
-}
-
-/* 看门狗任务：高于被监控任务的优先级，定期轮询 */
-void watchdog_task(void *argument)
-{
-	(void)argument;
-    DEBUG_PRINTF("watchdog_monitor_task start");
-
-	const TickType_t xPeriod = pdMS_TO_TICKS(1000); /* 每1秒检查一次 */
-	TickType_t xLastWakeTime = xTaskGetTickCount();
-
-	for (;;) 
-	{
-				wdt_monitor_check();
-
-				/* 用 vTaskDelayUntil 保证固定周期，避免累积误差 */
-				xTaskDelayUntil(&xLastWakeTime, xPeriod);
-	}
 }
 
 /**

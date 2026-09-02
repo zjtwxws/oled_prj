@@ -20,5 +20,8 @@ void freertos_app_init(void);
  */
 void freertos_task_start(void);
 
+void watchdog_task(void *argument);
+
+
 #endif
 
