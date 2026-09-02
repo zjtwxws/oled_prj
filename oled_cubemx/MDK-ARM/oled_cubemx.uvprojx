@@ -892,6 +892,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\freertos_app.c</FilePath>
             </File>
+            <File>
+              <FileName>app_watchdog.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\app_watchdog.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1646,6 +1651,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\freertos_app.c</FilePath>
             </File>
+            <File>
+              <FileName>app_watchdog.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\app_watchdog.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2399,6 +2409,11 @@
               <FileName>freertos_app.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\stm32f407\src\freertos_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_watchdog.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32f407\src\app_watchdog.c</FilePath>
             </File>
           </Files>
         </Group>

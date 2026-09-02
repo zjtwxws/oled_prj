@@ -18,6 +18,7 @@
 #include "sys_config.h"
 #include "ssd1306.h"
 #include "iwdg.h"
+#include "app_watchdog.h"
 
 #define COMM_TASK_STACK_WORDS       1024U
 #define KEY_TASK_STACK_WORDS        512U
@@ -367,23 +368,6 @@ static void storage_task(void *argument)
 }
 
 /**
- * @brief  看门狗任务
- * @param  argument 任务参数
- */
-static void watchdog_task(void *argument)
-{
-    (void)argument;
-    TickType_t last_wake = xTaskGetTickCount();
-    DEBUG_PRINTF("watchdog_task start");
-
-    for (;;)
-    {
-        iwdg_drv_feed();
-        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(200U));
-    }
-}
-
-/**
  * @brief  CLI 与异步日志输出任务
  * @param  argument 任务参数
  */
@@ -405,6 +389,24 @@ static void cli_task(void *argument)
 
         vTaskDelay(pdMS_TO_TICKS(2U));
     }
+}
+
+/* 看门狗任务：高于被监控任务的优先级，定期轮询 */
+void watchdog_task(void *argument)
+{
+	(void)argument;
+    DEBUG_PRINTF("watchdog_monitor_task start");
+
+	const TickType_t xPeriod = pdMS_TO_TICKS(1000); /* 每1秒检查一次 */
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+
+	for (;;) 
+	{
+				wdt_monitor_check();
+
+				/* 用 vTaskDelayUntil 保证固定周期，避免累积误差 */
+				xTaskDelayUntil(&xLastWakeTime, xPeriod);
+	}
 }
 
 /**

@@ -46,6 +46,7 @@
 "oled_cubemx\ota_req.o"
 "oled_cubemx\app_ipc.o"
 "oled_cubemx\freertos_app.o"
+"oled_cubemx\app_watchdog.o"
 "oled_cubemx\cli_cmds.o"
 "oled_cubemx\nr_micro_shell_core.o"
 "oled_cubemx\port_1.o"
