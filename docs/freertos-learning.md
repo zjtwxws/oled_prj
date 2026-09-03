@@ -1,9 +1,14 @@
 # FreeRTOS 学习文档（oled_prj / STM32F407）
 
-> 版本：V1.0  
-> 日期：2026-08-18  
+> 版本：V2.0  
+> 日期：2026-09-02  
 > 适用工程：`E:\BaiduNetdiskDownload\code\oled_prj`  
 > 配套详细移植设计：[freertos-port-design.md](freertos-port-design.md)
+> 配套深度文档：[任务内核原理](freertos-task-internals.md)、[队列深度原理](freertos-queue.md)、[信号量与互斥锁](freertos-semaphore-mutex.md)
+
+> 说明：本文档 V2.0 起按当前工程实际代码更新。当前 `freertos_app.c` 已从早期
+> “单用户任务（app_task）”模型演进为 **7 个静态任务** 的多任务模型，任务之间通过
+> `app_ipc` 静态队列通信。文中涉及旧模型的示例仅作入门讲解保留。
 
 ## 1. 当前工程中的 FreeRTOS
 
@@ -145,10 +150,10 @@ void demo_task_create(void)
 }
 ```
 
-### 2.6 当前项目实际示例
+### 2.6 当前项目实际示例（早期模型，已演进）
 
-当前 [freertos_app.c](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/freertos_app.c)
-中已经把原来的 `user_app_handle()` 放入 `app_task`：
+早期 [freertos_app.c](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/freertos_app.c)
+曾把原来的 `user_app_handle()` 放入 `app_task`：
 
 ```c
 static void app_task(void *argument)
@@ -163,62 +168,76 @@ static void app_task(void *argument)
 }
 ```
 
-这表示当前业务仍保持“单用户任务”模型。`vTaskDelay(pdMS_TO_TICKS(1U))` 让
-`app_task` 每轮至少阻塞 1 ms，从而给 IDLE 任务和后续低优先级任务运行机会。
+> ⚠️ **注意**：当前工程已不再使用该单任务模型。现在 `freertos_app.c` 使用
+> `xTaskCreateStatic` 创建 7 个静态任务（comm/key/display/cli/led/storage/watchdog），
+> 职责拆分与优先级安排见下面 2.7/2.8。上面的代码仅用于理解“任务函数 + for(;;) + 延时”
+> 的基本形态。
 
-### 2.7 当前 app_task_handle 的用途与用法
+### 2.7 任务句柄（TaskHandle_t）的用途与用法
 
-在 [freertos_app.c](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/freertos_app.c:14)
-中，`app_task_handle` 的定义如下：
-
-```c
-static TaskHandle_t app_task_handle = NULL;
-```
-
-创建 `app_task` 时，把 `&app_task_handle` 作为 `xTaskCreate` 的第 6 个参数传入：
+任务句柄用于对任务执行挂起、恢复、删除、改优先级、查栈等操作。以 `comm_task` 为例，
+当前工程中的定义与创建见 [freertos_app.c](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/freertos_app.c)：
 
 ```c
-ret = xTaskCreate(app_task,
-                  "app_task",
-                  APP_TASK_STACK_WORDS,
-                  NULL,
-                  APP_TASK_PRIORITY,
-                  &app_task_handle);
+static TaskHandle_t comm_task_handle = NULL;
 
-configASSERT(ret == pdPASS);
+/* 用静态内存创建 */
+comm_task_handle = xTaskCreateStatic(comm_task,
+                                     "comm",
+                                     COMM_TASK_STACK_WORDS,
+                                     NULL,
+                                     COMM_TASK_PRIORITY,
+                                     comm_stack,
+                                     &comm_tcb);
 ```
 
-创建成功后，`app_task_handle` 就是 `app_task` 的任务句柄。后续要操作这个任务时，把它
-传给 FreeRTOS 对应 API。当前项目已经启用了 `vTaskSuspend`、`vTaskResume`、
-`vTaskDelete`、`vTaskPrioritySet` 和 `uxTaskGetStackHighWaterMark` 等接口，因此可以这样
-使用：
+拿到句柄后可以这样使用（接口已启用）：
 
 ```c
-/* 挂起 app_task */
-vTaskSuspend(app_task_handle);
+/* 挂起任务 */
+vTaskSuspend(comm_task_handle);
 
-/* 恢复 app_task */
-vTaskResume(app_task_handle);
+/* 恢复任务 */
+vTaskResume(comm_task_handle);
 
-/* 删除 app_task */
-vTaskDelete(app_task_handle);
+/* 删除任务（静态任务内存不会回收） */
+vTaskDelete(comm_task_handle);
 
-/* 修改 app_task 优先级 */
-vTaskPrioritySet(app_task_handle, tskIDLE_PRIORITY + 2U);
+/* 修改任务优先级 */
+vTaskPrioritySet(comm_task_handle, tskIDLE_PRIORITY + 2U);
 
-/* 查询 app_task 栈高水位，单位 word */
-UBaseType_t stack_high_water = uxTaskGetStackHighWaterMark(app_task_handle);
+/* 查询任务栈高水位，单位 word */
+UBaseType_t stack_high_water = uxTaskGetStackHighWaterMark(comm_task_handle);
 ```
 
-当前项目暂时只保存 `app_task_handle`，还没有实际调用这些操作。它属于任务句柄预留，
-后续如果要管理 `app_task` 的生命周期、优先级或栈使用情况，可以直接使用。
-
-如果 API 是在 `app_task` 内部操作当前任务自己，也可以把任务句柄参数写成 `NULL`，例如：
+如果 API 在任务内部操作自己，也可以把任务句柄参数写成 `NULL`，例如：
 
 ```c
 uxTaskGetStackHighWaterMark(NULL);
 vTaskDelete(NULL);
 ```
+
+当前工程在 [app_ipc.c](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/app_ipc.c)
+中保存了 `comm_task` 句柄并用它做任务通知（`app_ipc_set_comm_task`），
+这是任务句柄在项目中的实际用途之一。
+
+### 2.8 当前工程任务总览（V2.0 起）
+
+当前 `freertos_app.c` 创建的任务如下：
+
+| 任务 | 静态创建 | 栈 (word) | 优先级 | 主要职责 | 运行模式 |
+|------|----------|-----------|--------|----------|----------|
+| `comm` | 是 | 1024 | 5（最高） | USART1 协议收发、结果回包 | 任务通知 + 2ms 轮询 |
+| `key` | 是 | 512 | 4 | 按键扫描与菜单事件 | 20ms 周期 |
+| `display` | 是 | 1024 | 3 | 消费显示命令、刷新 OLED | 50ms 周期 + 收队列 |
+| `cli` | 是 | 512 | 2 | USART2 调试 CLI、异步日志 | 2ms 周期 |
+| `led` | 是 | 256 | 1 | 消费 LED 命令、状态机 | 50ms 周期 + 收队列 |
+| `storage` | 是 | 512 | 1 | Flash 配置读写 | 阻塞等命令 |
+| `watchdog` | 是 | 256 | 0 | 应用级看门狗监控 | 1ms 周期 |
+
+任务之间的数据流全部通过 [app_ipc.c](/E:/BaiduNetdiskDownload/code/oled_prj/stm32f407/src/app_ipc.c)
+中的 6 条静态队列（disp/led/storage/proto_tx/cmd_result/debug_log）传递，
+详见 [队列深度原理](freertos-queue.md) 第 10 节。
 
 ## 3. 在当前工程中新增一个任务
 
@@ -228,24 +247,33 @@ vTaskDelete(NULL);
 |------|----------------|
 | 任务做什么 | 明确任务循环体，避免任务之间职责重叠 |
 | 多长时间运行一次 | 使用 `vTaskDelay` 还是 `vTaskDelayUntil` |
-| 优先级多少 | 是否必须比 `app_task` 更高，会不会抢占现有协议处理 |
+| 优先级多少 | 插入到现有优先级阶梯（comm 5 > key 4 > display 3 > cli 2 > led/storage 1 > watchdog 0）的哪个位置 |
 | 栈用多少 | 先给一个保守值，再用 `uxTaskGetStackHighWaterMark` 实测 |
 
-当前工程先保持“最小多任务”，新增任务前不建议直接把 `user_app_handle()` 拆散。原因
-是它内部串行处理协议、CLI、按键、显示、LED 和看门狗，拆散会引入共享资源与竞态问题。
+当前工程已经是 7 个静态任务的多任务模型。新增任务前要注意：任务职责应单一，需要
+与其他任务共享数据的场景应通过 [app_ipc](freertos-queue.md) 队列通信，避免直接操作
+其他任务拥有的外设（OLED 归 `display_task`、USART1 归 `comm_task` 等）。
 
-### 3.2 新增任务的标准步骤
+### 3.2 新增任务的标准步骤（静态创建）
 
-1. 在 `freertos_app.c` 顶部增加栈深、优先级和周期宏。
-2. 增加 `static TaskHandle_t xxx_task_handle = NULL;`。
-3. 编写 `static void xxx_task(void *argument)` 任务函数。
-4. 在 `freertos_app_init()` 中调用 `xTaskCreate`。
-5. 检查 `configMAX_PRIORITIES` 和 `configTOTAL_HEAP_SIZE` 是否足够。
-6. 编译三个 Keil target，观察高水位和 heap 余量。
+当前工程任务全部为**静态创建**（`xTaskCreateStatic`），与早期文档的 `xTaskCreate`
+不同，新增任务应按以下步骤：
+
+1. 在 `freertos_app.c` 顶部增加栈深、优先级宏：
+   `#define XXX_TASK_STACK_WORDS` / `#define XXX_TASK_PRIORITY`。
+2. 增加静态栈与 TCB：`static StackType_t xxx_stack[...]; static StaticTask_t xxx_tcb;`。
+3. 增加句柄：`static TaskHandle_t xxx_task_handle = NULL;`。
+4. 编写 `static void xxx_task(void *argument)` 任务函数（`for(;;)` + 延时/阻塞）。
+5. 在 `tasks_init()` 中调用 `create_static_task(...)`（封装了 `xTaskCreateStatic`）。
+6. 检查 `configMAX_PRIORITIES` 是否够用；静态任务不消耗 `configTOTAL_HEAP_SIZE`。
+7. 编译三个 Keil target，用 `tasks_info` CLI 观察状态与高水位。
+
+> 若想改回动态创建（从 heap 分配），沿用 `xTaskCreate` 即可，但注意
+> `configTOTAL_HEAP_SIZE=12288` 字节要同时容纳任务栈+TCB。
 
 ### 3.3 示例：增加一个周期任务
 
-下面的示例只是展示如何新增任务，不直接操作共享外设，避免和当前单任务业务产生竞态：
+下面用**动态创建**演示最小增量（仅示意，当前工程风格为静态创建，见上方步骤）：
 
 ```c
 /* 新增宏 */
@@ -272,19 +300,10 @@ static void heartbeat_task(void *argument)
     }
 }
 
-/* 在 freertos_app_init() 中追加创建逻辑 */
-void freertos_app_init(void)
+/* 在 freertos_app_init() / tasks_init() 中追加创建逻辑（此处演示动态创建） */
+void demo_task_create(void)
 {
     BaseType_t ret = pdFAIL;
-
-    ret = xTaskCreate(app_task,
-                      "app_task",
-                      APP_TASK_STACK_WORDS,
-                      NULL,
-                      APP_TASK_PRIORITY,
-                      &app_task_handle);
-
-    configASSERT(ret == pdPASS);
 
     ret = xTaskCreate(heartbeat_task,
                       "heartbeat",
@@ -298,18 +317,20 @@ void freertos_app_init(void)
 ```
 
 如果新任务要操作 LED、串口、菜单或显示，应先确认这些模块是否允许从多个任务同时调用。
-本项目当前业务模型下，更安全的方式是只让 `app_task` 继续拥有外设操作权，新任务只做
-独立计算或通过队列/互斥锁与 `app_task` 通信。
+本项目当前职责模型下，更安全的方式是让任务通过 [app_ipc](freertos-queue.md) 的
+`g_xxx_cmd_queue` 把命令投递给对应消费任务（`display_task` / `led_task` 等），由拥有
+外设的任务统一操作硬件。
 
 ### 3.4 增加任务后的检查项
 
 | 检查项 | 方法 |
 |--------|------|
 | 编译是否通过 | 依次编译 `oled_cubemx`、`oled_cubemx_slota`、`oled_cubemx_slotb` |
-| `xTaskCreate` 是否成功 | 确认 `configASSERT` 未触发 |
-| 栈是否足够 | 开启 `configCHECK_FOR_STACK_OVERFLOW = 2`，观察 `uxTaskGetStackHighWaterMark` |
-| heap 是否足够 | 增大任务后确认 `xTaskCreate` 不再返回内存错误 |
-| 是否饿死原业务 | 长时间观察 OLED、菜单、串口协议、看门狗是否正常 |
+| 任务创建是否成功 | 静态创建检查返回句柄非 NULL，动态创建检查 `pdPASS` |
+| 栈是否足够 | `configCHECK_FOR_STACK_OVERFLOW = 2` + `tasks_info` 观察高水位 |
+| heap 是否足够 | 动态任务确认 `xTaskCreate` 不再返回内存错误（静态任务不占 heap） |
+| 是否饿死其他任务 | 长时间观察 OLED、菜单、串口协议、看门狗是否正常 |
+| 队列是否够深 | 用 `uxQueueMessagesWaiting` / `uxQueueSpacesAvailable` 检查是否溢出丢命令 |
 
 ## 4. 基于当前 STM32F407 开发板的移植说明
 

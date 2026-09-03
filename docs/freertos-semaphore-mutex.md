@@ -4,7 +4,8 @@
 > 日期：2026-08-25  
 > 适用工程：`E:\BaiduNetdiskDownload\code\oled_prj`  
 > 内核版本：`FreeRTOS Kernel V11.1.0`  
-> 配套文档：[FreeRTOS 学习文档](freertos-learning.md)、[FreeRTOS 移植设计](freertos-port-design.md)
+> 配套文档：[FreeRTOS 学习文档](freertos-learning.md)、[FreeRTOS 移植设计](freertos-port-design.md)、
+> [队列深度原理](freertos-queue.md)、[任务内核原理](freertos-task-internals.md)
 
 ## 1. 一句话理解
 
@@ -428,6 +429,10 @@ take，但 take 和 give 次数必须匹配。
 
 ## 5. 信号量与互斥锁对比
 
+> 补充阅读：信号量与互斥锁底层的完整队列机制见
+> [队列深度原理](freertos-queue.md)；任务优先级继承/调度器对锁的处理见
+> [任务内核原理](freertos-task-internals.md) 第 11 节。
+
 | 项目 | 信号量 | 互斥锁 |
 |------|--------|--------|
 | 底层对象 | `Queue_t` | `Queue_t` |
@@ -488,9 +493,11 @@ take，但 take 和 give 次数必须匹配。
 #define configMAX_PRIORITIES                   8
 ```
 
-当前 `stm32f407/src`、`stm32f407/inc` 和 `oled_cubemx/Src` 中尚未搜索到实际使用
-`xSemaphore`、`SemaphoreHandle_t` 或 `QueueHandle_t` 的代码，本文示例属于接入模板，
-还不是当前工程已编译接入的代码。
+> **状态更新（2026-09-02）**：当前 `stm32f407/src` 中尚未使用 `xSemaphore` /
+> `SemaphoreHandle_t`，本文示例属于接入模板。不过工程已大量使用同属 `Queue_t` 体系的
+> **队列**（见 [app_ipc.c](../stm32f407/src/app_ipc.c)，6 条静态队列），任务间通信与
+> 唤醒由队列 + 任务通知承担。若后续需要互斥锁保护共享资源（例如多任务访问 Flash），
+> 可直接按本文第 4.6 节模板接入。
 
 ## 9. 核心源码位置
 
@@ -508,3 +515,6 @@ take，但 take 和 give 次数必须匹配。
 | `thirdparty/freertos/tasks.c` | `xTaskRemoveFromEventList` | 任务从等待链表唤醒 |
 | `thirdparty/freertos/include/semphr.h` | 所有 `xSemaphore...` 宏 | 应用层 API |
 | `portable/GCC/ARM_CM4F/portmacro.h` | `portYIELD()` | 触发 PendSV |
+
+> 队列（含信号量/互斥锁本质）的源码级逐函数分析，见 [队列深度原理](freertos-queue.md) 第 2~9 节；
+> 调度与任务通知/延时机制见 [任务内核原理](freertos-task-internals.md)。

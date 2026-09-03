@@ -166,7 +166,7 @@ int cli_cmd_wdt_monitor(uint8_t argc, char **argv)
 void watchdog_task(void *argument)
 {
 	(void)argument;
-    DEBUG_PRINTF("watchdog_monitor_task start");
+	DEBUG_PRINTF("watchdog_monitor_task start");
 
 	cli_cmd_register("wdt_monitor", cli_cmd_wdt_monitor, "显示任务看门狗监控状态");
 
